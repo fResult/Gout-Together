@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: "Gout Together"
+  threads:
+    virtual:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,prometheus"
