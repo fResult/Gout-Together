@@ -52,7 +52,7 @@ tasks.register<Copy>("copyAgent") {
 }
 
 application {
-  mainClass.set("dev/fResult/goutTogether/GoutTogetherApplication.java")
+  mainClass.set("$group.goutTogether.GoutTogetherApplication")
 }
 
 tasks.withType<BootJar> {
