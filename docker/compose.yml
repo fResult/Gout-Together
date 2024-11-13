@@ -1,12 +1,16 @@
 services:
-  # postgres:
-  #   image: 'postgres:17.0-alpine3.20'
-  #   environment: # NOTE: Must declare in the ENV file
-  #     - 'POSTGRES_DB=goutapp'
-  #     - 'POSTGRES_USER=goutsvc'
-  #     - 'POSTGRES_PASS WORD=secret'
-  #   ports:
-  #     - '5432:5432'
+  postgres:
+    image: 'postgres:17.0-alpine3.20'
+    container_name: gout-backend-postgres
+    env_file:
+      - ../.env
+    environment: # NOTE: Must declare in the ENV file
+      - 'POSTGRES_DB=gout'
+      - 'POSTGRES_USER=goutapp'
+      - 'POSTGRES_PASSWORD=secret'
+    ports:
+      - '5432:5432'
+
   lgtm:
     image: grafana/otel-lgtm
     container_name: gout-backend-lgtm
@@ -16,6 +20,7 @@ services:
       - '4317:4317'
       - '4318:4318'
       - '3000:3000'
+
 #  gout:
 #    image: 'korn704/gout-lgtm:latest'
 #    ports:

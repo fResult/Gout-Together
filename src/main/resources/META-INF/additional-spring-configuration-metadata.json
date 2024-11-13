@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "spring.docker.compose.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Use for Docker Compose"
+    }
+  ]
+}
