@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS bookings (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    tour_id INTEGER NOT NULL REFERENCES tours(id),
+    state VARCHAR(20) NOT NULL,
+    booking_date TIMESTAMP NOT NULL,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
