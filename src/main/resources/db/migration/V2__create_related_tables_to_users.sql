@@ -27,5 +27,5 @@ CREATE TABLE IF NOT EXISTS user_wallets (
     id SERIAL PRIMARY KEY,
     user_id INTEGER UNIQUE NOT NULL REFERENCES users(id),
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    balance DECIMAL(13, 2) NOT NULL
+    balance NUMERIC(13, 2) NOT NULL
 );
