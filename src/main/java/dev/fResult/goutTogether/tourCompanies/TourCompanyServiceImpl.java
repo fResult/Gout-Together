@@ -18,7 +18,7 @@ public class TourCompanyServiceImpl implements TourCompanyService {
     }
 
     @Override
-    public TourCompany registerTour(TourCompanyRequest body) {
+    public TourCompany registerTourCompany(TourCompanyRequest body) {
         logger.debug("[registerTour] newly tour company is registering");
         var companyToRegister = TourCompany.of(null, body.name(), TourCompanyStatus.WAITING.name());
         var registeredCompany = tourCompanyRepository.save(companyToRegister);
