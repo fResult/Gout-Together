@@ -20,7 +20,7 @@ repositories {
   mavenCentral()
 }
 
-val agent by configurations.creating
+val agent: Configuration by configurations.creating
 
 dependencies {
   implementation("io.opentelemetry:opentelemetry-api")

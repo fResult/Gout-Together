@@ -1,4 +1,4 @@
-package dev.fResult.goutTogether.tour;
+package dev.fResult.goutTogether.tours;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
