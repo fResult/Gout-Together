@@ -4,5 +4,5 @@ import dev.fResult.goutTogether.tourCompanies.models.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.models.TourCompanyRequest;
 
 public interface TourCompanyService {
-    TourCompany registerTour(TourCompanyRequest body);
+    TourCompany registerTourCompany(TourCompanyRequest body);
 }

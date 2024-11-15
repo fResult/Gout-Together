@@ -27,6 +27,6 @@ public class TourCompanyController {
     public ResponseEntity<TourCompany> register(@RequestBody TourCompanyRequest body) {
         logger.info("Registering a new tour company");
         return ResponseEntity.created(URI.create("/api/v1/tour-companies"))
-                .body(tourCompanyService.registerTour(body));
+                .body(tourCompanyService.registerTourCompany(body));
     }
 }
