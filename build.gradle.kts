@@ -28,8 +28,9 @@ dependencies {
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-  implementation("org.springframework.boot:spring-boot-starter-validation")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
+  implementation("org.springframework.boot:spring-boot-starter-security")
+  implementation("org.springframework.boot:spring-boot-starter-validation")
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
   implementation("org.flywaydb:flyway-core")
@@ -39,6 +40,7 @@ dependencies {
   runtimeOnly("org.postgresql:postgresql")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
+  testImplementation("org.springframework.security:spring-security-test")
 
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
