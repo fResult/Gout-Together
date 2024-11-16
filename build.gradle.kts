@@ -33,6 +33,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-validation")
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+  implementation("org.bouncycastle:bcprov-jdk18on:1.79") // As an Argon2PasswordEncoder's dependency in Spring Security
   implementation("org.flywaydb:flyway-core")
   implementation("org.flywaydb:flyway-database-postgresql")
 
