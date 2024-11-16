@@ -1,7 +1,7 @@
 package dev.fResult.goutTogether.tourCompanies;
 
 import dev.fResult.goutTogether.tourCompanies.models.TourCompany;
-import dev.fResult.goutTogether.tourCompanies.models.RegisterTourCompanyRequest;
+import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;

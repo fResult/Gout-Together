@@ -1,4 +1,4 @@
-package dev.fResult.goutTogether.tourCompanies.models;
+package dev.fResult.goutTogether.tourCompanies.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 
