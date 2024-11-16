@@ -1,6 +1,5 @@
-package dev.fResult.goutTogether.tourCompanies.models;
+package dev.fResult.goutTogether.tourCompanies.entities;
 
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 

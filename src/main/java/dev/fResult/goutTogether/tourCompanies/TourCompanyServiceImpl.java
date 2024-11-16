@@ -1,7 +1,7 @@
 package dev.fResult.goutTogether.tourCompanies;
 
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
-import dev.fResult.goutTogether.tourCompanies.models.TourCompany;
+import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
 import dev.fResult.goutTogether.enumurations.TourCompanyStatus;
 import org.slf4j.Logger;

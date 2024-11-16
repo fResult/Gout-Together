@@ -1,6 +1,6 @@
 package dev.fResult.goutTogether.tourCompanies;
 
-import dev.fResult.goutTogether.tourCompanies.models.TourCompany;
+import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
