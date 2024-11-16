@@ -5,8 +5,10 @@ import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
 import dev.fResult.goutTogether.enumurations.TourCompanyStatus;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyLogin;
+import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyWallet;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
+import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyWalletRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
@@ -14,20 +16,26 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+
 @Service
 public class TourCompanyServiceImpl implements TourCompanyService {
   private final Logger logger = LoggerFactory.getLogger(TourCompanyServiceImpl.class);
 
   private final TourCompanyRepository tourCompanyRepository;
   private final TourCompanyLoginRepository tourCompanyLoginRepository;
+  private final TourCompanyWalletRepository tourCompanyWalletRepository;
   private final PasswordEncoder passwordEncoder;
 
   public TourCompanyServiceImpl(
       TourCompanyRepository tourCompanyRepository,
       TourCompanyLoginRepository tourCompanyLoginRepository,
+      TourCompanyWalletRepository tourCompanyWalletRepository,
       PasswordEncoder passwordEncoder) {
     this.tourCompanyRepository = tourCompanyRepository;
     this.tourCompanyLoginRepository = tourCompanyLoginRepository;
+    this.tourCompanyWalletRepository = tourCompanyWalletRepository;
     this.passwordEncoder = passwordEncoder;
   }
 
@@ -39,15 +47,13 @@ public class TourCompanyServiceImpl implements TourCompanyService {
     var registeredCompany = tourCompanyRepository.save(companyToRegister);
     logger.info("[registerTourCompany] new tour company: {} is registered", registeredCompany);
 
-    var companyCredential = buildTourCompanyLogin(registeredCompany, body);
-    tourCompanyLoginRepository.save(companyCredential);
-    logger.info(
-        "[registerTourCompany] new tour company credential: {} is created", companyCredential);
+    createTourCompanyLogin(registeredCompany, body);
 
     return registeredCompany;
   }
 
   @Override
+  @Transactional
   public TourCompany approveTourCompany(int id) {
     logger.debug("[approveTourCompany] tour company id [{}] is approving", id);
     return tourCompanyRepository
@@ -71,23 +77,37 @@ public class TourCompanyServiceImpl implements TourCompanyService {
                       existingCompany.name(),
                       TourCompanyStatus.APPROVED.name());
               var approvedCompany = tourCompanyRepository.save(companyToApprove);
-              logger.info("[approveTour] approved tour company: {}", approvedCompany);
+              logger.info("[approveTourCompany] approved tour company: {}", approvedCompany);
+              createCompanyWallet(approvedCompany);
 
-              // TODO: Create wallet for approved company
               return approvedCompany;
             })
         .orElseThrow(
             () -> {
-              logger.warn("[approveTour] tour company id [{}] not found", id);
+              logger.warn("[approveTourCompany] tour company id [{}] not found", id);
               return new EntityNotFound(String.format("Tour company id [%s] not found", id));
             });
   }
 
-  private TourCompanyLogin buildTourCompanyLogin(
-      TourCompany company, RegisterTourCompanyRequest body) {
+  private void createTourCompanyLogin(TourCompany company, RegisterTourCompanyRequest body) {
     var encryptedPassword = passwordEncoder.encode(body.password());
 
-    return TourCompanyLogin.of(
-        null, AggregateReference.to(company.id()), body.username(), encryptedPassword);
+    var companyCredentialToCreate =
+        TourCompanyLogin.of(
+            null, AggregateReference.to(company.id()), body.username(), encryptedPassword);
+    tourCompanyLoginRepository.save(companyCredentialToCreate);
+    logger.info(
+        "[registerTourCompany] new tour company credential: {} is created",
+        companyCredentialToCreate);
+  }
+
+  private void createCompanyWallet(TourCompany company) {
+    var companyWalletToCreate =
+        TourCompanyWallet.of(
+            null, AggregateReference.to(company.id()), Instant.now(), BigDecimal.ZERO);
+
+    tourCompanyWalletRepository.save(companyWalletToCreate);
+    logger.info(
+        "[approveTourCompany] new tour company wallet: {} is created", companyWalletToCreate);
   }
 }
