@@ -3,7 +3,7 @@ package dev.fResult.goutTogether.tourCompanies;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.tourCompanies.models.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.models.TourCompanyRequest;
-import dev.fResult.goutTogether.tours.TourCompanyStatus;
+import dev.fResult.goutTogether.enumurations.TourCompanyStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
