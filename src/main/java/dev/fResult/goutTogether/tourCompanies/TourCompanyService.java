@@ -1,10 +1,10 @@
 package dev.fResult.goutTogether.tourCompanies;
 
 import dev.fResult.goutTogether.tourCompanies.models.TourCompany;
-import dev.fResult.goutTogether.tourCompanies.models.TourCompanyRequest;
+import dev.fResult.goutTogether.tourCompanies.models.RegisterTourCompanyRequest;
 
 public interface TourCompanyService {
-    TourCompany registerTourCompany(TourCompanyRequest body);
+    TourCompany registerTourCompany(RegisterTourCompanyRequest body);
 
     TourCompany approveTourCompany(int id) throws Exception;
 }

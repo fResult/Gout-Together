@@ -2,7 +2,7 @@ package dev.fResult.goutTogether.tourCompanies;
 
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.tourCompanies.models.TourCompany;
-import dev.fResult.goutTogether.tourCompanies.models.TourCompanyRequest;
+import dev.fResult.goutTogether.tourCompanies.models.RegisterTourCompanyRequest;
 import dev.fResult.goutTogether.enumurations.TourCompanyStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +18,18 @@ public class TourCompanyServiceImpl implements TourCompanyService {
     }
 
     @Override
-    public TourCompany registerTourCompany(TourCompanyRequest body) {
+    public TourCompany registerTourCompany(RegisterTourCompanyRequest body) {
         logger.debug("[registerTour] newly tour company is registering");
-        var companyToRegister = TourCompany.of(null, body.name(), TourCompanyStatus.WAITING.name());
+        var companyToRegister = TourCompany.of(
+                null,
+                body.name(),
+                body.username(),
+                body.password(),
+                TourCompanyStatus.WAITING.name());
         var registeredCompany = tourCompanyRepository.save(companyToRegister);
         logger.info("[registerTour] new tour company: {} is registered", registeredCompany);
 
+        // TODO: Create Login for registered company
         return registeredCompany;
     }
 
@@ -39,9 +45,16 @@ public class TourCompanyServiceImpl implements TourCompanyService {
                     throw new RuntimeException(e);
                 }
             }
-            var companyToApprove = TourCompany.of(existingCompany.id(), existingCompany.name(), TourCompanyStatus.APPROVED.name());
+            var companyToApprove = TourCompany.of(
+                    existingCompany.id(),
+                    existingCompany.name(),
+                    existingCompany.username(),
+                    existingCompany.password(),
+                    TourCompanyStatus.APPROVED.name());
             var approvedCompany = tourCompanyRepository.save(companyToApprove);
             logger.info("[approveTour] approved tour company: {}", approvedCompany);
+
+            // TODO: Create wallet for approved company
             return approvedCompany;
         }).orElseThrow(() -> {
             logger.warn("[approveTour] tour company id [{}] not found", id);

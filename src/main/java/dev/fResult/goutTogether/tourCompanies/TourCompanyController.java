@@ -1,7 +1,7 @@
 package dev.fResult.goutTogether.tourCompanies;
 
 import dev.fResult.goutTogether.tourCompanies.models.TourCompany;
-import dev.fResult.goutTogether.tourCompanies.models.TourCompanyRequest;
+import dev.fResult.goutTogether.tourCompanies.models.RegisterTourCompanyRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ public class TourCompanyController {
     }
 
     @PostMapping
-    public ResponseEntity<TourCompany> register(@RequestBody @Validated TourCompanyRequest body) {
+    public ResponseEntity<TourCompany> register(@RequestBody @Validated RegisterTourCompanyRequest body) {
         logger.info("Registering a new tour company");
         return ResponseEntity.created(URI.create("/api/v1/tour-companies"))
                 .body(tourCompanyService.registerTourCompany(body));
