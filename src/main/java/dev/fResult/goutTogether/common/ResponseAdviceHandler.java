@@ -50,6 +50,7 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
     var detail =
         ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     logger.error(ex.getMessage());
+    ex.printStackTrace();
 
     return ResponseEntity.of(detail).build();
   }
