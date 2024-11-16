@@ -5,5 +5,4 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TourCompanyWalletRepository extends CrudRepository<TourCompanyWallet, Integer> {
-}
+public interface TourCompanyWalletRepository extends CrudRepository<TourCompanyWallet, Integer> {}

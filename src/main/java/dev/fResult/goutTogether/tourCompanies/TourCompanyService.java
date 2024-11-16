@@ -4,7 +4,7 @@ import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
 
 public interface TourCompanyService {
-    TourCompany registerTourCompany(RegisterTourCompanyRequest body);
+  TourCompany registerTourCompany(RegisterTourCompanyRequest body);
 
-    TourCompany approveTourCompany(int id) throws Exception;
+  TourCompany approveTourCompany(int id) throws Exception;
 }
