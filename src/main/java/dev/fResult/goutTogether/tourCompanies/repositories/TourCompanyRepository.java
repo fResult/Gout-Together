@@ -1,4 +1,4 @@
-package dev.fResult.goutTogether.tourCompanies;
+package dev.fResult.goutTogether.tourCompanies.repositories;
 
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import org.springframework.data.repository.CrudRepository;
