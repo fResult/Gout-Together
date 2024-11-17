@@ -1,4 +1,4 @@
-package dev.fResult.goutTogether.tours;
+package dev.fResult.goutTogether.tours.entities;
 
 import dev.fResult.goutTogether.enumurations.TourStatus;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
@@ -16,7 +16,7 @@ public record Tour(
     String location,
     int numberOfPeople,
     Instant activityDate,
-    TourStatus status) {
+    String status) {
 
   public static Tour of(
       Integer id,
@@ -26,7 +26,7 @@ public record Tour(
       String location,
       int numberOfPeople,
       Instant activityDate,
-      TourStatus status) {
+      String status) {
     return new Tour(
         id, tourCompanyId, title, description, location, numberOfPeople, activityDate, status);
   }
