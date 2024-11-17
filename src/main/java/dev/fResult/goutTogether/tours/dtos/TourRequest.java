@@ -1,5 +1,6 @@
 package dev.fResult.goutTogether.tours.dtos;
 
+import dev.fResult.goutTogether.enumurations.TourStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -10,9 +11,9 @@ public record TourRequest(
     @NotBlank String title,
     @NotBlank String description,
     @NotBlank String location,
-    int numberOfPeople,
+    @NotNull Integer numberOfPeople,
     @NotNull Instant activityDate,
-    String status) {
+    TourStatus status) {
 
   public TourRequest of(
       Integer tourCompanyId,
@@ -21,7 +22,7 @@ public record TourRequest(
       String location,
       int numberOfPeople,
       Instant activityDate,
-      String status) {
+      TourStatus status) {
     return new TourRequest(
         tourCompanyId, title, description, location, numberOfPeople, activityDate, status);
   }
