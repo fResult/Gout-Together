@@ -67,8 +67,8 @@ public class TourCompanyServiceImpl implements TourCompanyService {
                   throw new Exception(
                       String.format(
                           "[approveTourCompany] Tour company id [%s] is already approved", id));
-                } catch (Exception e) {
-                  throw new RuntimeException(e);
+                } catch (Exception ex) {
+                  throw new RuntimeException(ex);
                 }
               }
               var companyToApprove =
