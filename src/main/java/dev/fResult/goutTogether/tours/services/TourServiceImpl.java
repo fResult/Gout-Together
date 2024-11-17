@@ -1,5 +1,6 @@
 package dev.fResult.goutTogether.tours.services;
 
+import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.enumurations.TourStatus;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import dev.fResult.goutTogether.tours.dtos.TourRequest;
@@ -55,7 +56,9 @@ public class TourServiceImpl implements TourService {
 
   @Override
   public Tour getTourById(Integer id) {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return tourRepository
+        .findById(id)
+        .orElseThrow(() -> new EntityNotFound(String.format("[getTourById] Tour id [%s] not found", id)));
   }
 
   @Override

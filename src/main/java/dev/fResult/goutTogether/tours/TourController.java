@@ -40,6 +40,11 @@ public class TourController {
     return ResponseEntity.ok(tours);
   }
 
+    @GetMapping("/{id}")
+    public Tour byId(@PathVariable int id) {
+      return tourService.getTourById(id);
+    }
+
   @PostMapping
   public ResponseEntity<Tour> create(@RequestBody @Validated TourRequest body) {
     var createdTour = tourService.createTour(body);
