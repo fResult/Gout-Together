@@ -7,6 +7,9 @@ import dev.fResult.goutTogether.tours.services.TourService;
 import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +23,21 @@ public class TourController {
 
   public TourController(TourService tourService, TourCompanyService tourCompanyService) {
     this.tourService = tourService;
+  }
+
+  @GetMapping
+  public ResponseEntity<Page<Tour>> getTours(
+      @RequestParam(required = true) int page,
+      @RequestParam(required = true) int size,
+      @RequestParam(defaultValue = "id") String field,
+      @RequestParam(defaultValue = "ASCC") Sort.Direction direction) {
+     var sort =  Sort.by(direction, field);
+
+//    var sort = Sort.by(Sort.Direction.fromString(direction.name()), field);
+    var pageable = PageRequest.of(page, size, sort);
+    var tours = tourService.getTours(pageable);
+
+    return ResponseEntity.ok(tours);
   }
 
   @PostMapping

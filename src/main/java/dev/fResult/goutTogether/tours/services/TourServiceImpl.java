@@ -9,6 +9,7 @@ import dev.fResult.goutTogether.tours.repositories.TourRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +59,7 @@ public class TourServiceImpl implements TourService {
   }
 
   @Override
-  public Page<Tour> getTours(Integer page, Integer size) {
-    throw new UnsupportedOperationException("Not implemented yet");
+  public Page<Tour> getTours(Pageable pageable) {
+    return tourRepository.findAll(pageable);
   }
 }
