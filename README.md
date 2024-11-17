@@ -16,7 +16,10 @@ Course Code Example: <https://github.com/marttp/20240629-GoutTogether>
 
 ## My Summary
 ### Things I learned from this bootcamp
-- LGTM Stack with OpenTelemetry
+- OpenTelemetry Java Agent 
+- Spring Security
 
 ### Things I did different
 - Using the Gradle Kotlin instead of the Gradle Groovy
+- PasswordEncoder, using Argon2PasswordEncoder instead of BCryptPasswordEncoder
+- Using the OpenTelemetry Java Agent instead of the OpenTelemetry Java SDK
