@@ -30,10 +30,9 @@ public class TourController {
       @RequestParam(required = true) int page,
       @RequestParam(required = true) int size,
       @RequestParam(defaultValue = "id") String field,
-      @RequestParam(defaultValue = "ASCC") Sort.Direction direction) {
-     var sort =  Sort.by(direction, field);
+      @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+    var sort = Sort.by(direction, field);
 
-//    var sort = Sort.by(Sort.Direction.fromString(direction.name()), field);
     var pageable = PageRequest.of(page, size, sort);
     var tours = tourService.getTours(pageable);
 
