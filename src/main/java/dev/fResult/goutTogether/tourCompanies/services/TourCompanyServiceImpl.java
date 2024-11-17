@@ -1,23 +1,23 @@
-package dev.fResult.goutTogether.tourCompanies;
+package dev.fResult.goutTogether.tourCompanies.services;
 
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
-import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
-import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
 import dev.fResult.goutTogether.enumurations.TourCompanyStatus;
+import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
+import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyWallet;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyWalletRepository;
+import java.math.BigDecimal;
+import java.time.Instant;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.time.Instant;
 
 @Service
 public class TourCompanyServiceImpl implements TourCompanyService {
@@ -87,6 +87,13 @@ public class TourCompanyServiceImpl implements TourCompanyService {
               logger.warn("[approveTourCompany] tour company id [{}] not found", id);
               return new EntityNotFound(String.format("Tour company id [%s] not found", id));
             });
+  }
+
+  @Override
+  public TourCompany getTourCompanyById(int id) {
+    return tourCompanyRepository
+        .findById(id)
+        .orElseThrow(() -> new EntityNotFound(String.format("Tour company id [%s] not found", id)));
   }
 
   private void createTourCompanyLogin(TourCompany company, RegisterTourCompanyRequest body) {
