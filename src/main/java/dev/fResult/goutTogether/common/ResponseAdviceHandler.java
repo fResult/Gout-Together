@@ -1,6 +1,7 @@
 package dev.fResult.goutTogether.common;
 
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
@@ -36,6 +37,14 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
 
     return ResponseEntity.of(detail).build();
   }
+
+  @ExceptionHandler(ValidationException.class)
+    protected ResponseEntity<?> handleValidationException(ValidationException ex) {
+        var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        logger.info("Validation error: {}", ex.getMessage());
+
+        return ResponseEntity.of(detail).build();
+    }
 
   @ExceptionHandler(EntityNotFound.class)
   protected ResponseEntity<?> handleEntityNotFoundException(EntityNotFound ex) {
