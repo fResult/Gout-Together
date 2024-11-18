@@ -1,6 +1,6 @@
 package dev.fResult.goutTogether.tours.dtos;
 
-import dev.fResult.goutTogether.enumurations.TourStatus;
+import dev.fResult.goutTogether.common.enumurations.TourStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 

@@ -1,6 +1,5 @@
 package dev.fResult.goutTogether.tours.entities;
 
-import dev.fResult.goutTogether.enumurations.TourStatus;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import java.time.Instant;
 import org.springframework.data.annotation.Id;

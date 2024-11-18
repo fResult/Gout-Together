@@ -1,4 +1,4 @@
-package dev.fResult.goutTogether.configs;
+package dev.fResult.goutTogether.common.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

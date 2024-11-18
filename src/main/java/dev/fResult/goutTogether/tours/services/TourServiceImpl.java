@@ -1,7 +1,7 @@
 package dev.fResult.goutTogether.tours.services;
 
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
-import dev.fResult.goutTogether.enumurations.TourStatus;
+import dev.fResult.goutTogether.common.enumurations.TourStatus;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import dev.fResult.goutTogether.tours.dtos.TourRequest;
 import dev.fResult.goutTogether.tours.entities.Tour;

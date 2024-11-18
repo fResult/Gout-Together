@@ -1,4 +1,4 @@
-package dev.fResult.goutTogether.enumurations;
+package dev.fResult.goutTogether.common.enumurations;
 
 public enum TourCompanyStatus {
   WAITING,
