@@ -39,10 +39,10 @@ public class TourController {
     return ResponseEntity.ok(tours);
   }
 
-    @GetMapping("/{id}")
-    public Tour byId(@PathVariable int id) {
-      return tourService.getTourById(id);
-    }
+  @GetMapping("/{id}")
+  public ResponseEntity<Tour> byId(@PathVariable int id) {
+    return ResponseEntity.ok(tourService.getTourById(id));
+  }
 
   @PostMapping
   public ResponseEntity<Tour> create(@RequestBody @Validated TourRequest body) {
