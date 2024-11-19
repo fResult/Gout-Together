@@ -95,14 +95,14 @@ class TourCompanyServiceTest {
   @Test
   void whenApproveCompanyButCompanyIsAlreadyApprovedThenError() {
     // Arrange
-    var TOUR_ID = 1;
-    var expectedErrorMessage = String.format("Tour company id [%d] is already approved", TOUR_ID);
+    var TOUR_COMPANY_ID = 1;
+    var expectedErrorMessage = String.format("Tour company id [%d] is already approved", TOUR_COMPANY_ID);
     when(tourCompanyRepository.findById(anyInt()))
         .thenReturn(
-            Optional.of(TourCompany.of(TOUR_ID, "My Tour", TourCompanyStatus.APPROVED.name())));
+            Optional.of(TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.APPROVED.name())));
 
     // Actual
-    Executable actualExecutable = () -> tourCompanyService.approveTourCompany(TOUR_ID);
+    Executable actualExecutable = () -> tourCompanyService.approveTourCompany(TOUR_COMPANY_ID);
 
     // Assert
     var exception = assertThrows(ValidationException.class, actualExecutable);
@@ -127,12 +127,12 @@ class TourCompanyServiceTest {
   @Test
   void whenGetCompanyThenSuccess() {
     // Arrange
-    var TOUR_ID = 1;
-    var mockCompany = TourCompany.of(TOUR_ID, "My Tour", TourCompanyStatus.WAITING.name());
+    var TOUR_COMPANY_ID = 1;
+    var mockCompany = TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.WAITING.name());
     when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.of(mockCompany));
 
     // Actual
-    var actualCompany = tourCompanyService.getTourCompanyById(TOUR_ID);
+    var actualCompany = tourCompanyService.getTourCompanyById(TOUR_COMPANY_ID);
 
     // Assert
     assertEquals(mockCompany, actualCompany);
@@ -141,12 +141,12 @@ class TourCompanyServiceTest {
   @Test
   void whenGetCompanyButCompanyNotFoundThenError() {
     // Arrange
-    var TOUR_ID = 999;
-    var expectedErrorMessage = String.format("Tour company id [%d] not found", TOUR_ID);
+    var TOUR_COMPANY_ID = 999;
+    var expectedErrorMessage = String.format("Tour company id [%d] not found", TOUR_COMPANY_ID);
     when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> tourCompanyService.getTourCompanyById(TOUR_ID);
+    Executable actualExecutable = () -> tourCompanyService.getTourCompanyById(TOUR_COMPANY_ID);
 
     // Assert
     var exception = assertThrowsExactly(EntityNotFound.class, actualExecutable);
