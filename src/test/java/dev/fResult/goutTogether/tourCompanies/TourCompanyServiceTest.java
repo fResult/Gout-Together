@@ -96,10 +96,12 @@ class TourCompanyServiceTest {
   void whenApproveCompanyButCompanyIsAlreadyApprovedThenError() {
     // Arrange
     var TOUR_COMPANY_ID = 1;
-    var expectedErrorMessage = String.format("Tour company id [%d] is already approved", TOUR_COMPANY_ID);
+    var expectedErrorMessage =
+        String.format("Tour company id [%d] is already approved", TOUR_COMPANY_ID);
     when(tourCompanyRepository.findById(anyInt()))
         .thenReturn(
-            Optional.of(TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.APPROVED.name())));
+            Optional.of(
+                TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.APPROVED.name())));
 
     // Actual
     Executable actualExecutable = () -> tourCompanyService.approveTourCompany(TOUR_COMPANY_ID);
@@ -125,7 +127,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenGetCompanyThenSuccess() {
+  void whenGetCompanyByIdThenSuccess() {
     // Arrange
     var TOUR_COMPANY_ID = 1;
     var mockCompany = TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.WAITING.name());
@@ -139,7 +141,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenGetCompanyButCompanyNotFoundThenError() {
+  void whenGetCompanyByIdButCompanyNotFoundThenError() {
     // Arrange
     var TOUR_COMPANY_ID = 999;
     var expectedErrorMessage = String.format("Tour company id [%d] not found", TOUR_COMPANY_ID);
