@@ -13,6 +13,6 @@ public class TestController {
 
     @GetMapping("/roles")
     public Iterable<Role> allRoles() {
-        return roleService.all();
+        return roleService.getRoles();
     }
 }
