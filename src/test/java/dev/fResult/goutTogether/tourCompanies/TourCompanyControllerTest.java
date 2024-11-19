@@ -75,4 +75,17 @@ class TourCompanyControllerTest {
         .andExpect(jsonPath("$.id").value(TOUR_ID))
         .andExpect(jsonPath("$.status").value(TourCompanyStatus.APPROVED.name()));
   }
+
+  @Test
+  void whenApproveCompanyButCompanyNotFoundThenError() throws Exception {
+    // Arrange
+    var TOUR_ID = 999;
+    when(tourCompanyService.approveTourCompany(anyInt())).thenThrow(new EntityNotFound());
+
+    // Actual
+    var resultActions = mockMvc.perform(post(TOUR_COMPANY_API + "/{id}/approve", TOUR_ID));
+
+    // Assert
+    resultActions.andExpect(status().isNotFound());
+  }
 }
