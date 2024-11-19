@@ -14,6 +14,7 @@ import dev.fResult.goutTogether.tours.entities.Tour;
 import dev.fResult.goutTogether.tours.repositories.TourRepository;
 import dev.fResult.goutTogether.tours.services.TourCountService;
 import dev.fResult.goutTogether.tours.services.TourServiceImpl;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,7 @@ class TourServiceTest {
             "Go 12 places around Kunlun",
             "Kunlun, China",
             20,
-            Instant.now(),
+            Instant.now().plus(Duration.ofDays(45)),
             null);
     var mockCompany = TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourStatus.APPROVED.name());
     var mockCreatedTour =
@@ -78,7 +79,7 @@ class TourServiceTest {
             "Go 12 places around Kunlun",
             "Kunlun, China",
             20,
-            Instant.now(),
+            Instant.now().plus(Duration.ofDays(45)),
             TourStatus.APPROVED.name());
     when(tourRepository.findById(TOUR_ID)).thenReturn(Optional.of(mockTour));
 
