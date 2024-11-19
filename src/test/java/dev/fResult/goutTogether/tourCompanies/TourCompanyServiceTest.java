@@ -1,12 +1,30 @@
 package dev.fResult.goutTogether.tourCompanies;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyWallet;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyLogin;
@@ -14,17 +32,6 @@ import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepos
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyWalletRepository;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyServiceImpl;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.Executable;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.jdbc.core.mapping.AggregateReference;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class TourCompanyServiceTest {
@@ -68,9 +75,17 @@ class TourCompanyServiceTest {
     var mockApprovedTourCompany =
         TourCompany.of(
             mockTourCompany.id(), mockTourCompany.name(), TourCompanyStatus.APPROVED.name());
+    var mockCreatedCompanyWallet =
+        TourCompanyWallet.of(
+            null,
+            AggregateReference.to(mockApprovedTourCompany.id()),
+            Instant.now(),
+            BigDecimal.ZERO);
 
     when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.of(mockTourCompany));
     when(tourCompanyRepository.save(any(TourCompany.class))).thenReturn(mockApprovedTourCompany);
+    when(tourCompanyWalletRepository.save(any(TourCompanyWallet.class)))
+        .thenReturn(mockCreatedCompanyWallet);
 
     // Actual
     var actualApprovedCompany = tourCompanyService.approveTourCompany(1);
@@ -78,6 +93,9 @@ class TourCompanyServiceTest {
     // Assert
     assertNotNull(actualApprovedCompany);
     assertEquals(mockApprovedTourCompany, actualApprovedCompany);
+    assertNotNull(mockCreatedCompanyWallet);
+  }
+
   }
 
   @Test
