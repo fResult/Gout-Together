@@ -175,4 +175,29 @@ class TourControllerTest {
     // Assert
     actualResults.andExpect(status().isCreated()).andExpect(jsonPath("$.id").value(TOUR_ID));
   }
+
+  @Test
+  void whenCreateTourButMissingSomeFieldsThenError() throws Exception {
+    // Arrange
+    var TOUR_COMPANY_ID = 1;
+    var body =
+        TourRequest.of(
+            TOUR_COMPANY_ID,
+            null,
+            "Go 12 places around Kunlun",
+            "Kunlun, China",
+            20,
+            null,
+            null);
+
+    // Actual
+    var actualResults =
+        mockMvc.perform(
+            post(TOUR_API)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    actualResults.andExpect(status().isBadRequest());
+  }
 }
