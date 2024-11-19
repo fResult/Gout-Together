@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
@@ -74,6 +75,20 @@ class TourCompanyControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(TOUR_ID))
         .andExpect(jsonPath("$.status").value(TourCompanyStatus.APPROVED.name()));
+  }
+
+  @Test
+  void whenApproveCompanyButCompanyIsAlreadyApprovedThenError() throws Exception {
+    // Arrange
+    var TOUR_COMPANY_ID = 1;
+    when(tourCompanyService.approveTourCompany(TOUR_COMPANY_ID))
+        .thenThrow(new ValidationException());
+
+    // Actual
+    var resultActions = mockMvc.perform(post(TOUR_COMPANY_API + "/{id}/approve", TOUR_COMPANY_ID));
+
+    // Assert
+    resultActions.andExpect(status().isUnprocessableEntity());
   }
 
   @Test
