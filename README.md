@@ -23,3 +23,4 @@ Course Code Example: <https://github.com/marttp/20240629-GoutTogether>
 - Using the Gradle Kotlin instead of the Gradle Groovy
 - PasswordEncoder, using Argon2PasswordEncoder instead of BCryptPasswordEncoder
 - Using the OpenTelemetry Java Agent instead of the OpenTelemetry Java SDK
+- Add more assertion, assert the error message
