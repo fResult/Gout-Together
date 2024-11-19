@@ -1,16 +1,18 @@
 package dev.fResult.goutTogether.tours;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import dev.fResult.goutTogether.common.enumurations.TourStatus;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
+import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import dev.fResult.goutTogether.tours.dtos.TourRequest;
 import dev.fResult.goutTogether.tours.entities.Tour;
+import dev.fResult.goutTogether.tours.entities.TourCount;
 import dev.fResult.goutTogether.tours.repositories.TourRepository;
 import dev.fResult.goutTogether.tours.services.TourCountService;
 import dev.fResult.goutTogether.tours.services.TourServiceImpl;
@@ -30,6 +32,7 @@ class TourServiceTest {
   @InjectMocks private TourServiceImpl tourService;
 
   @Mock private TourRepository tourRepository;
+  @Mock private TourCompanyRepository tourCompanyRepository;
   @Mock private TourCompanyService tourCompanyService;
   @Mock private TourCountService tourCountService;
 
@@ -49,7 +52,7 @@ class TourServiceTest {
     var mockCompany = TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourStatus.APPROVED.name());
     var mockCreatedTour =
         Tour.of(
-            1,
+            body.tourCompanyId(),
             AggregateReference.to(body.tourCompanyId()),
             body.title(),
             body.description(),
@@ -57,14 +60,19 @@ class TourServiceTest {
             body.numberOfPeople(),
             body.activityDate(),
             TourStatus.PENDING.name());
+    var mockTourCount = TourCount.of(1, AggregateReference.to(mockCreatedTour.id()), 0);
 
     when(tourCompanyService.getTourCompanyById(TOUR_COMPANY_ID)).thenReturn(mockCompany);
     when(tourRepository.save(any(Tour.class))).thenReturn(mockCreatedTour);
+    when(tourCountService.createTourCount(any(TourCount.class))).thenReturn(mockTourCount);
 
     // Actual
     var actualCreatedTour = tourService.createTour(body);
+    var actualCreatedTourCount = tourCountService.createTourCount(mockTourCount);
+
     // Assert
     assertEquals(mockCreatedTour, actualCreatedTour);
+    assertNotNull(actualCreatedTourCount);
   }
 
   @Test

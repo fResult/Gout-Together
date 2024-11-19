@@ -58,14 +58,7 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   @Transactional
   public TourCompany approveTourCompany(int id) {
     logger.debug("[approveTourCompany] tour company id [{}] is approving", id);
-    var tourCompany =
-        tourCompanyRepository
-            .findById(id)
-            .orElseThrow(
-                () -> {
-                  logger.warn("[approveTourCompany] tour company id [{}] not found", id);
-                  return new EntityNotFound(String.format("Tour company id [%s] not found", id));
-                });
+    var tourCompany = getTourCompanyById(id);
 
     if (tourCompany.status().equals(TourCompanyStatus.APPROVED.name())) {
       logger.warn("[approveTourCompany] tour company with id [{}] is already approved", id);
@@ -85,7 +78,11 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   public TourCompany getTourCompanyById(int id) {
     return tourCompanyRepository
         .findById(id)
-        .orElseThrow(() -> new EntityNotFound(String.format("Tour company id [%s] not found", id)));
+        .orElseThrow(
+            () -> {
+              logger.warn("[getTourCompanyById] tour company id [{}] not found", id);
+              return new EntityNotFound(String.format("Tour company id [%s] not found", id));
+            });
   }
 
   private void createTourCompanyLogin(TourCompany company, RegisterTourCompanyRequest body) {
