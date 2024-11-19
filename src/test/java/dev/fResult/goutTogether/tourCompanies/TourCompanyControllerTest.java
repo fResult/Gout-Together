@@ -1,6 +1,7 @@
 package dev.fResult.goutTogether.tourCompanies;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -23,6 +24,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(TourCompanyController.class)
 class TourCompanyControllerTest {
+  private final String TOUR_COMPANY_API = "/api/v1/tour-companies";
+
   @Autowired private WebApplicationContext webApplicationContext;
   @Autowired private ObjectMapper objectMapper;
 
@@ -32,7 +35,6 @@ class TourCompanyControllerTest {
 
   @BeforeEach
   public void setup() {
-    System.out.println("Setting up");
     mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
   }
 
@@ -48,11 +50,29 @@ class TourCompanyControllerTest {
     // Actual
     var resultActions =
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v1/tour-companies")
+            MockMvcRequestBuilders.post(TOUR_COMPANY_API)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(body)));
 
     // Assert
     resultActions.andExpect(status().isCreated()).andExpect(jsonPath("$.id").value(TOUR_ID));
+  }
+
+  @Test
+  void whenApproveTourCompanyThenSuccess() throws Exception {
+    // Arrange
+    var TOUR_ID = 1;
+    var mockTourCompany = TourCompany.of(TOUR_ID, "My Tour", TourCompanyStatus.APPROVED.name());
+    when(tourCompanyService.approveTourCompany(anyInt())).thenReturn(mockTourCompany);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(MockMvcRequestBuilders.post(TOUR_COMPANY_API + "/{id}/approve", TOUR_ID));
+
+    // Assert
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(TOUR_ID))
+        .andExpect(jsonPath("$.status").value(TourCompanyStatus.APPROVED.name()));
   }
 }
