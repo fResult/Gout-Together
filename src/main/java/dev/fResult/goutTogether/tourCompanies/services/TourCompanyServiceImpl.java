@@ -1,14 +1,5 @@
 package dev.fResult.goutTogether.tourCompanies.services;
 
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
-import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
-import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
-import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
-import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyLogin;
-import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyWallet;
-import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
-import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
-import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyWalletRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
 
@@ -18,6 +9,17 @@ import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.common.exceptions.ValidationException;
+import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
+import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
+import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyLogin;
+import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyWallet;
+import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
+import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
+import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyWalletRepository;
 
 @Service
 public class TourCompanyServiceImpl implements TourCompanyService {
@@ -56,37 +58,27 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   @Transactional
   public TourCompany approveTourCompany(int id) {
     logger.debug("[approveTourCompany] tour company id [{}] is approving", id);
-    return tourCompanyRepository
-        .findById(id)
-        .map(
-            existingCompany -> {
-              if (existingCompany.status().equals(TourCompanyStatus.APPROVED.name())) {
-                logger.warn(
-                    "[approveTourCompany] tour company with id [{}] is already approved", id);
-                try {
-                  throw new Exception(
-                      String.format(
-                          "[approveTourCompany] Tour company id [%s] is already approved", id));
-                } catch (Exception ex) {
-                  throw new RuntimeException(ex);
-                }
-              }
-              var companyToApprove =
-                  TourCompany.of(
-                      existingCompany.id(),
-                      existingCompany.name(),
-                      TourCompanyStatus.APPROVED.name());
-              var approvedCompany = tourCompanyRepository.save(companyToApprove);
-              logger.info("[approveTourCompany] approved tour company: {}", approvedCompany);
-              createCompanyWallet(approvedCompany);
+    var tourCompany =
+        tourCompanyRepository
+            .findById(id)
+            .orElseThrow(
+                () -> {
+                  logger.warn("[approveTourCompany] tour company id [{}] not found", id);
+                  return new EntityNotFound(String.format("Tour company id [%s] not found", id));
+                });
 
-              return approvedCompany;
-            })
-        .orElseThrow(
-            () -> {
-              logger.warn("[approveTourCompany] tour company id [{}] not found", id);
-              return new EntityNotFound(String.format("Tour company id [%s] not found", id));
-            });
+    if (tourCompany.status().equals(TourCompanyStatus.APPROVED.name())) {
+      logger.warn("[approveTourCompany] tour company with id [{}] is already approved", id);
+      throw new ValidationException(String.format("Tour company id [%s] is already approved", id));
+    }
+
+    var companyToApprove =
+        TourCompany.of(tourCompany.id(), tourCompany.name(), TourCompanyStatus.APPROVED.name());
+    var approvedCompany = tourCompanyRepository.save(companyToApprove);
+    logger.info("[approveTourCompany] approved tour company: {}", approvedCompany);
+    createCompanyWallet(approvedCompany);
+
+    return approvedCompany;
   }
 
   @Override

@@ -92,10 +92,25 @@ class TourCompanyServiceTest {
     assertNotNull(mockCreatedCompanyWallet);
   }
 
+  @Test
+  void whenApproveCompanyButCompanyIsAlreadyApprovedThenError() {
+    // Arrange
+    var TOUR_ID = 1;
+    var expectedErrorMessage = String.format("Tour company id [%d] is already approved", TOUR_ID);
+    when(tourCompanyRepository.findById(anyInt()))
+        .thenReturn(
+            Optional.of(TourCompany.of(TOUR_ID, "My Tour", TourCompanyStatus.APPROVED.name())));
+
+    // Actual
+    Executable actualExecutable = () -> tourCompanyService.approveTourCompany(TOUR_ID);
+
+    // Assert
+    var exception = assertThrows(ValidationException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test
-  void whenApproveCompanyButTourCompanyNotFoundThenError() {
+  void whenApproveCompanyButCompanyNotFoundThenError() {
     // Arrange
     var TOUR_ID = 99999;
     var expectedErrorMessage = String.format("Tour company id [%d] not found", TOUR_ID);
