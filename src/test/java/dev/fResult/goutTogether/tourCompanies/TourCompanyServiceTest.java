@@ -24,6 +24,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
+
 @ExtendWith(MockitoExtension.class)
 class TourCompanyServiceTest {
   @InjectMocks private TourCompanyServiceImpl tourCompanyService;
@@ -35,10 +37,10 @@ class TourCompanyServiceTest {
 
   @Test
   void whenRegisterCompanyThenSuccess() {
+    // Arrange
     var body = RegisterTourCompanyRequest.of(null, "My Tour", "MyTour", "mypassword", null);
     var expectedRegisteredCompany = TourCompany.of(1, "My Tour", TourCompanyStatus.WAITING.name());
 
-    // Arrange
     var mockTourCompany = TourCompany.of(1, "My Tour", TourCompanyStatus.WAITING.name());
     var mockCompanyCredential =
         TourCompanyLogin.of(
@@ -57,6 +59,25 @@ class TourCompanyServiceTest {
     // Assert
     assertNotNull(actualRegisteredCompany);
     assertEquals(expectedRegisteredCompany, actualRegisteredCompany);
+  }
+
+  @Test
+  void whenApproveTourCompanyThenSuccess() {
+    // Arrange
+    var mockTourCompany = TourCompany.of(1, "My Tour", TourCompanyStatus.WAITING.name());
+    var mockApprovedTourCompany =
+        TourCompany.of(
+            mockTourCompany.id(), mockTourCompany.name(), TourCompanyStatus.APPROVED.name());
+
+    when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.of(mockTourCompany));
+    when(tourCompanyRepository.save(any(TourCompany.class))).thenReturn(mockApprovedTourCompany);
+
+    // Actual
+    var actualApprovedCompany = tourCompanyService.approveTourCompany(1);
+
+    // Assert
+    assertNotNull(actualApprovedCompany);
+    assertEquals(mockApprovedTourCompany, actualApprovedCompany);
   }
 
   @Test
