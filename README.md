@@ -14,10 +14,14 @@ Course Code Example: <https://github.com/marttp/20240629-GoutTogether>
 ./gradlew clean build
 ```
 
+### Visit to Grafana on local machine
+- <http://localhost:3000>
+
 ## My Summary
 ### Things I learned from this bootcamp
 - OpenTelemetry Java Agent 
 - Spring Security
+- Unit Test with JUnit 5 and Mockito
 
 ### Things I did different
 - Using the Gradle Kotlin instead of the Gradle Groovy
