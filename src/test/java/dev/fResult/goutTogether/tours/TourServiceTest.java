@@ -76,6 +76,21 @@ class TourServiceTest {
   }
 
   @Test
+  void whenCreateTourButTourCompanyNotFoundThenSuccess() {
+    // Arrange
+    var TOUR_COMPANY_ID = 999;
+    var expectedErrorMessage = String.format("Tour company id [%d] not found", TOUR_COMPANY_ID);
+    when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualExecutable = () -> tourCompanyService.getTourCompanyById(TOUR_COMPANY_ID);
+
+    // Assert
+    var actualException = assertThrowsExactly(EntityNotFound.class, actualExecutable);
+    assertEquals(expectedErrorMessage, actualException.getMessage());
+  }
+
+  @Test
   void whenGetTourByIdThenSuccess() {
     // Arrange
     var TOUR_ID = 1;
