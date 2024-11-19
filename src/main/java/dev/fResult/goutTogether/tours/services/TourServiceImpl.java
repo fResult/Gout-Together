@@ -59,7 +59,7 @@ public class TourServiceImpl implements TourService {
   public Tour getTourById(Integer id) {
     return tourRepository
         .findById(id)
-        .orElseThrow(() -> new EntityNotFound(String.format("[getTourById] Tour id [%s] not found", id)));
+        .orElseThrow(() -> new EntityNotFound(String.format("Tour id [%s] not found", id)));
   }
 
   @Override

@@ -1,9 +1,12 @@
 package dev.fResult.goutTogether.tours;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import dev.fResult.goutTogether.common.enumurations.TourStatus;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import dev.fResult.goutTogether.tours.dtos.TourRequest;
@@ -12,9 +15,10 @@ import dev.fResult.goutTogether.tours.repositories.TourRepository;
 import dev.fResult.goutTogether.tours.services.TourCountService;
 import dev.fResult.goutTogether.tours.services.TourServiceImpl;
 import java.time.Instant;
-import org.junit.jupiter.api.Assertions;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -59,6 +63,21 @@ class TourServiceTest {
     // Actual
     var actualCreatedTour = tourService.createTour(body);
     // Assert
-    Assertions.assertEquals(mockCreatedTour, actualCreatedTour);
+    assertEquals(mockCreatedTour, actualCreatedTour);
+  }
+
+  @Test
+  void whenGetTourByIdButTourNotFoundThenError() {
+    // Arrange
+    var TOUR_ID = 999;
+    var expectedErrorMessage = String.format("Tour id [%d] not found", TOUR_ID);
+    when(tourRepository.findById(TOUR_ID)).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualExecutable = () -> tourService.getTourById(TOUR_ID);
+
+    // Assert
+    var exception = assertThrowsExactly(EntityNotFound.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
   }
 }
