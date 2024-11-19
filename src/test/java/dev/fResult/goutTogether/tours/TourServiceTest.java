@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import dev.fResult.goutTogether.common.enumurations.TourStatus;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
-import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import dev.fResult.goutTogether.tours.dtos.TourRequest;
 import dev.fResult.goutTogether.tours.entities.Tour;
@@ -32,7 +31,6 @@ class TourServiceTest {
   @InjectMocks private TourServiceImpl tourService;
 
   @Mock private TourRepository tourRepository;
-  @Mock private TourCompanyRepository tourCompanyRepository;
   @Mock private TourCompanyService tourCompanyService;
   @Mock private TourCountService tourCountService;
 
@@ -79,11 +77,21 @@ class TourServiceTest {
   void whenCreateTourButTourCompanyNotFoundThenSuccess() {
     // Arrange
     var TOUR_COMPANY_ID = 999;
+    var body =
+        TourRequest.of(
+            TOUR_COMPANY_ID,
+            "Kunlun 7 days",
+            "Go 12 places around Kunlun",
+            "Kunlun, China",
+            20,
+            Instant.now().plus(Duration.ofDays(45)),
+            null);
     var expectedErrorMessage = String.format("Tour company id [%d] not found", TOUR_COMPANY_ID);
-    when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.empty());
+    when(tourCompanyService.getTourCompanyById(anyInt()))
+        .thenThrow(new EntityNotFound(expectedErrorMessage));
 
     // Actual
-    Executable actualExecutable = () -> tourCompanyService.getTourCompanyById(TOUR_COMPANY_ID);
+    Executable actualExecutable = () -> tourService.createTour(body);
 
     // Assert
     var actualException = assertThrowsExactly(EntityNotFound.class, actualExecutable);
