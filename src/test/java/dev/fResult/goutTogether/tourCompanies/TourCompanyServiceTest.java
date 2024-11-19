@@ -1,11 +1,12 @@
 package dev.fResult.goutTogether.tourCompanies;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyLogin;
@@ -15,6 +16,7 @@ import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyWalletRepo
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -55,5 +57,18 @@ class TourCompanyServiceTest {
     // Assert
     assertNotNull(actualRegisteredCompany);
     assertEquals(expectedRegisteredCompany, actualRegisteredCompany);
+  }
+
+  @Test
+  void whenApproveCompanyButTourCompanyNotFoundThenError() {
+    // Arrange
+    when(tourCompanyRepository.findById(anyInt()))
+        .thenThrow(new EntityNotFound(String.format("Tour company id [%d] not found", 99999)));
+
+    // Actual
+    Executable actualExecutable = () -> tourCompanyService.approveTourCompany(99999);
+
+    // Assert
+    assertThrows(EntityNotFound.class, actualExecutable);
   }
 }
