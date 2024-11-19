@@ -1,26 +1,9 @@
 package dev.fResult.goutTogether.tourCompanies;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyWallet;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.Executable;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.jdbc.core.mapping.AggregateReference;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
@@ -28,10 +11,23 @@ import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyLogin;
+import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyWallet;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyWalletRepository;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyServiceImpl;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class TourCompanyServiceTest {
@@ -101,13 +97,15 @@ class TourCompanyServiceTest {
   @Test
   void whenApproveCompanyButTourCompanyNotFoundThenError() {
     // Arrange
-    when(tourCompanyRepository.findById(anyInt()))
-        .thenThrow(new EntityNotFound(String.format("Tour company id [%d] not found", 99999)));
+    var TOUR_ID = 99999;
+    var expectedErrorMessage = String.format("Tour company id [%d] not found", TOUR_ID);
+    when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> tourCompanyService.approveTourCompany(99999);
+    Executable actualExecutable = () -> tourCompanyService.approveTourCompany(TOUR_ID);
 
     // Assert
-    assertThrows(EntityNotFound.class, actualExecutable);
+    var exception = assertThrowsExactly(EntityNotFound.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
   }
 }
