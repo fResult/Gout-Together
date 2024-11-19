@@ -39,7 +39,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenRegisterTourCompanyThenSuccess() throws Exception {
+  void whenRegisterCompanyThenSuccess() throws Exception {
     // Arrange
     var TOUR_ID = 1;
     var body = RegisterTourCompanyRequest.of(null, "My Tour", "MyTour", "mypassword", null);
@@ -59,7 +59,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenApproveTourCompanyThenSuccess() throws Exception {
+  void whenApproveCompanyThenSuccess() throws Exception {
     // Arrange
     var TOUR_ID = 1;
     var mockTourCompany = TourCompany.of(TOUR_ID, "My Tour", TourCompanyStatus.APPROVED.name());
