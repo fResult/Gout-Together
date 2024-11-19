@@ -137,4 +137,19 @@ class TourCompanyServiceTest {
     // Assert
     assertEquals(mockCompany, actualCompany);
   }
+
+  @Test
+  void whenGetCompanyButCompanyNotFoundThenError() {
+    // Arrange
+    var TOUR_ID = 999;
+    var expectedErrorMessage = String.format("Tour company id [%d] not found", TOUR_ID);
+    when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualExecutable = () -> tourCompanyService.getTourCompanyById(TOUR_ID);
+
+    // Assert
+    var exception = assertThrowsExactly(EntityNotFound.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
+  }
 }

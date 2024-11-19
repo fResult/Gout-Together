@@ -94,6 +94,7 @@ public class TourCompanyServiceImpl implements TourCompanyService {
     var companyCredentialToCreate =
         TourCompanyLogin.of(
             null, AggregateReference.to(company.id()), body.username(), encryptedPassword);
+
     tourCompanyLoginRepository.save(companyCredentialToCreate);
     logger.info(
         "[registerTourCompany] new tour company credential: {} is created",
