@@ -3,11 +3,13 @@ package dev.fResult.goutTogether.tourCompanies;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
@@ -18,7 +20,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -50,7 +51,7 @@ class TourCompanyControllerTest {
     // Actual
     var resultActions =
         mockMvc.perform(
-            MockMvcRequestBuilders.post(TOUR_COMPANY_API)
+            post(TOUR_COMPANY_API)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(body)));
 
@@ -66,8 +67,7 @@ class TourCompanyControllerTest {
     when(tourCompanyService.approveTourCompany(anyInt())).thenReturn(mockTourCompany);
 
     // Actual
-    var resultActions =
-        mockMvc.perform(MockMvcRequestBuilders.post(TOUR_COMPANY_API + "/{id}/approve", TOUR_ID));
+    var resultActions = mockMvc.perform(post(TOUR_COMPANY_API + "/{id}/approve", TOUR_ID));
 
     // Assert
     resultActions
