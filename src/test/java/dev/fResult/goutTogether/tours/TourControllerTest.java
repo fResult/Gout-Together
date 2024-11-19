@@ -99,6 +99,20 @@ class TourControllerTest {
     // Assert
     resultActions.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(TOUR_ID));
   }
+
+  @Test
+  void whenGetTourByIdButTourNotFoundThenError() throws Exception {
+    // Arrange
+    var TOUR_ID = 999;
+    when(tourService.getTourById(anyInt())).thenThrow(new EntityNotFound());
+
+    // Actual
+    var resultActions = mockMvc.perform(get(TOUR_API + "/{id}", TOUR_ID));
+
+    // Assert
+    resultActions.andExpect(status().isNotFound());
+  }
+
   @Test
   void whenCreateTourThenSuccess() throws Exception {
     // Arrange
