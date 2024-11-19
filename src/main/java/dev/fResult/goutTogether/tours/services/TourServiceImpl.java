@@ -1,7 +1,7 @@
 package dev.fResult.goutTogether.tours.services;
 
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.common.enumurations.TourStatus;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import dev.fResult.goutTogether.tours.dtos.TourRequest;
 import dev.fResult.goutTogether.tours.entities.Tour;
@@ -51,6 +51,7 @@ public class TourServiceImpl implements TourService {
     logger.debug("[createTour] new tour: {} is created", createdTour);
     tourCountService.createTourCount(
         TourCount.of(null, AggregateReference.to(createdTour.id()), 0));
+
     return createdTour;
   }
 

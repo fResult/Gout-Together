@@ -15,7 +15,7 @@ public record TourRequest(
     @NotNull Instant activityDate,
     TourStatus status) {
 
-  public TourRequest of(
+  public static TourRequest of(
       Integer tourCompanyId,
       String title,
       String description,
