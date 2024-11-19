@@ -67,6 +67,29 @@ class TourServiceTest {
   }
 
   @Test
+  void whenGetTourByIdThenSuccess() {
+    // Arrange
+    var TOUR_ID = 1;
+    var mockTour =
+        Tour.of(
+            TOUR_ID,
+            AggregateReference.to(1),
+            "Kunlun 7 days",
+            "Go 12 places around Kunlun",
+            "Kunlun, China",
+            20,
+            Instant.now(),
+            TourStatus.APPROVED.name());
+    when(tourRepository.findById(TOUR_ID)).thenReturn(Optional.of(mockTour));
+
+    // Actual
+    var actualTour = tourService.getTourById(TOUR_ID);
+
+    // Assert
+    assertEquals(mockTour, actualTour);
+  }
+
+  @Test
   void whenGetTourByIdButTourNotFoundThenError() {
     // Arrange
     var TOUR_ID = 999;
