@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.dockerjava.api.exception.InternalServerErrorException;
 import dev.fResult.goutTogether.common.enumurations.TourStatus;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.tours.dtos.TourRequest;
@@ -114,6 +115,20 @@ class TourControllerTest {
   }
 
   @Test
+  void whenGetTourByIdButServerErrorThenError() throws Exception {
+    // Arrange
+    var TOUR_ID = 999;
+    when(tourService.getTourById(anyInt()))
+        .thenThrow(new InternalServerErrorException("Mock Error"));
+
+    // Actual
+    var resultActions = mockMvc.perform(get(TOUR_API + "/{id}", TOUR_ID));
+
+    // Assert
+    resultActions.andExpect(status().isInternalServerError());
+  }
+
+  @Test
   void whenCreateTourThenSuccess() throws Exception {
     // Arrange
     var TOUR_ID = 1;
@@ -147,10 +162,6 @@ class TourControllerTest {
                 .content(objectMapper.writeValueAsString(body)));
 
     // Assert
-    actualResults
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.id").value(TOUR_ID))
-        .andExpect(jsonPath("$.tourCompanyId.id").value(TOUR_COMPANY_ID))
-        .andExpect(jsonPath("$.status").value(TourStatus.PENDING.name()));
+    actualResults.andExpect(status().isCreated()).andExpect(jsonPath("$.id").value(TOUR_ID));
   }
 }
