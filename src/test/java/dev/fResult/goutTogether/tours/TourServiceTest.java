@@ -17,6 +17,7 @@ import dev.fResult.goutTogether.tours.services.TourCountService;
 import dev.fResult.goutTogether.tours.services.TourServiceImpl;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +25,8 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 
 @ExtendWith(MockitoExtension.class)
@@ -134,5 +137,29 @@ class TourServiceTest {
     // Assert
     var exception = assertThrowsExactly(EntityNotFound.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
+  @Test
+  void whenGetToursThenSuccess() {
+    // Arrange
+    var tours =
+        List.of(
+            Tour.of(
+                1,
+                AggregateReference.to(1),
+                "Kunlun 7 days",
+                "Go 12 places around Kunlun",
+                "Kunlun, China",
+                20,
+                Instant.now().plus(Duration.ofDays(45)),
+                TourStatus.APPROVED.name()));
+    var pageTours = new PageImpl<>(tours);
+    when(tourRepository.findAll(any(Pageable.class))).thenReturn(pageTours);
+
+    // Actual
+    var actualTours = tourService.getTours(Pageable.ofSize(3));
+
+    // Assert
+    assertEquals(pageTours, actualTours);
   }
 }
