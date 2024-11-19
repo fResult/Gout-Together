@@ -26,6 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 
@@ -157,7 +158,7 @@ class TourServiceTest {
     when(tourRepository.findAll(any(Pageable.class))).thenReturn(pageTours);
 
     // Actual
-    var actualTours = tourService.getTours(Pageable.ofSize(3));
+    var actualTours = tourService.getTours(PageRequest.of(0, 3));
 
     // Assert
     assertEquals(pageTours, actualTours);
