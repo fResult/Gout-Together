@@ -49,6 +49,35 @@ class TourControllerTest {
   }
 
   @Test
+  void whenGetToursThenSuccess() throws Exception {
+    // Arrange
+    var TOUR_ID = 1;
+    var params = new LinkedMultiValueMap<>(Map.of("page", List.of("0"), "size", List.of("10")));
+    var tours =
+        List.of(
+            Tour.of(
+                TOUR_ID,
+                AggregateReference.to(1),
+                "Kunlun 7 days",
+                "Go 12 places around Kunlun",
+                "Kunlun, China",
+                20,
+                Instant.now().plus(Duration.ofDays(45)),
+                TourStatus.APPROVED.name()));
+    var pageTours = new PageImpl<>(tours);
+    when(tourService.getTours(any(Pageable.class))).thenReturn(pageTours);
+
+    // Actual
+    var actualResults = mockMvc.perform(get(TOUR_API).params(params));
+
+    // Assert
+    actualResults
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content[0].id").value(TOUR_ID));
+  }
+
+  @Test
   void whenGetTourByIdThenSuccess() throws Exception {
     // Arrange
     var TOUR_ID = 1;
