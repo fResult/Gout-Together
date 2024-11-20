@@ -1,4 +1,4 @@
-package dev.fResult.goutTogether.wallets;
+package dev.fResult.goutTogether.wallets.entities;
 
 import dev.fResult.goutTogether.users.entities.User;
 import org.springframework.data.annotation.Id;
