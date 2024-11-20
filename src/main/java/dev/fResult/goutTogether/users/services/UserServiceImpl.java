@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UpdatePasswordResult changePassword(UserForgotPasswordRequest body) {
-    return UpdatePasswordResult.SUCCESS;
+    throw  new UnsupportedOperationException("Not implemented yet");
   }
 
   // FIXME: rename this method to be easier to understand
