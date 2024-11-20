@@ -1,7 +1,7 @@
 # Gout Together Backend
 
 This project is for learning Java, Spring Boot
-from [Java Backend Developer Bootcamp \[2024\]](https://www.youtube.com/playlist?list=PLm3A9eDaMzukMQtdDoeOR-HbFN35vieQY)
+from [Java Backend Developer Boot Camp \[2024\]](https://www.youtube.com/playlist?list=PLm3A9eDaMzukMQtdDoeOR-HbFN35vieQY)
 BY [TP Coder](https://www.youtube.com/@tpcoder)
 
 Course Code Example: <https://github.com/marttp/20240629-GoutTogether>
@@ -17,13 +17,9 @@ Course Code Example: <https://github.com/marttp/20240629-GoutTogether>
 ### Start the application
 
 #### In development mode with OpenTelemetry Java Agent
-<!-- slide -->
 
-
-As we already declared the required environment vaiables in the `.env` file, we can start application with the following
-comman<!-- slide -->
-
-d.
+As we already declared the required environment variables in the `.env` file, we can start application with the following
+command.
 
 ```bash
 ./gradlew bootRun
