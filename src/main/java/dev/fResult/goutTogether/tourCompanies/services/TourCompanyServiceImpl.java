@@ -3,7 +3,7 @@ package dev.fResult.goutTogether.tourCompanies.services;
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
-import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
@@ -41,7 +41,7 @@ public class TourCompanyServiceImpl implements TourCompanyService {
 
   @Override
   @Transactional
-  public TourCompany registerTourCompany(RegisterTourCompanyRequest body) {
+  public TourCompany registerTourCompany(TourCompanyRegistrationRequest body) {
     logger.debug("[registerTourCompany] newly tour company is registering");
     var companyToRegister = TourCompany.of(null, body.name(), TourCompanyStatus.WAITING.name());
     var registeredCompany = tourCompanyRepository.save(companyToRegister);
@@ -83,7 +83,7 @@ public class TourCompanyServiceImpl implements TourCompanyService {
             });
   }
 
-  private void createTourCompanyLogin(TourCompany company, RegisterTourCompanyRequest body) {
+  private void createTourCompanyLogin(TourCompany company, TourCompanyRegistrationRequest body) {
     var encryptedPassword = passwordEncoder.encode(body.password());
 
     var companyCredentialToCreate =

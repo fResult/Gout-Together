@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
-import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,9 +44,9 @@ class TourCompanyControllerTest {
   void whenRegisterCompanyThenSuccess() throws Exception {
     // Arrange
     var TOUR_ID = 1;
-    var body = RegisterTourCompanyRequest.of(null, "My Tour", "MyTour", "mypassword", null);
+    var body = TourCompanyRegistrationRequest.of(null, "My Tour", "MyTour", "mypassword", null);
     var mockTourCompany = TourCompany.of(TOUR_ID, "My Tour", TourCompanyStatus.WAITING.name());
-    when(tourCompanyService.registerTourCompany(any(RegisterTourCompanyRequest.class)))
+    when(tourCompanyService.registerTourCompany(any(TourCompanyRegistrationRequest.class)))
         .thenReturn(mockTourCompany);
 
     // Actual

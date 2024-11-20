@@ -1,10 +1,10 @@
 package dev.fResult.goutTogether.tourCompanies.services;
 
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
-import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 
 public interface TourCompanyService {
-  TourCompany registerTourCompany(RegisterTourCompanyRequest body);
+  TourCompany registerTourCompany(TourCompanyRegistrationRequest body);
 
   TourCompany approveTourCompany(int id);
 

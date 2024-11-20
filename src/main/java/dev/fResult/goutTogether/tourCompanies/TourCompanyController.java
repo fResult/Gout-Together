@@ -1,6 +1,6 @@
 package dev.fResult.goutTogether.tourCompanies;
 
-import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import java.net.URI;
@@ -23,7 +23,7 @@ public class TourCompanyController {
 
   @PostMapping
   public ResponseEntity<TourCompany> register(
-      @RequestBody @Validated RegisterTourCompanyRequest body) {
+      @RequestBody @Validated TourCompanyRegistrationRequest body) {
     logger.info("Registering a new tour company");
     return ResponseEntity.created(URI.create("/api/v1/tour-companies"))
         .body(tourCompanyService.registerTourCompany(body));

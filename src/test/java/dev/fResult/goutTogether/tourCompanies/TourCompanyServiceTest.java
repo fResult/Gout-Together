@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
-import dev.fResult.goutTogether.tourCompanies.dtos.RegisterTourCompanyRequest;
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
@@ -41,7 +41,7 @@ class TourCompanyServiceTest {
   @Test
   void whenRegisterCompanyThenSuccess() {
     // Arrange
-    var body = RegisterTourCompanyRequest.of(null, "My Tour", "MyTour", "mypassword", null);
+    var body = TourCompanyRegistrationRequest.of(null, "My Tour", "MyTour", "mypassword", null);
     var expectedRegisteredCompany = TourCompany.of(1, "My Tour", TourCompanyStatus.WAITING.name());
 
     var mockTourCompany = TourCompany.of(1, "My Tour", TourCompanyStatus.WAITING.name());
