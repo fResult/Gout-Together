@@ -2,6 +2,8 @@ package dev.fResult.goutTogether.users;
 
 import java.util.List;
 
+import dev.fResult.goutTogether.users.entities.Role;
+import dev.fResult.goutTogether.users.repositories.RoleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
