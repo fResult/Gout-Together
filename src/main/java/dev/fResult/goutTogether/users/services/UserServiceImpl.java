@@ -3,7 +3,7 @@ package dev.fResult.goutTogether.users.services;
 import dev.fResult.goutTogether.auths.AuthService;
 import dev.fResult.goutTogether.auths.UserForgotPasswordRequest;
 import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
 import dev.fResult.goutTogether.users.dtos.UserUpdateRequest;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl implements UserService {
   private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+  private final ErrorHelper errorHelper = new ErrorHelper(UserServiceImpl.class);
 
   private final UserRepository userRepository;
   private final AuthService authService;
@@ -39,26 +40,20 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserInfoResponse getUserById(int id) {
-    var existingUser =
-        userRepository
-            .findById(id)
-            .orElseThrow(
-                () -> {
-                  logger.error("[getUserById] User with id {} not found", id);
-                  return new EntityNotFound(String.format("User id [%s] not found", id));
-                });
-    return UserInfoResponse.of(
-        existingUser.id(),
-        existingUser.firstName(),
-        existingUser.lastName(),
-        existingUser.phoneNumber());
+    return userRepository
+        .findById(id)
+        .map(UserInfoResponse::fromDao)
+        .orElseThrow(errorHelper.entityNotFound("getUserById", User.class, 888));
   }
 
   // TODO: Create User + Credential + Wallet
   @Override
   public UserInfoResponse register(UserRegistrationRequest body) {
     var userToRegister = User.of(null, body.firstName(), body.lastName(), body.phoneNumber());
-    return Optional.of(userRepository.save(userToRegister)).map(UserInfoResponse::fromDao).get();
+    var registeredUser = userRepository.save(userToRegister);
+    logger.info("[register] new user: {} is registered", registeredUser);
+
+    return Optional.of(registeredUser).map(UserInfoResponse::fromDao).get();
   }
 
   @Override
@@ -68,8 +63,11 @@ public class UserServiceImpl implements UserService {
         userRepository
             .findById(id)
             .map(bodyToUserUpdate)
-            .orElseThrow(() -> new EntityNotFound(String.format("User id [%s] not found", id)));
-    return Optional.of(userRepository.save(userToUpdate)).map(UserInfoResponse::fromDao).get();
+            .orElseThrow(errorHelper.entityNotFound("updateUser", User.class, id));
+    var updatedUser = userRepository.save(userToUpdate);
+    logger.info("[updateUser] user: {} is updated", updatedUser);
+
+    return Optional.of(updatedUser).map(UserInfoResponse::fromDao).get();
   }
 
   // TODO: Delete User + Credential + Wallet (Cascade)
@@ -80,7 +78,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UpdatePasswordResult changePassword(UserForgotPasswordRequest body) {
-    throw  new UnsupportedOperationException("Not implemented yet");
+    throw new UnsupportedOperationException("Not implemented yet");
   }
 
   // FIXME: rename this method to be easier to understand
