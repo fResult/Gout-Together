@@ -1,5 +1,10 @@
 package dev.fResult.goutTogether.users;
 
+import dev.fResult.goutTogether.auths.UserForgotPasswordRequest;
+import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
+import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
+import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
+import dev.fResult.goutTogether.users.dtos.UserUpdateRequest;
 import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.services.UserService;
 import java.net.URI;
@@ -27,19 +32,29 @@ public class UserController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<User> byId(@PathVariable int id) {
+  public ResponseEntity<UserInfoResponse> byId(@PathVariable int id) {
     return ResponseEntity.ok(userService.getUserById(id));
   }
 
   @PostMapping
-  public ResponseEntity<User> register(@Validated @RequestBody User user) {
-    var createdUserUri = URI.create(String.format("/api/v1/users/%d", user.id()));
-    return ResponseEntity.created(createdUserUri).body(userService.register(user));
+  public ResponseEntity<UserInfoResponse> register(
+      @Validated @RequestBody UserRegistrationRequest body) {
+    var createdUser = userService.register(body);
+    var createdUserUri = URI.create(String.format("/api/v1/users/%d", createdUser.id()));
+    return ResponseEntity.created(createdUserUri).body(createdUser);
   }
 
   @PatchMapping("/{id}")
-  public ResponseEntity<User> updateUser(@PathVariable int id, @Validated @RequestBody User user) {
-    return ResponseEntity.ok(userService.updateUser(id, user));
+  public ResponseEntity<UserInfoResponse> updateUser(
+      @PathVariable int id, @Validated @RequestBody UserUpdateRequest body) {
+    return ResponseEntity.ok(userService.updateUser(id, body));
+  }
+
+  // TODO: Re-think the forgot password flow
+  @PatchMapping("/forgot-password")
+  public ResponseEntity<UpdatePasswordResult> changePassword(
+      @RequestBody UserForgotPasswordRequest body) {
+    return ResponseEntity.ok(userService.changePassword(body));
   }
 
   @DeleteMapping("/{id}")
