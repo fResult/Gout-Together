@@ -16,21 +16,21 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TourCountServiceTest {
-    @InjectMocks private TourCountService tourCountService;
+  @InjectMocks private TourCountService tourCountService;
 
-    @Mock private TourCountRepository tourCountRepository;
+  @Mock private TourCountRepository tourCountRepository;
 
-    @Test
-    void whenCreateTourCountThenSuccess() {
-        // Arrange
-        var TOUR_ID = 1;
-        var mockCreatedTourCount = TourCount.of(null, AggregateReference.to(TOUR_ID), 0);
-        when(tourCountRepository.save(mockCreatedTourCount)).thenReturn(mockCreatedTourCount);
+  @Test
+  void whenCreateTourCountThenSuccess() {
+    // Arrange
+    var TOUR_ID = 1;
+    var mockCreatedTourCount = TourCount.of(null, AggregateReference.to(TOUR_ID), 0);
+    when(tourCountRepository.save(mockCreatedTourCount)).thenReturn(mockCreatedTourCount);
 
-        // Act
-        var actualCreatedTourCount = tourCountService.createTourCount(mockCreatedTourCount);
+    // Act
+    var actualCreatedTourCount = tourCountService.createTourCount(mockCreatedTourCount);
 
-        // Assert
-        assertEquals(mockCreatedTourCount, actualCreatedTourCount);
-    }
+    // Assert
+    assertEquals(mockCreatedTourCount, actualCreatedTourCount);
+  }
 }
