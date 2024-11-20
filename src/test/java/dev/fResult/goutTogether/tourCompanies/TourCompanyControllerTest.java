@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
@@ -95,7 +95,7 @@ class TourCompanyControllerTest {
   void whenApproveCompanyButCompanyNotFoundThenError() throws Exception {
     // Arrange
     var TOUR_ID = 99999;
-    when(tourCompanyService.approveTourCompany(anyInt())).thenThrow(new EntityNotFound());
+    when(tourCompanyService.approveTourCompany(anyInt())).thenThrow(new EntityNotFoundException());
 
     // Actual
     var resultActions = mockMvc.perform(post(TOUR_COMPANY_API + "/{id}/approve", TOUR_ID));

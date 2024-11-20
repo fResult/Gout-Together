@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dockerjava.api.exception.InternalServerErrorException;
 import dev.fResult.goutTogether.common.enumurations.TourStatus;
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.tours.dtos.TourRequest;
 import dev.fResult.goutTogether.tours.entities.Tour;
 import dev.fResult.goutTogether.tours.services.TourService;
@@ -116,7 +116,7 @@ class TourControllerTest {
   void whenGetTourByIdButTourNotFoundThenError() throws Exception {
     // Arrange
     var TOUR_ID = 99999;
-    when(tourService.getTourById(anyInt())).thenThrow(new EntityNotFound());
+    when(tourService.getTourById(anyInt())).thenThrow(new EntityNotFoundException());
 
     // Actual
     var resultActions = mockMvc.perform(get(TOUR_API + "/{id}", TOUR_ID));

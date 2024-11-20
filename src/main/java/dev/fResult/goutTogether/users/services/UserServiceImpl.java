@@ -3,6 +3,7 @@ package dev.fResult.goutTogether.users.services;
 import dev.fResult.goutTogether.auths.AuthService;
 import dev.fResult.goutTogether.auths.UserForgotPasswordRequest;
 import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
+import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;

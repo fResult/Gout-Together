@@ -1,6 +1,6 @@
 package dev.fResult.goutTogether.common;
 
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +46,8 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
     return ResponseEntity.of(detail).build();
   }
 
-  @ExceptionHandler(EntityNotFound.class)
-  protected ResponseEntity<?> handleEntityNotFoundException(EntityNotFound ex) {
+  @ExceptionHandler(EntityNotFoundException.class)
+  protected ResponseEntity<?> handleEntityNotFoundException(EntityNotFoundException ex) {
     var detail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     logger.info("Entity not found: {}", ex.getMessage());
 

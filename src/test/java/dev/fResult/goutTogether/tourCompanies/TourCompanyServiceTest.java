@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
@@ -123,7 +123,7 @@ class TourCompanyServiceTest {
     Executable actualExecutable = () -> tourCompanyService.approveTourCompany(TOUR_ID);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFound.class, actualExecutable);
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
@@ -153,7 +153,7 @@ class TourCompanyServiceTest {
     Executable actualExecutable = () -> tourCompanyService.getTourCompanyById(TOUR_COMPANY_ID);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFound.class, actualExecutable);
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 }
