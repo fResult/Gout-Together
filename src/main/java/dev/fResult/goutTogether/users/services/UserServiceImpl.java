@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
   public UserInfoResponse register(UserRegistrationRequest body) {
     var userToRegister = User.of(null, body.firstName(), body.lastName(), body.phoneNumber());
     var registeredUser = userRepository.save(userToRegister);
-    logger.info("[register] new user: {} is registered", registeredUser);
+    logger.info("[register] new {}: {} is registered", User.class.getSimpleName(), registeredUser);
 
     return Optional.of(registeredUser).map(UserInfoResponse::fromDao).get();
   }
@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
             .map(bodyToUserUpdate)
             .orElseThrow(errorHelper.entityNotFound("updateUser", User.class, id));
     var updatedUser = userRepository.save(userToUpdate);
-    logger.info("[updateUser] user: {} is updated", updatedUser);
+    logger.info("[updateUser] {}: {} is updated", User.class.getSimpleName(), updatedUser);
 
     return Optional.of(updatedUser).map(UserInfoResponse::fromDao).get();
   }
