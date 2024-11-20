@@ -1,8 +1,10 @@
 package dev.fResult.goutTogether.users.services;
 
+import dev.fResult.goutTogether.auths.AuthService;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.repositories.UserRepository;
+import dev.fResult.goutTogether.wallets.services.WalletService;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +15,14 @@ public class UserServiceImpl implements UserService {
   private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
   private final UserRepository userRepository;
+  private final AuthService authService;
+  private final WalletService walletService;
 
-  public UserServiceImpl(UserRepository userRepository) {
+  public UserServiceImpl(
+      UserRepository userRepository, AuthService authService, WalletService walletService) {
     this.userRepository = userRepository;
+    this.authService = authService;
+    this.walletService = walletService;
   }
 
   @Override
