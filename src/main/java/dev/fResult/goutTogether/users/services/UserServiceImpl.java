@@ -34,6 +34,7 @@ public class UserServiceImpl implements UserService {
             });
   }
 
+  // TODO: Create User + Credential + Wallet
   @Override
   public User register(User user) {
     return userRepository.save(user);
@@ -45,6 +46,7 @@ public class UserServiceImpl implements UserService {
     return userRepository.save(userToUpdate);
   }
 
+  // TODO: Delete User + Credential + Wallet (Cascade)
   @Override
   public void deleteUser(int id) {
     var userToDelete = getUserById(id);
