@@ -38,4 +38,10 @@ public class UserServiceImpl implements UserService {
   public User register(User user) {
     return userRepository.save(user);
   }
+
+  @Override
+  public User updateUser(int id, User user) {
+    var userToUpdate = getUserById(id);
+    return userRepository.save(userToUpdate);
+  }
 }

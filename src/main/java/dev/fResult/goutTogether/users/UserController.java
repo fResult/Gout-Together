@@ -4,6 +4,7 @@ import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.services.UserService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,7 +27,12 @@ public class UserController {
   }
 
   @PostMapping
-  public ResponseEntity<User> register(@RequestBody User user) {
+  public ResponseEntity<User> register(@Validated @RequestBody User user) {
     return ResponseEntity.ok(userService.register(user));
+  }
+
+  @PatchMapping("/{id}")
+  public ResponseEntity<User> updateUser(@PathVariable int id, @Validated @RequestBody User user) {
+    return ResponseEntity.ok(userService.updateUser(id, user));
   }
 }
