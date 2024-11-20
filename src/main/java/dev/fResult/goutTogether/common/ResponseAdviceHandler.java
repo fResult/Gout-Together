@@ -39,12 +39,12 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
   }
 
   @ExceptionHandler(ValidationException.class)
-    protected ResponseEntity<?> handleValidationException(ValidationException ex) {
-        var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
-        logger.info("Validation error: {}", ex.getMessage());
+  protected ResponseEntity<?> handleValidationException(ValidationException ex) {
+    var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    logger.info("Validation error: {}", ex.getMessage());
 
-        return ResponseEntity.of(detail).build();
-    }
+    return ResponseEntity.of(detail).build();
+  }
 
   @ExceptionHandler(EntityNotFound.class)
   protected ResponseEntity<?> handleEntityNotFoundException(EntityNotFound ex) {

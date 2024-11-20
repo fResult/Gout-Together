@@ -7,7 +7,6 @@ import dev.fResult.goutTogether.tours.dtos.TourRequest;
 import dev.fResult.goutTogether.tours.entities.Tour;
 import dev.fResult.goutTogether.tours.entities.TourCount;
 import dev.fResult.goutTogether.tours.repositories.TourRepository;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -36,9 +35,7 @@ public class TourServiceImpl implements TourService {
   @Override
   @Transactional
   public Tour createTour(TourRequest body) {
-    var tourCompany =
-        Optional.ofNullable(tourCompanyService.getTourCompanyById(body.tourCompanyId()))
-            .orElseThrow();
+    var tourCompany = tourCompanyService.getTourCompanyById(body.tourCompanyId());
     var tourToCreate =
         Tour.of(
             null,

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/tour-companies")
 public class TourCompanyController {
   private final Logger logger = LoggerFactory.getLogger(TourCompanyController.class);
+
   private final TourCompanyService tourCompanyService;
 
   public TourCompanyController(TourCompanyService tourCompanyService) {

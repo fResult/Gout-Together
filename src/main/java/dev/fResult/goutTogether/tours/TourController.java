@@ -21,7 +21,7 @@ public class TourController {
 
   private final TourService tourService;
 
-  public TourController(TourService tourService, TourCompanyService tourCompanyService) {
+  public TourController(TourService tourService) {
     this.tourService = tourService;
   }
 
