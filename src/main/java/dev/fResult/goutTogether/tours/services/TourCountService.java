@@ -6,17 +6,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TourCountService {
-    private final TourCountRepository tourCountRepository;
+  private final TourCountRepository tourCountRepository;
 
-    public TourCountService(TourCountRepository tourCountRepository) {
-        this.tourCountRepository = tourCountRepository;
-    }
+  public TourCountService(TourCountRepository tourCountRepository) {
+    this.tourCountRepository = tourCountRepository;
+  }
 
-    public TourCount createTourCount(TourCount tourCount) {
-        return tourCountRepository.save(tourCount);
-    }
+  public TourCount createTourCount(TourCount tourCount) {
+    return tourCountRepository.save(tourCount);
+  }
 
-    public void incrementTourCount() {
-        // Increment the tour count
-    }
+  public void incrementTourCount() {
+    // Increment the tour count
+  }
 }

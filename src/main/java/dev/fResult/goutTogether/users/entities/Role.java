@@ -1,4 +1,4 @@
-package dev.fResult.goutTogether.users;
+package dev.fResult.goutTogether.users.entities;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
