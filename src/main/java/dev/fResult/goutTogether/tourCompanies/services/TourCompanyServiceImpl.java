@@ -1,14 +1,14 @@
 package dev.fResult.goutTogether.tourCompanies.services;
 
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
+import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyLogin;
-import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
+import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
 import dev.fResult.goutTogether.wallets.repositories.TourCompanyWalletRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TourCompanyServiceImpl implements TourCompanyService {
   private final Logger logger = LoggerFactory.getLogger(TourCompanyServiceImpl.class);
+  private final ErrorHelper errorHelper = new ErrorHelper(TourCompanyServiceImpl.class);
 
   private final TourCompanyRepository tourCompanyRepository;
   private final TourCompanyLoginRepository tourCompanyLoginRepository;
@@ -42,10 +43,14 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   @Override
   @Transactional
   public TourCompany registerTourCompany(TourCompanyRegistrationRequest body) {
-    logger.debug("[registerTourCompany] newly tour company is registering");
+    logger.debug(
+        "[registerTourCompany] new {} is registering", TourCompany.class.getSimpleName());
     var companyToRegister = TourCompany.of(null, body.name(), TourCompanyStatus.WAITING.name());
     var registeredCompany = tourCompanyRepository.save(companyToRegister);
-    logger.info("[registerTourCompany] new tour company: {} is registered", registeredCompany);
+    logger.info(
+        "[registerTourCompany] new {}: {} is registered",
+        TourCompany.class.getSimpleName(),
+        registeredCompany);
 
     createTourCompanyLogin(registeredCompany, body);
 
@@ -55,18 +60,23 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   @Override
   @Transactional
   public TourCompany approveTourCompany(int id) {
-    logger.debug("[approveTourCompany] tour company id [{}] is approving", id);
+    logger.debug(
+        "[approveTourCompany] {} id [{}] is approving", TourCompany.class.getSimpleName(), id);
     var tourCompany = getTourCompanyById(id);
 
     if (tourCompany.status().equals(TourCompanyStatus.APPROVED.name())) {
-      logger.warn("[approveTourCompany] tour company with id [{}] is already approved", id);
+      logger.warn(
+          "[approveTourCompany] {} id [{}] is already approved",
+          TourCompany.class.getSimpleName(),
+          id);
       throw new ValidationException(String.format("Tour company id [%s] is already approved", id));
     }
 
     var companyToApprove =
         TourCompany.of(tourCompany.id(), tourCompany.name(), TourCompanyStatus.APPROVED.name());
     var approvedCompany = tourCompanyRepository.save(companyToApprove);
-    logger.info("[approveTourCompany] approved tour company: {}", approvedCompany);
+    logger.info(
+        "[approveTourCompany] approved {}: {}", TourCompany.class.getSimpleName(), approvedCompany);
     createCompanyWallet(approvedCompany);
 
     return approvedCompany;
@@ -76,11 +86,7 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   public TourCompany getTourCompanyById(int id) {
     return tourCompanyRepository
         .findById(id)
-        .orElseThrow(
-            () -> {
-              logger.warn("[getTourCompanyById] tour company id [{}] not found", id);
-              return new EntityNotFound(String.format("Tour company id [%s] not found", id));
-            });
+        .orElseThrow(errorHelper.entityNotFound("getTourCompanyById", TourCompany.class, id));
   }
 
   private void createTourCompanyLogin(TourCompany company, TourCompanyRegistrationRequest body) {
@@ -92,7 +98,8 @@ public class TourCompanyServiceImpl implements TourCompanyService {
 
     tourCompanyLoginRepository.save(companyCredentialToCreate);
     logger.info(
-        "[registerTourCompany] new tour company credential: {} is created",
+        "[registerTourCompany] new {}: {} is created",
+        TourCompanyLogin.class.getSimpleName(),
         companyCredentialToCreate);
   }
 
@@ -103,6 +110,8 @@ public class TourCompanyServiceImpl implements TourCompanyService {
 
     tourCompanyWalletRepository.save(companyWalletToCreate);
     logger.info(
-        "[approveTourCompany] new tour company wallet: {} is created", companyWalletToCreate);
+        "[approveTourCompany] new {}: {} is created",
+        TourCompanyWallet.class.getSimpleName(),
+        companyWalletToCreate);
   }
 }

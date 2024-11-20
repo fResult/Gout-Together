@@ -1,16 +1,14 @@
 package dev.fResult.goutTogether.helpers;
 
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class ErrorHelper {
   private final Logger logger;
 
-  public ErrorHelper (Class<?> classToLog) {
+  public ErrorHelper(Class<?> classToLog) {
     logger = LoggerFactory.getLogger(classToLog);
   }
 
