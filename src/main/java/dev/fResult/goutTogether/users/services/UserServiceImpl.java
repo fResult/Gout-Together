@@ -72,15 +72,6 @@ public class UserServiceImpl implements UserService {
     return Optional.of(userRepository.save(userToUpdate)).map(UserInfoResponse::fromDao).get();
   }
 
-  private Function<User, User> toUserUpdate(UserUpdateRequest body) {
-    return user ->
-        User.of(
-            user.id(),
-            Optional.ofNullable(body.firstName()).orElse(user.firstName()),
-            Optional.ofNullable(body.lastName()).orElse(user.lastName()),
-            Optional.ofNullable(body.phoneNumber()).orElse(user.phoneNumber()));
-  }
-
   // TODO: Delete User + Credential + Wallet (Cascade)
   @Override
   public void deleteUser(int id) {
@@ -90,5 +81,15 @@ public class UserServiceImpl implements UserService {
   @Override
   public UpdatePasswordResult changePassword(UserForgotPasswordRequest body) {
     return UpdatePasswordResult.SUCCESS;
+  }
+
+  // FIXME: rename this method to be easier to understand
+  private Function<User, User> toUserUpdate(UserUpdateRequest body) {
+    return user ->
+        User.of(
+            user.id(),
+            Optional.ofNullable(body.firstName()).orElse(user.firstName()),
+            Optional.ofNullable(body.lastName()).orElse(user.lastName()),
+            Optional.ofNullable(body.phoneNumber()).orElse(user.phoneNumber()));
   }
 }
