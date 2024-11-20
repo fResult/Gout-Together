@@ -27,4 +27,9 @@ public class UserServiceImpl implements UserService {
               return new EntityNotFound(String.format("User id [%s] not found", id));
             });
   }
+
+  @Override
+  public User register(User user) {
+    return userRepository.save(user);
+  }
 }
