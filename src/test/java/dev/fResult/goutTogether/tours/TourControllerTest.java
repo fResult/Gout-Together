@@ -115,7 +115,7 @@ class TourControllerTest {
   @Test
   void whenGetTourByIdButTourNotFoundThenError() throws Exception {
     // Arrange
-    var TOUR_ID = 999;
+    var TOUR_ID = 99999;
     when(tourService.getTourById(anyInt())).thenThrow(new EntityNotFound());
 
     // Actual
@@ -128,7 +128,7 @@ class TourControllerTest {
   @Test
   void whenGetTourByIdButServerErrorThenError() throws Exception {
     // Arrange
-    var TOUR_ID = 999;
+    var TOUR_ID = 99999;
     when(tourService.getTourById(anyInt()))
         .thenThrow(new InternalServerErrorException("Mock Error"));
 

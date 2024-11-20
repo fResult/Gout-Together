@@ -1,7 +1,7 @@
 package dev.fResult.goutTogether.tours.services;
 
 import dev.fResult.goutTogether.common.enumurations.TourStatus;
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import dev.fResult.goutTogether.tours.dtos.TourRequest;
 import dev.fResult.goutTogether.tours.entities.Tour;
@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TourServiceImpl implements TourService {
   private final Logger logger = LoggerFactory.getLogger(TourServiceImpl.class);
+  private final ErrorHelper errorHelper = new ErrorHelper(TourServiceImpl.class);
 
   private final TourRepository tourRepository;
   private final TourCompanyService tourCompanyService;
@@ -48,7 +49,7 @@ public class TourServiceImpl implements TourService {
             TourStatus.PENDING.name());
 
     var createdTour = tourRepository.save(tourToCreate);
-    logger.debug("[createTour] new tour: {} is created", createdTour);
+    logger.debug("[createTour] new {}: {} is created", Tour.class.getSimpleName(), createdTour);
     tourCountService.createTourCount(
         TourCount.of(null, AggregateReference.to(createdTour.id()), 0));
 
@@ -59,7 +60,7 @@ public class TourServiceImpl implements TourService {
   public Tour getTourById(Integer id) {
     return tourRepository
         .findById(id)
-        .orElseThrow(() -> new EntityNotFound(String.format("Tour id [%s] not found", id)));
+        .orElseThrow(errorHelper.entityNotFound("getTourById", Tour.class, id));
   }
 
   @Override

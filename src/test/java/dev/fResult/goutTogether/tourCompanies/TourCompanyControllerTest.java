@@ -94,7 +94,7 @@ class TourCompanyControllerTest {
   @Test
   void whenApproveCompanyButCompanyNotFoundThenError() throws Exception {
     // Arrange
-    var TOUR_ID = 999;
+    var TOUR_ID = 99999;
     when(tourCompanyService.approveTourCompany(anyInt())).thenThrow(new EntityNotFound());
 
     // Actual
