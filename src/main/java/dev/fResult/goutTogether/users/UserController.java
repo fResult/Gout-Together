@@ -2,6 +2,7 @@ package dev.fResult.goutTogether.users;
 
 import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.services.UserService;
+import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -28,7 +29,8 @@ public class UserController {
 
   @PostMapping
   public ResponseEntity<User> register(@Validated @RequestBody User user) {
-    return ResponseEntity.ok(userService.register(user));
+    var createdUserUri = URI.create(String.format("/api/v1/users/%d", user.id()));
+    return ResponseEntity.created(createdUserUri).body(userService.register(user));
   }
 
   @PatchMapping("/{id}")
