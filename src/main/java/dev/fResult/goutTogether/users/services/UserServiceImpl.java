@@ -3,6 +3,7 @@ package dev.fResult.goutTogether.users.services;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
 import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.repositories.UserRepository;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,11 @@ public class UserServiceImpl implements UserService {
 
   public UserServiceImpl(UserRepository userRepository) {
     this.userRepository = userRepository;
+  }
+
+  @Override
+  public List<User> getUsers() {
+    return userRepository.findAll();
   }
 
   @Override
