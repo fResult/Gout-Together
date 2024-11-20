@@ -1,4 +1,4 @@
-package dev.fResult.goutTogether.users;
+package dev.fResult.goutTogether.users.services;
 
 import java.util.List;
 

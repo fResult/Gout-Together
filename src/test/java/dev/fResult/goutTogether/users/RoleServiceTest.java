@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 import dev.fResult.goutTogether.users.entities.Role;
 import dev.fResult.goutTogether.users.repositories.RoleRepository;
+import dev.fResult.goutTogether.users.services.RoleService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
