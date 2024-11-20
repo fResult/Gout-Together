@@ -14,17 +14,56 @@ Course Code Example: <https://github.com/marttp/20240629-GoutTogether>
 ./gradlew clean build
 ```
 
+### Start the application
+
+#### In development mode with OpenTelemetry Java Agent
+<!-- slide -->
+
+
+As we already declared the required environment vaiables in the `.env` file, we can start application with the following
+comman<!-- slide -->
+
+d.
+
+```bash
+./gradlew bootRun
+```
+
+Since this is for learning purpose, the environment variables in the `.env` file are:
+
+```env
+JAVA_TOOL_OPTIONS="-javaagent:build/agent/opentelemetry-javaagent.jar"
+OTEL_SERVICE_NAME=gout
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+OTEL_RESOURCE_ATTRIBUTES="service.name=gout,service.instance.id=gout,env=dev"
+# Logs are disabled by default
+OTEL_LOGS_EXPORTER=otlp
+OTEL_METRIC_EXPORT_INTERVAL=500
+OTEL_BSP_SCHEDULE_DELAY=500
+
+```
+
+#### In Build mode with OpenTelemetry Java Agent
+
+```bash
+java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
+```
+
 ### Visit to Grafana on local machine
+
 - <http://localhost:3000>
 
 ## My Summary
-### Things I learned from this bootcamp
-- OpenTelemetry Java Agent 
+
+### Things I learned from attending the course
+
+- OpenTelemetry Java Agent
 - Spring Security
 - Unit Test with JUnit 5 and Mockito
 
 ### Things I did different
+
 - Using the Gradle Kotlin instead of the Gradle Groovy
 - PasswordEncoder, using Argon2PasswordEncoder instead of BCryptPasswordEncoder
-- Using the OpenTelemetry Java Agent instead of the OpenTelemetry Java SDK
 - Add more assertion, assert the error message
