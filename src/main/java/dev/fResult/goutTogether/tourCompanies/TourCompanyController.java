@@ -51,4 +51,15 @@ public class TourCompanyController {
     logger.info("[approvedCompany] company id [{}] is approved", id);
     return ResponseEntity.ok(approvedCompany);
   }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<String> deleteTourCompanyById(@PathVariable int id) {
+    logger.info(
+        "[deleteTourCompanyById] Deleting a {} id [{}]", TourCompany.class.getSimpleName(), id);
+    tourCompanyService.deleteTourCompanyById(id);
+
+    return ResponseEntity.ok(
+        String.format(
+            "Delete %s by id [%d] deleted successfully", TourCompany.class.getSimpleName(), id));
+  }
 }

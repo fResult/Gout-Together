@@ -6,9 +6,9 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public record TourCompanyUpdateRequest(
-    Integer id, @Size(min = 1, max = 255) String name, @Size(min = 1, max = 20) String status) {
-  public static TourCompanyUpdateRequest of(Integer id, String name, String status) {
-    return new TourCompanyUpdateRequest(id, name, status);
+    @Size(min = 1, max = 255) String name, @Size(min = 1, max = 20) String status) {
+  public static TourCompanyUpdateRequest of(String name, String status) {
+    return new TourCompanyUpdateRequest(name, status);
   }
 
   public static Function<TourCompany, TourCompany> dtoToTourCompanyUpdate(
