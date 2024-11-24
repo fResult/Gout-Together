@@ -66,12 +66,12 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public UserLogin findUserCredentialByUserId(int id) {
-    logger.debug("[findUserCredentialByUserId] Finding {} by id: {}", UserLogin.class, id);
+  public UserLogin findUserCredentialByUserId(int userId) {
+    logger.debug("[findUserCredentialByUserId] Finding {} by id: {}", UserLogin.class, userId);
 
     return userLoginRepository
-        .findById(id)
-        .orElseThrow(errorHelper.entityNotFound("findUserCredentialByUserId", UserLogin.class, id));
+        .findOneByUserId(userId)
+        .orElseThrow(errorHelper.entityNotFound("findUserCredentialByUserId", UserLogin.class, userId));
   }
 
   @Override

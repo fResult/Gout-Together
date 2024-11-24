@@ -9,11 +9,11 @@ public interface AuthService {
 
   Optional<UserLogin> findUserCredentialByEmail(String userEmail);
 
-  UserLogin findUserCredentialByUserId(int id);
+  UserLogin findUserCredentialByUserId(int userId);
 
   UserLogin createCredentialLogin(int userId, String email, String password);
 
-  boolean deleteUserCredentialById(int id);
+  boolean deleteUserCredentialById(int userId);
 
   Optional<TourCompanyLogin> findTourCompanyCredentialByUsername(String username);
 
