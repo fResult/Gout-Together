@@ -5,6 +5,7 @@ import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
 import dev.fResult.goutTogether.users.dtos.UserUpdateRequest;
+import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.services.UserService;
 import java.net.URI;
 import java.util.List;
@@ -57,8 +58,9 @@ public class UserController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Boolean> deleteUser(@PathVariable int id) {
+  public ResponseEntity<String> deleteUser(@PathVariable int id) {
     userService.deleteUserById(id);
-    return ResponseEntity.ok(true);
+    return ResponseEntity.ok(
+        String.format("%s with id [%d] has been deleted", User.class.getSimpleName(), id));
   }
 }
