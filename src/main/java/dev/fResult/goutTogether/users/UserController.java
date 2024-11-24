@@ -5,7 +5,6 @@ import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
 import dev.fResult.goutTogether.users.dtos.UserUpdateRequest;
-import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.services.UserService;
 import java.net.URI;
 import java.util.List;
@@ -47,7 +46,7 @@ public class UserController {
   @PatchMapping("/{id}")
   public ResponseEntity<UserInfoResponse> updateUser(
       @PathVariable int id, @Validated @RequestBody UserUpdateRequest body) {
-    return ResponseEntity.ok(userService.updateUser(id, body));
+    return ResponseEntity.ok(userService.updateUserById(id, body));
   }
 
   // TODO: Re-think the forgot password flow
@@ -58,8 +57,8 @@ public class UserController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteUser(@PathVariable int id) {
-    userService.deleteUser(id);
-    return ResponseEntity.noContent().build();
+  public ResponseEntity<Boolean> deleteUser(@PathVariable int id) {
+    userService.deleteUserById(id);
+    return ResponseEntity.ok(true);
   }
 }
