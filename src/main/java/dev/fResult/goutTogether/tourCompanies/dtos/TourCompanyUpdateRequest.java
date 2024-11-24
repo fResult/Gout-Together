@@ -1,9 +1,7 @@
 package dev.fResult.goutTogether.tourCompanies.dtos;
 
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
 import java.util.Optional;
 import java.util.function.Function;
 

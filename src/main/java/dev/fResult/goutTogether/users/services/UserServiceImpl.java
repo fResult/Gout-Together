@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -42,16 +44,16 @@ public class UserServiceImpl implements UserService {
   @Override
   public List<UserInfoResponse> getUsers() {
     logger.debug("[getUsers] Getting all {}s", User.class.getSimpleName());
-    var users = userRepository.findAll();
-    var userIdToCredentialMap = buildUserIdToCredentialMap(users);
+    var userStream = userRepository.findAll().stream();
+    var userIdToCredentialMap = buildUserIdToCredentialMap(userStream);
     var toResponse = UserInfoResponse.fromUserDaoWithUserCredentialMap(userIdToCredentialMap);
 
-    return users.stream().map(toResponse).toList();
+    return userStream.map(toResponse).toList();
   }
 
   @Override
   public UserInfoResponse getUserById(int id) {
-    return getUserInfoById(id)
+    return getOptUserInfoById(id)
         .orElseThrow(errorHelper.entityNotFound("getUserById", User.class, id));
   }
 
@@ -65,8 +67,7 @@ public class UserServiceImpl implements UserService {
       logger.warn(
           "[register] {} email [{}] already exists", User.class.getSimpleName(), body.email());
       throw new CredentialExistsException(
-          String.format(
-              "%s email [%s] already exists", User.class.getSimpleName(), body.email()));
+          String.format("%s email [%s] already exists", User.class.getSimpleName(), body.email()));
     }
 
     var userToRegister = User.of(null, body.firstName(), body.lastName(), body.phoneNumber());
@@ -100,7 +101,7 @@ public class UserServiceImpl implements UserService {
   public void deleteUserById(int id) {
     var userEntityName = User.class.getSimpleName();
     logger.debug("[deleteUser] {} id [{}] is deleting", userEntityName, id);
-    getUserInfoById(id).orElseThrow(errorHelper.entityNotFound("deleteUser", User.class, id));
+    getOptUserInfoById(id).orElseThrow(errorHelper.entityNotFound("deleteUser", User.class, id));
 
     userRepository.deleteById(id);
     logger.info("[deleteUser] {} id [{}] is deleted", userEntityName, id);
@@ -111,18 +112,18 @@ public class UserServiceImpl implements UserService {
     throw new UnsupportedOperationException("Not implemented yet");
   }
 
-  private Set<Integer> buildUniqueUserIds(List<User> users) {
-    return users.stream().map(User::id).collect(Collectors.toSet());
+  private Set<Integer> buildUniqueUserIds(Stream<User> userStream) {
+    return userStream.map(User::id).collect(Collectors.toSet());
   }
 
-  private Map<Integer, UserLogin> buildUserIdToCredentialMap(List<User> users) {
-    var userIds = buildUniqueUserIds(users);
+  private Map<Integer, UserLogin> buildUserIdToCredentialMap(Stream<User> userStream) {
+    var userIds = buildUniqueUserIds(userStream);
 
     return authService.findUserCredentialsByUserIds(userIds).stream()
         .collect(Collectors.toMap(cred -> cred.userId().getId(), Function.identity()));
   }
 
-  private Optional<UserInfoResponse> getUserInfoById(int id) {
+  private Optional<UserInfoResponse> getOptUserInfoById(int id) {
     return userRepository
         .findById(id)
         .flatMap(opt -> Optional.of(this.toResponseWithUserCredential(opt)));
@@ -130,6 +131,7 @@ public class UserServiceImpl implements UserService {
 
   private UserInfoResponse toResponseWithUserCredential(User user) {
     var userCredential = authService.findUserCredentialByUserId(user.id());
+
     return UserInfoResponse.fromUserDao(user, userCredential);
   }
 }
