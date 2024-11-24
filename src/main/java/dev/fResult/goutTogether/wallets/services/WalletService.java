@@ -1,6 +1,11 @@
 package dev.fResult.goutTogether.wallets.services;
 
-import org.springframework.stereotype.Service;
+import dev.fResult.goutTogether.wallets.entities.UserWallet;
 
-@Service
-public class WalletService {}
+import java.util.Optional;
+
+public interface WalletService {
+  UserWallet createConsumerWallet(int userId);
+
+  Optional<UserWallet> findUserWalletByUserId(int userId);
+}
