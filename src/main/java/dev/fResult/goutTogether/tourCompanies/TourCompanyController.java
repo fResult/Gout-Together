@@ -1,5 +1,6 @@
 package dev.fResult.goutTogether.tourCompanies;
 
+import dev.fResult.goutTogether.common.utils.StringUtil;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
@@ -25,13 +26,16 @@ public class TourCompanyController {
 
   @GetMapping
   public ResponseEntity<List<TourCompanyResponse>> get() {
-    logger.info("Getting all tour companies");
+    logger.debug(
+        "[getTourCompanies] Getting all {}",
+        StringUtil.pluralize(TourCompany.class.getSimpleName()));
+
     return ResponseEntity.ok(tourCompanyService.getTourCompanies());
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<TourCompanyResponse> get(@PathVariable int id) {
-    logger.info("Getting {} id [{}]", TourCompany.class.getSimpleName(), id);
+    logger.debug("[getTourCompanyById] Getting {} id [{}]", TourCompany.class.getSimpleName(), id);
 
     return ResponseEntity.ok(tourCompanyService.getTourCompanyById(id));
   }
@@ -39,22 +43,26 @@ public class TourCompanyController {
   @PostMapping
   public ResponseEntity<TourCompanyResponse> register(
       @RequestBody @Validated TourCompanyRegistrationRequest body) {
-    logger.info("Registering a new tour company");
+    logger.info("[registerTourCompany] Registering a new {}", TourCompany.class.getSimpleName());
+
     return ResponseEntity.created(URI.create("/api/v1/tour-companies"))
         .body(tourCompanyService.registerTourCompany(body));
   }
 
   @PostMapping("/{id}/approve")
   public ResponseEntity<TourCompanyResponse> approve(@PathVariable int id) {
-    logger.info("Approving a new tour company id [{}]", id);
+    logger.debug(
+        "[approveTourCompanyById] Approving a new {} id [{}]",
+        TourCompany.class.getSimpleName(),
+        id);
     var approvedCompany = tourCompanyService.approveTourCompany(id);
-    logger.info("[approvedCompany] company id [{}] is approved", id);
+
     return ResponseEntity.ok(approvedCompany);
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<String> deleteTourCompanyById(@PathVariable int id) {
-    logger.info(
+    logger.debug(
         "[deleteTourCompanyById] Deleting a {} id [{}]", TourCompany.class.getSimpleName(), id);
     tourCompanyService.deleteTourCompanyById(id);
 

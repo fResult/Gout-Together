@@ -5,6 +5,7 @@ import dev.fResult.goutTogether.auths.services.AuthService;
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
 import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
+import dev.fResult.goutTogether.common.utils.StringUtil;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
@@ -38,7 +39,9 @@ public class TourCompanyServiceImpl implements TourCompanyService {
 
   @Override
   public List<TourCompanyResponse> getTourCompanies() {
-    logger.debug("[getTourCompanies] Getting all {}s", TourCompany.class.getSimpleName());
+    logger.debug(
+        "[getTourCompanies] Getting all {}",
+        StringUtil.pluralize(TourCompany.class.getSimpleName()));
 
     return tourCompanyRepository.findAll().stream().map(TourCompanyResponse::fromDao).toList();
   }

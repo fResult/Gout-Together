@@ -31,8 +31,9 @@ public class TourController {
       @RequestParam(required = true) int size,
       @RequestParam(defaultValue = "id") String field,
       @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
-    var sort = Sort.by(direction, field);
+    logger.debug("[getTours] Getting all {}", Tour.class.getSimpleName());
 
+    var sort = Sort.by(direction, field);
     var pageable = PageRequest.of(page, size, sort);
     var tours = tourService.getTours(pageable);
 
@@ -46,6 +47,8 @@ public class TourController {
 
   @PostMapping
   public ResponseEntity<Tour> create(@RequestBody @Validated TourRequest body) {
+    logger.debug("[create] Creating a new {}", Tour.class.getSimpleName());
+
     var createdTour = tourService.createTour(body);
     var uri = URI.create(String.format("/api/v1/tours/%d", createdTour.id()));
     return ResponseEntity.created(uri).body(createdTour);

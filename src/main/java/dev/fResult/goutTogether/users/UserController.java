@@ -39,14 +39,18 @@ public class UserController {
   @PostMapping
   public ResponseEntity<UserInfoResponse> register(
       @Validated @RequestBody UserRegistrationRequest body) {
+    logger.debug("[register] Registering a new {}", User.class.getSimpleName());
     var createdUser = userService.register(body);
     var createdUserUri = URI.create(String.format("/api/v1/users/%d", createdUser.id()));
+
     return ResponseEntity.created(createdUserUri).body(createdUser);
   }
 
   @PatchMapping("/{id}")
-  public ResponseEntity<UserInfoResponse> updateUser(
+  public ResponseEntity<UserInfoResponse> updateUserById(
       @PathVariable int id, @Validated @RequestBody UserUpdateRequest body) {
+    logger.debug("[updateUserById] Updating {} by id [{}]", User.class.getSimpleName(), id);
+
     return ResponseEntity.ok(userService.updateUserById(id, body));
   }
 
@@ -58,8 +62,10 @@ public class UserController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<String> deleteUser(@PathVariable int id) {
+  public ResponseEntity<String> deleteUserById(@PathVariable int id) {
+    logger.debug("[deleteUserById] Deleting {} by id [{}]", User.class.getSimpleName(), id);
     userService.deleteUserById(id);
+
     return ResponseEntity.ok(
         String.format("%s with id [%d] has been deleted", User.class.getSimpleName(), id));
   }
