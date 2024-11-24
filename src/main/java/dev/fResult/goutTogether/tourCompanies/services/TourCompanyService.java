@@ -1,12 +1,21 @@
 package dev.fResult.goutTogether.tourCompanies.services;
 
-import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 public interface TourCompanyService {
-  TourCompany registerTourCompany(TourCompanyRegistrationRequest body);
+  List<TourCompanyResponse> getTourCompanies();
 
-  TourCompany approveTourCompany(int id);
+  TourCompanyResponse getTourCompanyById(int id);
 
-  TourCompany getTourCompanyById(int id);
+  TourCompanyResponse registerTourCompany(TourCompanyRegistrationRequest body);
+
+  TourCompanyResponse approveTourCompany(int id);
+
+  TourCompanyResponse updateTourCompanyById(int id, TourCompanyRegistrationRequest body);
+
+  boolean deleteTourCompanyById(int id);
 }

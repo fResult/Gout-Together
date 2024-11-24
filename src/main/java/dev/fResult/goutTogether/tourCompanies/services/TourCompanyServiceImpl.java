@@ -7,10 +7,12 @@ import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
-import dev.fResult.goutTogether.wallets.repositories.TourCompanyWalletRepository;
 import dev.fResult.goutTogether.wallets.services.WalletService;
+import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -27,7 +29,6 @@ public class TourCompanyServiceImpl implements TourCompanyService {
 
   public TourCompanyServiceImpl(
       TourCompanyRepository tourCompanyRepository,
-      TourCompanyWalletRepository tourCompanyWalletRepository,
       AuthService authService,
       WalletService walletService) {
     this.tourCompanyRepository = tourCompanyRepository;
@@ -36,8 +37,21 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   }
 
   @Override
+  public List<TourCompanyResponse> getTourCompanies() {
+    logger.debug("[getTourCompanies] Getting all {}s", TourCompany.class.getSimpleName());
+
+    return tourCompanyRepository.findAll().stream().map(TourCompanyResponse::fromDao).toList();
+  }
+
+  @Override
+  public TourCompanyResponse getTourCompanyById(int id) {
+    return getOptTourCompanyById(id)
+        .orElseThrow(errorHelper.entityNotFound("getTourCompanyById", TourCompany.class, id));
+  }
+
+  @Override
   @Transactional
-  public TourCompany registerTourCompany(TourCompanyRegistrationRequest body) {
+  public TourCompanyResponse registerTourCompany(TourCompanyRegistrationRequest body) {
     logger.debug("[registerTourCompany] New {} is registering", TourCompany.class.getSimpleName());
 
     var existingCompanyCredential =
@@ -62,21 +76,21 @@ public class TourCompanyServiceImpl implements TourCompanyService {
 
     authService.createTourCompanyLogin(registeredCompany.id(), body.username(), body.password());
 
-    return registeredCompany;
+    return TourCompanyResponse.fromDao(registeredCompany);
   }
 
   @Override
   @Transactional
-  public TourCompany approveTourCompany(int id) {
+  public TourCompanyResponse approveTourCompany(int id) {
     logger.debug(
         "[approveTourCompany] {} id [{}] is approving", TourCompany.class.getSimpleName(), id);
     var tourCompany = getTourCompanyById(id);
 
-    if (tourCompany.status().equals(TourCompanyStatus.APPROVED.name())) {
+    if (tourCompany.status().equals(TourCompanyStatus.APPROVED)) {
       logger.warn(
           "[approveTourCompany] {} id [{}] is already approved",
           TourCompany.class.getSimpleName(),
-          id);
+          tourCompany.id());
       throw new ValidationException(String.format("Tour company id [%s] is already approved", id));
     }
 
@@ -84,17 +98,41 @@ public class TourCompanyServiceImpl implements TourCompanyService {
         TourCompany.of(tourCompany.id(), tourCompany.name(), TourCompanyStatus.APPROVED.name());
     var approvedCompany = tourCompanyRepository.save(companyToApprove);
     logger.info(
-        "[approveTourCompany] approved {}: {}", TourCompany.class.getSimpleName(), approvedCompany);
+        "[approveTourCompany] {} is approved: {}",
+        TourCompany.class.getSimpleName(),
+        approvedCompany);
 
     walletService.createTourCompanyWallet(approvedCompany.id());
 
-    return approvedCompany;
+    return TourCompanyResponse.fromDao(approvedCompany);
   }
 
   @Override
-  public TourCompany getTourCompanyById(int id) {
+  public TourCompanyResponse updateTourCompanyById(int id, TourCompanyRegistrationRequest body) {
+    throw new UnsupportedOperationException("Not implemented yet");
+  }
+
+  @Override
+  public boolean deleteTourCompanyById(int id) {
+    logger.debug(
+        "[deleteTourCompanyById] {} id [{}] is deleting", TourCompany.class.getSimpleName(), id);
+    var existingCompany =
+        getOptTourCompanyById(id)
+            .orElseThrow(
+                errorHelper.entityNotFound("deleteTourCompanyById", TourCompany.class, id));
+
+    tourCompanyRepository.deleteById(existingCompany.id());
+    logger.info(
+        "[deleteTourCompanyById] {} id [{}] is deleted",
+        TourCompany.class.getSimpleName(),
+        existingCompany.id());
+
+    return true;
+  }
+
+  private Optional<TourCompanyResponse> getOptTourCompanyById(int id) {
     return tourCompanyRepository
         .findById(id)
-        .orElseThrow(errorHelper.entityNotFound("getTourCompanyById", TourCompany.class, id));
+        .flatMap(company -> Optional.of(TourCompanyResponse.fromDao(company)));
   }
 }

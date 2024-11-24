@@ -5,8 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
+import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
 import dev.fResult.goutTogether.common.enumurations.TourStatus;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import dev.fResult.goutTogether.tours.dtos.TourRequest;
@@ -51,7 +53,7 @@ class TourServiceTest {
             20,
             Instant.now().plus(Duration.ofDays(45)),
             null);
-    var mockCompany = TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourStatus.APPROVED.name());
+    var mockCompany = TourCompanyResponse.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.WAITING);
     var mockCreatedTour =
         Tour.of(
             body.tourCompanyId(),
