@@ -9,7 +9,7 @@ import dev.fResult.goutTogether.users.entities.User;
 import java.util.List;
 
 public interface UserService {
-  List<User> getUsers();
+  List<UserInfoResponse> getUsers();
 
   UserInfoResponse getUserById(int id);
 

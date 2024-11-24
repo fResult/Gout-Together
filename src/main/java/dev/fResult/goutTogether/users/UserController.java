@@ -27,7 +27,7 @@ public class UserController {
   }
 
   @GetMapping
-  public ResponseEntity<List<User>> getUsers() {
+  public ResponseEntity<List<UserInfoResponse>> getUsers() {
     return ResponseEntity.ok(userService.getUsers());
   }
 
