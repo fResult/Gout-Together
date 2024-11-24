@@ -4,13 +4,11 @@ import dev.fResult.goutTogether.auths.UserLoginRepository;
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
+import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
+import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-
-import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
-import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
-import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
@@ -49,7 +47,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public UserLogin createUserLogin(int userId, String email, String password) {
+  public UserLogin createCredentialLogin(int userId, String email, String password) {
     logger.debug(
         "[createUserLogin] Creating new {} for userId: {}",
         UserLogin.class.getSimpleName(),
@@ -119,5 +117,18 @@ public class AuthServiceImpl implements AuthService {
         createdCompanyCredential);
 
     return companyCredentialToCreate;
+  }
+
+  @Override
+  public boolean deleteUserCredentialById(int id) {
+    logger.debug(
+        "[deleteUserCredentialById] Deleting {} by id: {}", UserLogin.class.getSimpleName(), id);
+    var credentialToDelete = findUserCredentialByUserId(id);
+
+    userLoginRepository.delete(credentialToDelete);
+    logger.info(
+        "[deleteUserCredentialById] {} id [{}] is deleted", UserLogin.class.getSimpleName(), id);
+
+    return true;
   }
 }

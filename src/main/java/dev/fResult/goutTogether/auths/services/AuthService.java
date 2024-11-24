@@ -11,7 +11,9 @@ public interface AuthService {
 
   UserLogin findUserCredentialByUserId(int id);
 
-  UserLogin createUserLogin(int userId, String email, String password);
+  UserLogin createCredentialLogin(int userId, String email, String password);
+
+  boolean deleteUserCredentialById(int id);
 
   Optional<TourCompanyLogin> findTourCompanyCredentialByUsername(String username);
 

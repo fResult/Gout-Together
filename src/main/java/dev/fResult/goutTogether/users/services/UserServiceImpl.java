@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
     logger.info("[register] New {} is registered: {}", User.class.getSimpleName(), registeredUser);
 
     var createdUserCredential =
-        authService.createUserLogin(registeredUser.id(), body.email(), body.password());
+        authService.createCredentialLogin(registeredUser.id(), body.email(), body.password());
     walletService.createConsumerWallet(registeredUser.id());
 
     return UserInfoResponse.fromUserDao(registeredUser, createdUserCredential);
@@ -95,21 +95,26 @@ public class UserServiceImpl implements UserService {
     return toResponseWithUserCredential(updatedUser);
   }
 
+  @Override
+  public UpdatePasswordResult changePassword(UserForgotPasswordRequest body) {
+    throw new UnsupportedOperationException("Not implemented yet");
+  }
+
   // TODO: Delete User + Credential + Wallet (Cascade)
   @Override
   @Transactional
-  public void deleteUserById(int id) {
+  public boolean deleteUserById(int id) {
     var userEntityName = User.class.getSimpleName();
     logger.debug("[deleteUser] {} id [{}] is deleting", userEntityName, id);
     getOptUserInfoById(id).orElseThrow(errorHelper.entityNotFound("deleteUser", User.class, id));
 
+    authService.deleteUserCredentialById(id);
+    walletService.deleteUserWalletById(id);
     userRepository.deleteById(id);
-    logger.info("[deleteUser] {} id [{}] is deleted", userEntityName, id);
-  }
 
-  @Override
-  public UpdatePasswordResult changePassword(UserForgotPasswordRequest body) {
-    throw new UnsupportedOperationException("Not implemented yet");
+    logger.info("[deleteUser] {} id [{}] is deleted", userEntityName, id);
+
+    return true;
   }
 
   private Set<Integer> buildUniqueUserIds(Stream<User> userStream) {
