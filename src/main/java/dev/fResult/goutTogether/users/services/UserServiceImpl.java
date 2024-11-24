@@ -44,11 +44,11 @@ public class UserServiceImpl implements UserService {
   @Override
   public List<UserInfoResponse> getUsers() {
     logger.debug("[getUsers] Getting all {}s", User.class.getSimpleName());
-    var userStream = userRepository.findAll().stream();
-    var userIdToCredentialMap = buildUserIdToCredentialMap(userStream);
+    var users = userRepository.findAll();
+    var userIdToCredentialMap = buildUserIdToCredentialMap(users);
     var toResponse = UserInfoResponse.fromUserDaoWithUserCredentialMap(userIdToCredentialMap);
 
-    return userStream.map(toResponse).toList();
+    return users.stream().map(toResponse).toList();
   }
 
   @Override
@@ -117,12 +117,12 @@ public class UserServiceImpl implements UserService {
     return true;
   }
 
-  private Set<Integer> buildUniqueUserIds(Stream<User> userStream) {
-    return userStream.map(User::id).collect(Collectors.toSet());
+  private Set<Integer> buildUniqueUserIds(List<User> users) {
+    return users.stream().map(User::id).collect(Collectors.toSet());
   }
 
-  private Map<Integer, UserLogin> buildUserIdToCredentialMap(Stream<User> userStream) {
-    var userIds = buildUniqueUserIds(userStream);
+  private Map<Integer, UserLogin> buildUserIdToCredentialMap(List<User> users) {
+    var userIds = buildUniqueUserIds(users);
 
     return authService.findUserCredentialsByUserIds(userIds).stream()
         .collect(Collectors.toMap(cred -> cred.userId().getId(), Function.identity()));
