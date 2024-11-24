@@ -60,6 +60,15 @@ public class TourCompanyController {
     return ResponseEntity.ok(approvedCompany);
   }
 
+  @PatchMapping("/{id}")
+  public ResponseEntity<TourCompanyResponse> updateTourCompanyById(
+      @PathVariable int id, @RequestBody @Validated TourCompanyRegistrationRequest body) {
+    logger.debug(
+        "[updateTourCompanyById] Updating a {} id [{}]", TourCompany.class.getSimpleName(), id);
+
+    return ResponseEntity.ok(tourCompanyService.updateTourCompanyById(id, body));
+  }
+
   @DeleteMapping("/{id}")
   public ResponseEntity<String> deleteTourCompanyById(@PathVariable int id) {
     logger.debug(
