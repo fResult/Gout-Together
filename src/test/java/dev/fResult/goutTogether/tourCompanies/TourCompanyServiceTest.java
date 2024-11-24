@@ -10,7 +10,7 @@ import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
-import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyLogin;
+import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyServiceImpl;

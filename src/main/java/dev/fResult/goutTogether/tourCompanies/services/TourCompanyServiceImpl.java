@@ -5,7 +5,7 @@ import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
-import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyLogin;
+import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
@@ -44,11 +44,11 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   @Transactional
   public TourCompany registerTourCompany(TourCompanyRegistrationRequest body) {
     logger.debug(
-        "[registerTourCompany] new {} is registering", TourCompany.class.getSimpleName());
+        "[registerTourCompany] New {} is registering", TourCompany.class.getSimpleName());
     var companyToRegister = TourCompany.of(null, body.name(), TourCompanyStatus.WAITING.name());
     var registeredCompany = tourCompanyRepository.save(companyToRegister);
     logger.info(
-        "[registerTourCompany] new {}: {} is registered",
+        "[registerTourCompany] New {} is registered: {}",
         TourCompany.class.getSimpleName(),
         registeredCompany);
 
@@ -98,7 +98,7 @@ public class TourCompanyServiceImpl implements TourCompanyService {
 
     tourCompanyLoginRepository.save(companyCredentialToCreate);
     logger.info(
-        "[registerTourCompany] new {}: {} is created",
+        "[registerTourCompany] New {} is created: {}",
         TourCompanyLogin.class.getSimpleName(),
         companyCredentialToCreate);
   }
@@ -110,7 +110,7 @@ public class TourCompanyServiceImpl implements TourCompanyService {
 
     tourCompanyWalletRepository.save(companyWalletToCreate);
     logger.info(
-        "[approveTourCompany] new {}: {} is created",
+        "[approveTourCompany] New {} is created: {}",
         TourCompanyWallet.class.getSimpleName(),
         companyWalletToCreate);
   }

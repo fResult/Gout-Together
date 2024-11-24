@@ -49,7 +49,7 @@ public class TourServiceImpl implements TourService {
             TourStatus.PENDING.name());
 
     var createdTour = tourRepository.save(tourToCreate);
-    logger.debug("[createTour] new {}: {} is created", Tour.class.getSimpleName(), createdTour);
+    logger.debug("[createTour] New {} is created: {}", Tour.class.getSimpleName(), createdTour);
     tourCountService.createTourCount(
         TourCount.of(null, AggregateReference.to(createdTour.id()), 0));
 

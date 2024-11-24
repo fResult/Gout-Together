@@ -1,5 +1,6 @@
-package dev.fResult.goutTogether.tourCompanies.entities;
+package dev.fResult.goutTogether.auths.entities;
 
+import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.data.relational.core.mapping.Table;
