@@ -63,10 +63,10 @@ public class UserServiceImpl implements UserService {
     var existingUserCredential = authService.findUserCredentialByEmail(body.email());
     if (existingUserCredential.isPresent()) {
       logger.warn(
-          "[register] {} email: [{}] is already existed", User.class.getSimpleName(), body.email());
+          "[register] {} email [{}] already exists", User.class.getSimpleName(), body.email());
       throw new CredentialExistsException(
           String.format(
-              "%s email: %s is already existed", User.class.getSimpleName(), body.email()));
+              "%s email [%s] already exists", User.class.getSimpleName(), body.email()));
     }
 
     var userToRegister = User.of(null, body.firstName(), body.lastName(), body.phoneNumber());

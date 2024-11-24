@@ -1,11 +1,13 @@
 package dev.fResult.goutTogether.tourCompanies.services;
 
+import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
+import dev.fResult.goutTogether.auths.services.AuthService;
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
+import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
-import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
@@ -27,24 +29,40 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   private final TourCompanyRepository tourCompanyRepository;
   private final TourCompanyLoginRepository tourCompanyLoginRepository;
   private final TourCompanyWalletRepository tourCompanyWalletRepository;
+  private final AuthService authService;
   private final PasswordEncoder passwordEncoder;
 
   public TourCompanyServiceImpl(
       TourCompanyRepository tourCompanyRepository,
       TourCompanyLoginRepository tourCompanyLoginRepository,
       TourCompanyWalletRepository tourCompanyWalletRepository,
+      AuthService authService,
       PasswordEncoder passwordEncoder) {
     this.tourCompanyRepository = tourCompanyRepository;
     this.tourCompanyLoginRepository = tourCompanyLoginRepository;
     this.tourCompanyWalletRepository = tourCompanyWalletRepository;
+    this.authService = authService;
     this.passwordEncoder = passwordEncoder;
   }
 
   @Override
   @Transactional
   public TourCompany registerTourCompany(TourCompanyRegistrationRequest body) {
-    logger.debug(
-        "[registerTourCompany] New {} is registering", TourCompany.class.getSimpleName());
+    logger.debug("[registerTourCompany] New {} is registering", TourCompany.class.getSimpleName());
+
+    var existingCompanyCredential =
+        authService.findTourCompanyCredentialByUsername(body.username());
+    if (existingCompanyCredential.isPresent()) {
+      logger.warn(
+          "[registerTourCompany] {} username [{}] already exists",
+          TourCompanyLogin.class.getSimpleName(),
+          body.username());
+      throw new CredentialExistsException(
+          String.format(
+              "%s username [%s] already exists",
+              TourCompanyLogin.class.getSimpleName(), body.username()));
+    }
+
     var companyToRegister = TourCompany.of(null, body.name(), TourCompanyStatus.WAITING.name());
     var registeredCompany = tourCompanyRepository.save(companyToRegister);
     logger.info(
@@ -52,7 +70,7 @@ public class TourCompanyServiceImpl implements TourCompanyService {
         TourCompany.class.getSimpleName(),
         registeredCompany);
 
-    createTourCompanyLogin(registeredCompany, body);
+    authService.createTourCompanyLogin(registeredCompany.id(), body.username(), body.password());
 
     return registeredCompany;
   }
@@ -87,20 +105,6 @@ public class TourCompanyServiceImpl implements TourCompanyService {
     return tourCompanyRepository
         .findById(id)
         .orElseThrow(errorHelper.entityNotFound("getTourCompanyById", TourCompany.class, id));
-  }
-
-  private void createTourCompanyLogin(TourCompany company, TourCompanyRegistrationRequest body) {
-    var encryptedPassword = passwordEncoder.encode(body.password());
-
-    var companyCredentialToCreate =
-        TourCompanyLogin.of(
-            null, AggregateReference.to(company.id()), body.username(), encryptedPassword);
-
-    tourCompanyLoginRepository.save(companyCredentialToCreate);
-    logger.info(
-        "[registerTourCompany] New {} is created: {}",
-        TourCompanyLogin.class.getSimpleName(),
-        companyCredentialToCreate);
   }
 
   private void createCompanyWallet(TourCompany company) {
