@@ -8,16 +8,11 @@ import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
-import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
-import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
 import dev.fResult.goutTogether.wallets.repositories.TourCompanyWalletRepository;
-import java.math.BigDecimal;
-import java.time.Instant;
+import dev.fResult.goutTogether.wallets.services.WalletService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.jdbc.core.mapping.AggregateReference;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,22 +22,17 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   private final ErrorHelper errorHelper = new ErrorHelper(TourCompanyServiceImpl.class);
 
   private final TourCompanyRepository tourCompanyRepository;
-  private final TourCompanyLoginRepository tourCompanyLoginRepository;
-  private final TourCompanyWalletRepository tourCompanyWalletRepository;
   private final AuthService authService;
-  private final PasswordEncoder passwordEncoder;
+  private final WalletService walletService;
 
   public TourCompanyServiceImpl(
       TourCompanyRepository tourCompanyRepository,
-      TourCompanyLoginRepository tourCompanyLoginRepository,
       TourCompanyWalletRepository tourCompanyWalletRepository,
       AuthService authService,
-      PasswordEncoder passwordEncoder) {
+      WalletService walletService) {
     this.tourCompanyRepository = tourCompanyRepository;
-    this.tourCompanyLoginRepository = tourCompanyLoginRepository;
-    this.tourCompanyWalletRepository = tourCompanyWalletRepository;
     this.authService = authService;
-    this.passwordEncoder = passwordEncoder;
+    this.walletService = walletService;
   }
 
   @Override
@@ -95,7 +85,8 @@ public class TourCompanyServiceImpl implements TourCompanyService {
     var approvedCompany = tourCompanyRepository.save(companyToApprove);
     logger.info(
         "[approveTourCompany] approved {}: {}", TourCompany.class.getSimpleName(), approvedCompany);
-    createCompanyWallet(approvedCompany);
+
+    walletService.createTourCompanyWallet(approvedCompany.id());
 
     return approvedCompany;
   }
@@ -105,17 +96,5 @@ public class TourCompanyServiceImpl implements TourCompanyService {
     return tourCompanyRepository
         .findById(id)
         .orElseThrow(errorHelper.entityNotFound("getTourCompanyById", TourCompany.class, id));
-  }
-
-  private void createCompanyWallet(TourCompany company) {
-    var companyWalletToCreate =
-        TourCompanyWallet.of(
-            null, AggregateReference.to(company.id()), Instant.now(), BigDecimal.ZERO);
-
-    tourCompanyWalletRepository.save(companyWalletToCreate);
-    logger.info(
-        "[approveTourCompany] New {} is created: {}",
-        TourCompanyWallet.class.getSimpleName(),
-        companyWalletToCreate);
   }
 }
