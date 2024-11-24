@@ -2,7 +2,6 @@ package dev.fResult.goutTogether.auths.services;
 
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
-
 import java.util.*;
 
 public interface AuthService {
