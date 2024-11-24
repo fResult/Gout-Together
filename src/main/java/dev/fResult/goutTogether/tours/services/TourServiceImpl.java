@@ -34,6 +34,22 @@ public class TourServiceImpl implements TourService {
   }
 
   @Override
+  public Page<Tour> getTours(Pageable pageable) {
+    logger.debug("[getTours] Getting all {}", Tour.class.getSimpleName());
+
+    return tourRepository.findAll(pageable);
+  }
+
+  @Override
+  public Tour getTourById(Integer id) {
+    logger.debug("[getTourById] Getting {} id [{}]", Tour.class.getSimpleName(), id);
+
+    return tourRepository
+        .findById(id)
+        .orElseThrow(errorHelper.entityNotFound("getTourById", Tour.class, id));
+  }
+
+  @Override
   @Transactional
   public Tour createTour(TourRequest body) {
     var tourCompany = tourCompanyService.getTourCompanyById(body.tourCompanyId());
@@ -54,17 +70,5 @@ public class TourServiceImpl implements TourService {
         TourCount.of(null, AggregateReference.to(createdTour.id()), 0));
 
     return createdTour;
-  }
-
-  @Override
-  public Tour getTourById(Integer id) {
-    return tourRepository
-        .findById(id)
-        .orElseThrow(errorHelper.entityNotFound("getTourById", Tour.class, id));
-  }
-
-  @Override
-  public Page<Tour> getTours(Pageable pageable) {
-    return tourRepository.findAll(pageable);
   }
 }

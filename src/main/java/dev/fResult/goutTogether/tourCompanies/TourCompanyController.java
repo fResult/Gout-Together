@@ -25,7 +25,7 @@ public class TourCompanyController {
   }
 
   @GetMapping
-  public ResponseEntity<List<TourCompanyResponse>> get() {
+  public ResponseEntity<List<TourCompanyResponse>> getTourCompanies() {
     logger.debug(
         "[getTourCompanies] Getting all {}",
         StringUtil.pluralize(TourCompany.class.getSimpleName()));
@@ -34,14 +34,14 @@ public class TourCompanyController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<TourCompanyResponse> get(@PathVariable int id) {
+  public ResponseEntity<TourCompanyResponse> getTourCompanyById(@PathVariable int id) {
     logger.debug("[getTourCompanyById] Getting {} id [{}]", TourCompany.class.getSimpleName(), id);
 
     return ResponseEntity.ok(tourCompanyService.getTourCompanyById(id));
   }
 
   @PostMapping
-  public ResponseEntity<TourCompanyResponse> register(
+  public ResponseEntity<TourCompanyResponse> registerTourCompany(
       @RequestBody @Validated TourCompanyRegistrationRequest body) {
     logger.info("[registerTourCompany] Registering a new {}", TourCompany.class.getSimpleName());
 
@@ -50,7 +50,7 @@ public class TourCompanyController {
   }
 
   @PostMapping("/{id}/approve")
-  public ResponseEntity<TourCompanyResponse> approve(@PathVariable int id) {
+  public ResponseEntity<TourCompanyResponse> approveTourCompanyById(@PathVariable int id) {
     logger.debug(
         "[approveTourCompanyById] Approving a new {} id [{}]",
         TourCompany.class.getSimpleName(),
