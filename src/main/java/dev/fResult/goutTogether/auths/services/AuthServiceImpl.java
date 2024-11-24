@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
 import org.slf4j.Logger;
@@ -105,17 +106,17 @@ public class AuthServiceImpl implements AuthService {
         TourCompanyLogin.class.getSimpleName(),
         tourCompanyId);
 
+    AggregateReference<TourCompany, Integer> companyReference =
+        AggregateReference.to(tourCompanyId);
     var encryptedPassword = passwordEncoder.encode(password);
-
     var companyCredentialToCreate =
-        TourCompanyLogin.of(
-            null, AggregateReference.to(tourCompanyId), username, encryptedPassword);
+        TourCompanyLogin.of(null, companyReference, username, encryptedPassword);
 
-    tourCompanyLoginRepository.save(companyCredentialToCreate);
+    var createdCompanyCredential = tourCompanyLoginRepository.save(companyCredentialToCreate);
     logger.info(
         "[createTourCompanyLogin] New {} is created: {}",
         TourCompanyLogin.class.getSimpleName(),
-        companyCredentialToCreate);
+        createdCompanyCredential);
 
     return companyCredentialToCreate;
   }
