@@ -38,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
     logger.debug(
         "[findUserCredentialsByUserIds] Finding {}s by userIds: {}", UserLogin.class, userIds);
 
-    return userLoginRepository.findAllById(userIds);
+    return userLoginRepository.findByUserIdIn(userIds);
   }
 
   @Override
