@@ -70,7 +70,7 @@ public class AuthServiceImpl implements AuthService {
     logger.debug("[findUserCredentialByUserId] Finding {} by id: {}", UserLogin.class, userId);
 
     return userLoginRepository
-        .findOneByUserId(userId)
+        .findOneByUserId(AggregateReference.to(userId))
         .orElseThrow(errorHelper.entityNotFound("findUserCredentialByUserId", UserLogin.class, userId));
   }
 

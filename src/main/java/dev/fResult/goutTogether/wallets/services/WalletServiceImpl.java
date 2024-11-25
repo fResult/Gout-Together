@@ -55,7 +55,7 @@ public class WalletServiceImpl implements WalletService {
         userId);
 
     return userWalletRepository
-        .findOneByUserId(userId)
+        .findOneByUserId(AggregateReference.to(userId))
         .orElseThrow(
             errorHelper.entityNotFound("findUserWalletByUserId", UserWallet.class, userId));
   }
