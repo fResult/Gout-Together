@@ -48,7 +48,7 @@ public class WalletServiceImpl implements WalletService {
   }
 
   @Override
-  public UserWallet findUserWalletByUserId(int userId) {
+  public UserWallet findConsumerWalletByUserId(int userId) {
     logger.debug(
         "[findUserWalletByUserId] Finding {} by userId: {}",
         UserWallet.class.getSimpleName(),
@@ -79,10 +79,10 @@ public class WalletServiceImpl implements WalletService {
     return createdWallet;
   }
 
-  public boolean deleteUserWalletById(int userId) {
+  public boolean deleteConsumerWalletById(int userId) {
     logger.debug(
         "[deleteUserWalletById] Deleting {} by id: {}", UserWallet.class.getSimpleName(), userId);
-    var walletToDelete = findUserWalletByUserId(userId);
+    var walletToDelete = findConsumerWalletByUserId(userId);
 
     userWalletRepository.delete(walletToDelete);
     logger.info(

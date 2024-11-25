@@ -6,9 +6,9 @@ import dev.fResult.goutTogether.wallets.entities.UserWallet;
 public interface WalletService {
   UserWallet createConsumerWallet(int userId);
 
-  UserWallet findUserWalletByUserId(int userId);
+  UserWallet findConsumerWalletByUserId(int userId);
 
-  boolean deleteUserWalletById(int userId);
+  boolean deleteConsumerWalletById(int userId);
 
   TourCompanyWallet createTourCompanyWallet(int tourCompanyId);
 }

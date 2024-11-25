@@ -98,7 +98,6 @@ public class UserServiceImpl implements UserService {
     throw new UnsupportedOperationException("Not implemented yet");
   }
 
-  // TODO: Delete User + Credential + Wallet (Cascade)
   @Override
   @Transactional
   public boolean deleteUserById(int id) {
@@ -107,7 +106,7 @@ public class UserServiceImpl implements UserService {
     getOptUserInfoById(id).orElseThrow(errorHelper.entityNotFound("deleteUser", User.class, id));
 
     authService.deleteUserCredentialById(id);
-    walletService.deleteUserWalletById(id);
+    walletService.deleteConsumerWalletById(id);
     userRepository.deleteById(id);
 
     logger.info("[deleteUser] {} id [{}] is deleted", userEntityName, id);
