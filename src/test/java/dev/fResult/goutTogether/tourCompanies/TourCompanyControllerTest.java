@@ -3,8 +3,7 @@ package dev.fResult.goutTogether.tourCompanies;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -15,6 +14,7 @@ import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyUpdateRequest;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
@@ -197,6 +197,30 @@ class TourCompanyControllerTest {
     // Assert
     resultActions.andExpect(status().isNotFound());
   }
+
+  @Test
+  void whenUpdateCompanyThenSuccess() throws Exception {
+    // Arrange
+    var STATUS_TO_UPDATE = TourCompanyStatus.BANNED;
+    var body = TourCompanyUpdateRequest.of(null, STATUS_TO_UPDATE);
+    var mockTourCompany = TourCompanyResponse.of(TOUR_COMPANY_ID_1, "My Tour", STATUS_TO_UPDATE);
+    when(tourCompanyService.updateTourCompanyById(anyInt(), any(TourCompanyUpdateRequest.class)))
+        .thenReturn(mockTourCompany);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            patch(TOUR_COMPANY_API + "/{id}", TOUR_COMPANY_ID_1)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(TOUR_COMPANY_ID_1))
+        .andExpect(jsonPath("$.status").value(STATUS_TO_UPDATE.name()));
+  }
+
   @Test
   void whenDeleteCompanyByIdThenSuccess() throws Exception {
     // Arrange
