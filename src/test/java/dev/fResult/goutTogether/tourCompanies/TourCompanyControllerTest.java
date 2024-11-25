@@ -78,7 +78,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenApproveCompanyButCompanyIsAlreadyApprovedThenError() throws Exception {
+  void whenApproveCompanyButCompanyIsAlreadyApprovedThenReturn422() throws Exception {
     // Arrange
     var TOUR_COMPANY_ID = 1;
     when(tourCompanyService.approveTourCompany(TOUR_COMPANY_ID))
@@ -92,7 +92,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenApproveCompanyButCompanyNotFoundThenError() throws Exception {
+  void whenApproveCompanyButCompanyNotFoundThenReturn404() throws Exception {
     // Arrange
     var TOUR_ID = 99999;
     when(tourCompanyService.approveTourCompany(anyInt())).thenThrow(new EntityNotFoundException());

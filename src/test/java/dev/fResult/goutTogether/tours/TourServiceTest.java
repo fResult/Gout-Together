@@ -129,7 +129,7 @@ class TourServiceTest {
   }
 
   @Test
-  void whenGetTourByIdButTourNotFoundThenError() {
+  void whenGetTourByIdButTourNotFoundThenThrowEntityNotfoundException() {
     // Arrange
     var TOUR_ID = 99999;
     var expectedErrorMessage =

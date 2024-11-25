@@ -78,7 +78,7 @@ class TourControllerTest {
   }
 
   @Test
-  void whenGetToursButForgotRequiredQueryParamsThenError() throws Exception {
+  void whenGetToursButForgotRequiredQueryParamsThenReturn400() throws Exception {
     // Arrange
     var params = new LinkedMultiValueMap<String, String>();
 
@@ -113,7 +113,7 @@ class TourControllerTest {
   }
 
   @Test
-  void whenGetTourByIdButTourNotFoundThenError() throws Exception {
+  void whenGetTourByIdButTourNotFoundThen404() throws Exception {
     // Arrange
     var TOUR_ID = 99999;
     when(tourService.getTourById(anyInt())).thenThrow(new EntityNotFoundException());
@@ -126,7 +126,7 @@ class TourControllerTest {
   }
 
   @Test
-  void whenGetTourByIdButServerErrorThenError() throws Exception {
+  void whenGetTourByIdButServerErrorThenReturn500() throws Exception {
     // Arrange
     var TOUR_ID = 99999;
     when(tourService.getTourById(anyInt()))
@@ -177,7 +177,7 @@ class TourControllerTest {
   }
 
   @Test
-  void whenCreateTourButMissingSomeFieldsThenError() throws Exception {
+  void whenCreateTourButMissingSomeFieldsThenReturn400() throws Exception {
     // Arrange
     var TOUR_COMPANY_ID = 1;
     var body =

@@ -41,7 +41,7 @@ class TourCompanyServiceTest {
   @Test
   void whenRegisterCompanyThenSuccess() {
     // Arrange
-    var body = TourCompanyRegistrationRequest.of(null, "My Tour", "MyTour", "mypassword", null);
+    var body = TourCompanyRegistrationRequest.of("My Tour", "MyTour", "mypassword", null);
     var expectedRegisteredCompany = TourCompany.of(1, "My Tour", TourCompanyStatus.WAITING.name());
 
     var mockTourCompany = TourCompany.of(1, "My Tour", TourCompanyStatus.WAITING.name());
@@ -93,7 +93,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenApproveCompanyButCompanyIsAlreadyApprovedThenError() {
+  void whenApproveCompanyButCompanyIsAlreadyApprovedThenThrowValidationException() {
     // Arrange
     var TOUR_COMPANY_ID = 1;
     var expectedErrorMessage =
@@ -112,7 +112,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenApproveCompanyButCompanyNotFoundThenError() {
+  void whenApproveCompanyButCompanyNotFoundThrowEntityNotFoundException() {
     // Arrange
     var TOUR_ID = 99999;
     var expectedErrorMessage =
@@ -142,7 +142,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenGetCompanyByIdButCompanyNotFoundThenError() {
+  void whenGetCompanyByIdButCompanyNotFoundThenThrowEntityNotFoundException() {
     // Arrange
     var TOUR_COMPANY_ID = 99999;
     var expectedErrorMessage =
