@@ -77,7 +77,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenGetUserByIdButCompanyNotFoundThenReturn404() throws Exception {
+  void whenGetUserByIdButUserNotFoundThenReturn404() throws Exception {
     // Arrange
     when(userService.getUserById(anyInt())).thenThrow(EntityNotFoundException.class);
 
@@ -160,5 +160,17 @@ public class UserControllerTest {
 
     // Assert
     resultActions.andExpect(status().isOk()).andExpect(jsonPath("$").value(responseMessage));
+  }
+
+  @Test
+  void whenDeleteUserByIdButUserNotFoundThenReturn404() throws Exception {
+    // Arrange
+    when(userService.deleteUserById(anyInt())).thenThrow(EntityNotFoundException.class);
+
+    // Actual
+    var resultActions = mockMvc.perform(delete(USER_API + "/{id}", NOT_FOUND_USER_ID));
+
+    // Assert
+    resultActions.andExpect(status().isNotFound());
   }
 }
