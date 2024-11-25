@@ -6,16 +6,16 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
-import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyLogin;
-import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
+import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
-import dev.fResult.goutTogether.wallets.repositories.TourCompanyWalletRepository;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyServiceImpl;
+import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
+import dev.fResult.goutTogether.wallets.repositories.TourCompanyWalletRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
@@ -115,14 +115,15 @@ class TourCompanyServiceTest {
   void whenApproveCompanyButCompanyNotFoundThenError() {
     // Arrange
     var TOUR_ID = 99999;
-    var expectedErrorMessage = String.format("Tour company id [%d] not found", TOUR_ID);
+    var expectedErrorMessage =
+        String.format("%s id [%d] not found", TourCompany.class.getSimpleName(), TOUR_ID);
     when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.empty());
 
     // Actual
     Executable actualExecutable = () -> tourCompanyService.approveTourCompany(TOUR_ID);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFound.class, actualExecutable);
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
@@ -143,15 +144,16 @@ class TourCompanyServiceTest {
   @Test
   void whenGetCompanyByIdButCompanyNotFoundThenError() {
     // Arrange
-    var TOUR_COMPANY_ID = 999;
-    var expectedErrorMessage = String.format("Tour company id [%d] not found", TOUR_COMPANY_ID);
+    var TOUR_COMPANY_ID = 99999;
+    var expectedErrorMessage =
+        String.format("%s id [%d] not found", TourCompany.class.getSimpleName(), TOUR_COMPANY_ID);
     when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.empty());
 
     // Actual
     Executable actualExecutable = () -> tourCompanyService.getTourCompanyById(TOUR_COMPANY_ID);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFound.class, actualExecutable);
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 }

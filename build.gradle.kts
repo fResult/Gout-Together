@@ -1,4 +1,15 @@
+import io.github.cdimascio.dotenv.Dotenv
 import org.springframework.boot.gradle.tasks.bundling.BootJar
+import org.springframework.boot.gradle.tasks.run.BootRun
+
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath("io.github.cdimascio:java-dotenv:5.2.2")
+  }
+}
 
 plugins {
   application
@@ -36,6 +47,7 @@ dependencies {
   implementation("org.bouncycastle:bcprov-jdk18on:1.79") // As an Argon2PasswordEncoder's dependency in Spring Security
   implementation("org.flywaydb:flyway-core")
   implementation("org.flywaydb:flyway-database-postgresql")
+  implementation("io.github.cdimascio:java-dotenv:5.2.2")
 
   runtimeOnly("io.micrometer:micrometer-registry-prometheus")
   runtimeOnly("org.postgresql:postgresql")
@@ -67,4 +79,14 @@ application {
 tasks.withType<BootJar> {
   dependsOn("copyAgent")
   archiveFileName.set("app.jar")
+}
+
+tasks.withType<BootRun> {
+  doFirst {
+    jvmArgs(listOf("-javaagent:build/agent/opentelemetry-javaagent.jar"))
+    val dotenv = Dotenv.configure().load()
+    dotenv.entries().forEach { entry ->
+      environment(entry.key, entry.value)
+    }
+  }
 }

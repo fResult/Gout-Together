@@ -5,8 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
+import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
 import dev.fResult.goutTogether.common.enumurations.TourStatus;
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import dev.fResult.goutTogether.tours.dtos.TourRequest;
@@ -51,7 +53,7 @@ class TourServiceTest {
             20,
             Instant.now().plus(Duration.ofDays(45)),
             null);
-    var mockCompany = TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourStatus.APPROVED.name());
+    var mockCompany = TourCompanyResponse.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.WAITING);
     var mockCreatedTour =
         Tour.of(
             body.tourCompanyId(),
@@ -80,7 +82,7 @@ class TourServiceTest {
   @Test
   void whenCreateTourButTourCompanyNotFoundThenSuccess() {
     // Arrange
-    var TOUR_COMPANY_ID = 999;
+    var TOUR_COMPANY_ID = 99999;
     var body =
         TourRequest.of(
             TOUR_COMPANY_ID,
@@ -90,15 +92,16 @@ class TourServiceTest {
             20,
             Instant.now().plus(Duration.ofDays(45)),
             null);
-    var expectedErrorMessage = String.format("Tour company id [%d] not found", TOUR_COMPANY_ID);
+    var expectedErrorMessage =
+        String.format("%s id [%d] not found", TourCompany.class.getSimpleName(), TOUR_COMPANY_ID);
     when(tourCompanyService.getTourCompanyById(anyInt()))
-        .thenThrow(new EntityNotFound(expectedErrorMessage));
+        .thenThrow(new EntityNotFoundException(expectedErrorMessage));
 
     // Actual
     Executable actualExecutable = () -> tourService.createTour(body);
 
     // Assert
-    var actualException = assertThrowsExactly(EntityNotFound.class, actualExecutable);
+    var actualException = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, actualException.getMessage());
   }
 
@@ -128,15 +131,16 @@ class TourServiceTest {
   @Test
   void whenGetTourByIdButTourNotFoundThenError() {
     // Arrange
-    var TOUR_ID = 999;
-    var expectedErrorMessage = String.format("Tour id [%d] not found", TOUR_ID);
+    var TOUR_ID = 99999;
+    var expectedErrorMessage =
+        String.format("%s id [%d] not found", Tour.class.getSimpleName(), TOUR_ID);
     when(tourRepository.findById(TOUR_ID)).thenReturn(Optional.empty());
 
     // Actual
     Executable actualExecutable = () -> tourService.getTourById(TOUR_ID);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFound.class, actualExecutable);
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 

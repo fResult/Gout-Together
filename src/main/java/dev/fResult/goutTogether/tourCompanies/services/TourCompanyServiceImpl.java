@@ -1,108 +1,141 @@
 package dev.fResult.goutTogether.tourCompanies.services;
 
+import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
+import dev.fResult.goutTogether.auths.services.AuthService;
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
+import dev.fResult.goutTogether.common.utils.StringUtil;
+import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
-import dev.fResult.goutTogether.tourCompanies.entities.TourCompanyLogin;
-import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
-import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
-import dev.fResult.goutTogether.wallets.repositories.TourCompanyWalletRepository;
-import java.math.BigDecimal;
-import java.time.Instant;
+import dev.fResult.goutTogether.wallets.services.WalletService;
+import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.jdbc.core.mapping.AggregateReference;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TourCompanyServiceImpl implements TourCompanyService {
   private final Logger logger = LoggerFactory.getLogger(TourCompanyServiceImpl.class);
+  private final ErrorHelper errorHelper = new ErrorHelper(TourCompanyServiceImpl.class);
 
   private final TourCompanyRepository tourCompanyRepository;
-  private final TourCompanyLoginRepository tourCompanyLoginRepository;
-  private final TourCompanyWalletRepository tourCompanyWalletRepository;
-  private final PasswordEncoder passwordEncoder;
+  private final AuthService authService;
+  private final WalletService walletService;
 
   public TourCompanyServiceImpl(
       TourCompanyRepository tourCompanyRepository,
-      TourCompanyLoginRepository tourCompanyLoginRepository,
-      TourCompanyWalletRepository tourCompanyWalletRepository,
-      PasswordEncoder passwordEncoder) {
+      AuthService authService,
+      WalletService walletService) {
     this.tourCompanyRepository = tourCompanyRepository;
-    this.tourCompanyLoginRepository = tourCompanyLoginRepository;
-    this.tourCompanyWalletRepository = tourCompanyWalletRepository;
-    this.passwordEncoder = passwordEncoder;
+    this.authService = authService;
+    this.walletService = walletService;
+  }
+
+  @Override
+  public List<TourCompanyResponse> getTourCompanies() {
+    logger.debug(
+        "[getTourCompanies] Getting all {}",
+        StringUtil.pluralize(TourCompany.class.getSimpleName()));
+
+    return tourCompanyRepository.findAll().stream().map(TourCompanyResponse::fromDao).toList();
+  }
+
+  @Override
+  public TourCompanyResponse getTourCompanyById(int id) {
+    return getOptTourCompanyById(id)
+        .orElseThrow(errorHelper.entityNotFound("getTourCompanyById", TourCompany.class, id));
   }
 
   @Override
   @Transactional
-  public TourCompany registerTourCompany(TourCompanyRegistrationRequest body) {
-    logger.debug("[registerTourCompany] newly tour company is registering");
+  public TourCompanyResponse registerTourCompany(TourCompanyRegistrationRequest body) {
+    logger.debug("[registerTourCompany] New {} is registering", TourCompany.class.getSimpleName());
+
+    var existingCompanyCredential =
+        authService.findTourCompanyCredentialByUsername(body.username());
+    if (existingCompanyCredential.isPresent()) {
+      logger.warn(
+          "[registerTourCompany] {} username [{}] already exists",
+          TourCompanyLogin.class.getSimpleName(),
+          body.username());
+      throw new CredentialExistsException(
+          String.format(
+              "%s username [%s] already exists",
+              TourCompanyLogin.class.getSimpleName(), body.username()));
+    }
+
     var companyToRegister = TourCompany.of(null, body.name(), TourCompanyStatus.WAITING.name());
     var registeredCompany = tourCompanyRepository.save(companyToRegister);
-    logger.info("[registerTourCompany] new tour company: {} is registered", registeredCompany);
+    logger.info(
+        "[registerTourCompany] New {} is registered: {}",
+        TourCompany.class.getSimpleName(),
+        registeredCompany);
 
-    createTourCompanyLogin(registeredCompany, body);
+    authService.createTourCompanyLogin(registeredCompany.id(), body.username(), body.password());
 
-    return registeredCompany;
+    return TourCompanyResponse.fromDao(registeredCompany);
   }
 
   @Override
   @Transactional
-  public TourCompany approveTourCompany(int id) {
-    logger.debug("[approveTourCompany] tour company id [{}] is approving", id);
+  public TourCompanyResponse approveTourCompany(int id) {
+    logger.debug(
+        "[approveTourCompany] {} id [{}] is approving", TourCompany.class.getSimpleName(), id);
     var tourCompany = getTourCompanyById(id);
 
-    if (tourCompany.status().equals(TourCompanyStatus.APPROVED.name())) {
-      logger.warn("[approveTourCompany] tour company with id [{}] is already approved", id);
+    if (tourCompany.status().equals(TourCompanyStatus.APPROVED)) {
+      logger.warn(
+          "[approveTourCompany] {} id [{}] is already approved",
+          TourCompany.class.getSimpleName(),
+          tourCompany.id());
       throw new ValidationException(String.format("Tour company id [%s] is already approved", id));
     }
 
     var companyToApprove =
         TourCompany.of(tourCompany.id(), tourCompany.name(), TourCompanyStatus.APPROVED.name());
     var approvedCompany = tourCompanyRepository.save(companyToApprove);
-    logger.info("[approveTourCompany] approved tour company: {}", approvedCompany);
-    createCompanyWallet(approvedCompany);
+    logger.info(
+        "[approveTourCompany] {} is approved: {}",
+        TourCompany.class.getSimpleName(),
+        approvedCompany);
 
-    return approvedCompany;
+    walletService.createTourCompanyWallet(approvedCompany.id());
+
+    return TourCompanyResponse.fromDao(approvedCompany);
   }
 
   @Override
-  public TourCompany getTourCompanyById(int id) {
+  public TourCompanyResponse updateTourCompanyById(int id, TourCompanyRegistrationRequest body) {
+    throw new UnsupportedOperationException("Not implemented yet");
+  }
+
+  @Override
+  public boolean deleteTourCompanyById(int id) {
+    logger.debug(
+        "[deleteTourCompanyById] {} id [{}] is deleting", TourCompany.class.getSimpleName(), id);
+    var existingCompany =
+        getOptTourCompanyById(id)
+            .orElseThrow(
+                errorHelper.entityNotFound("deleteTourCompanyById", TourCompany.class, id));
+
+    tourCompanyRepository.deleteById(existingCompany.id());
+    logger.info(
+        "[deleteTourCompanyById] {} id [{}] is deleted",
+        TourCompany.class.getSimpleName(),
+        existingCompany.id());
+
+    return true;
+  }
+
+  private Optional<TourCompanyResponse> getOptTourCompanyById(int id) {
     return tourCompanyRepository
         .findById(id)
-        .orElseThrow(
-            () -> {
-              logger.warn("[getTourCompanyById] tour company id [{}] not found", id);
-              return new EntityNotFound(String.format("Tour company id [%s] not found", id));
-            });
-  }
-
-  private void createTourCompanyLogin(TourCompany company, TourCompanyRegistrationRequest body) {
-    var encryptedPassword = passwordEncoder.encode(body.password());
-
-    var companyCredentialToCreate =
-        TourCompanyLogin.of(
-            null, AggregateReference.to(company.id()), body.username(), encryptedPassword);
-
-    tourCompanyLoginRepository.save(companyCredentialToCreate);
-    logger.info(
-        "[registerTourCompany] new tour company credential: {} is created",
-        companyCredentialToCreate);
-  }
-
-  private void createCompanyWallet(TourCompany company) {
-    var companyWalletToCreate =
-        TourCompanyWallet.of(
-            null, AggregateReference.to(company.id()), Instant.now(), BigDecimal.ZERO);
-
-    tourCompanyWalletRepository.save(companyWalletToCreate);
-    logger.info(
-        "[approveTourCompany] new tour company wallet: {} is created", companyWalletToCreate);
+        .flatMap(company -> Optional.of(TourCompanyResponse.fromDao(company)));
   }
 }

@@ -1,9 +1,11 @@
 package dev.fResult.goutTogether.users.services;
 
-import dev.fResult.goutTogether.auths.AuthService;
 import dev.fResult.goutTogether.auths.UserForgotPasswordRequest;
+import dev.fResult.goutTogether.auths.entities.UserLogin;
+import dev.fResult.goutTogether.auths.services.AuthService;
 import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
+import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
 import dev.fResult.goutTogether.users.dtos.UserUpdateRequest;
@@ -11,15 +13,20 @@ import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.repositories.UserRepository;
 import dev.fResult.goutTogether.wallets.services.WalletService;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserServiceImpl implements UserService {
   private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+  private final ErrorHelper errorHelper = new ErrorHelper(UserServiceImpl.class);
 
   private final UserRepository userRepository;
   private final AuthService authService;
@@ -33,63 +40,100 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public List<User> getUsers() {
-    return userRepository.findAll();
+  public List<UserInfoResponse> getUsers() {
+    logger.debug("[getUsers] Getting all {}s", User.class.getSimpleName());
+    var users = userRepository.findAll();
+    var userIdToCredentialMap = buildUserIdToCredentialMap(users);
+    var toResponse = UserInfoResponse.fromUserDaoWithUserCredentialMap(userIdToCredentialMap);
+
+    return users.stream().map(toResponse).toList();
   }
 
   @Override
   public UserInfoResponse getUserById(int id) {
-    var existingUser =
-        userRepository
-            .findById(id)
-            .orElseThrow(
-                () -> {
-                  logger.error("[getUserById] User with id {} not found", id);
-                  return new EntityNotFound(String.format("User id [%s] not found", id));
-                });
-    return UserInfoResponse.of(
-        existingUser.id(),
-        existingUser.firstName(),
-        existingUser.lastName(),
-        existingUser.phoneNumber());
+    return getOptUserInfoById(id)
+        .orElseThrow(errorHelper.entityNotFound("getUserById", User.class, id));
   }
 
-  // TODO: Create User + Credential + Wallet
   @Override
+  @Transactional
   public UserInfoResponse register(UserRegistrationRequest body) {
+    logger.debug("[register] new {} is registering", User.class.getSimpleName());
+
+    var existingUserCredential = authService.findUserCredentialByEmail(body.email());
+    if (existingUserCredential.isPresent()) {
+      logger.warn(
+          "[register] {} email [{}] already exists", User.class.getSimpleName(), body.email());
+      throw new CredentialExistsException(
+          String.format("%s email [%s] already exists", User.class.getSimpleName(), body.email()));
+    }
+
     var userToRegister = User.of(null, body.firstName(), body.lastName(), body.phoneNumber());
-    return Optional.of(userRepository.save(userToRegister)).map(UserInfoResponse::fromDao).get();
+    var registeredUser = userRepository.save(userToRegister);
+    logger.info("[register] New {} is registered: {}", User.class.getSimpleName(), registeredUser);
+
+    var createdUserCredential =
+        authService.createCredentialLogin(registeredUser.id(), body.email(), body.password());
+    walletService.createConsumerWallet(registeredUser.id());
+
+    return UserInfoResponse.fromUserDao(registeredUser, createdUserCredential);
   }
 
   @Override
-  public UserInfoResponse updateUser(int id, UserUpdateRequest body) {
-    var bodyToUserUpdate = toUserUpdate(body);
+  public UserInfoResponse updateUserById(int id, UserUpdateRequest body) {
+    var toUserUpdate = UserUpdateRequest.dtoToUserUpdate(body);
     var userToUpdate =
         userRepository
             .findById(id)
-            .map(bodyToUserUpdate)
-            .orElseThrow(() -> new EntityNotFound(String.format("User id [%s] not found", id)));
-    return Optional.of(userRepository.save(userToUpdate)).map(UserInfoResponse::fromDao).get();
-  }
+            .map(toUserUpdate)
+            .orElseThrow(errorHelper.entityNotFound("updateUserById", User.class, id));
+    var updatedUser = userRepository.save(userToUpdate);
+    logger.info("[updateUserById] {}: {} is updated", User.class.getSimpleName(), updatedUser);
 
-  // TODO: Delete User + Credential + Wallet (Cascade)
-  @Override
-  public void deleteUser(int id) {
-    userRepository.deleteById(id);
+    return toResponseWithUserCredential(updatedUser);
   }
 
   @Override
   public UpdatePasswordResult changePassword(UserForgotPasswordRequest body) {
-    throw  new UnsupportedOperationException("Not implemented yet");
+    throw new UnsupportedOperationException("Not implemented yet");
   }
 
-  // FIXME: rename this method to be easier to understand
-  private Function<User, User> toUserUpdate(UserUpdateRequest body) {
-    return user ->
-        User.of(
-            user.id(),
-            Optional.ofNullable(body.firstName()).orElse(user.firstName()),
-            Optional.ofNullable(body.lastName()).orElse(user.lastName()),
-            Optional.ofNullable(body.phoneNumber()).orElse(user.phoneNumber()));
+  @Override
+  @Transactional
+  public boolean deleteUserById(int id) {
+    var userEntityName = User.class.getSimpleName();
+    logger.debug("[deleteUser] {} id [{}] is deleting", userEntityName, id);
+    getOptUserInfoById(id).orElseThrow(errorHelper.entityNotFound("deleteUser", User.class, id));
+
+    authService.deleteUserCredentialById(id);
+    walletService.deleteConsumerWalletById(id);
+    userRepository.deleteById(id);
+
+    logger.info("[deleteUser] {} id [{}] is deleted", userEntityName, id);
+
+    return true;
+  }
+
+  private Set<Integer> buildUniqueUserIds(List<User> users) {
+    return users.stream().map(User::id).collect(Collectors.toSet());
+  }
+
+  private Map<Integer, UserLogin> buildUserIdToCredentialMap(List<User> users) {
+    var userIds = buildUniqueUserIds(users);
+
+    return authService.findUserCredentialsByUserIds(userIds).stream()
+        .collect(Collectors.toMap(cred -> cred.userId().getId(), Function.identity()));
+  }
+
+  private Optional<UserInfoResponse> getOptUserInfoById(int id) {
+    return userRepository
+        .findById(id)
+        .flatMap(opt -> Optional.of(this.toResponseWithUserCredential(opt)));
+  }
+
+  private UserInfoResponse toResponseWithUserCredential(User user) {
+    var userCredential = authService.findUserCredentialByUserId(user.id());
+
+    return UserInfoResponse.fromUserDao(user, userCredential);
   }
 }

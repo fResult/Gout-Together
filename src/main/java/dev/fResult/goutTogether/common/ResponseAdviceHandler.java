@@ -1,7 +1,9 @@
 package dev.fResult.goutTogether.common;
 
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
+import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
@@ -11,8 +13,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import java.util.HashMap;
 
 @RestControllerAdvice
 public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
@@ -46,10 +46,18 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
     return ResponseEntity.of(detail).build();
   }
 
-  @ExceptionHandler(EntityNotFound.class)
-  protected ResponseEntity<?> handleEntityNotFoundException(EntityNotFound ex) {
+  @ExceptionHandler(EntityNotFoundException.class)
+  protected ResponseEntity<?> handleEntityNotFoundException(EntityNotFoundException ex) {
     var detail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     logger.info("Entity not found: {}", ex.getMessage());
+
+    return ResponseEntity.of(detail).build();
+  }
+
+  @ExceptionHandler(CredentialExistsException.class)
+  protected ResponseEntity<?> handleCredentialExistsException(CredentialExistsException ex) {
+    var detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    logger.info("Credential exists: {}", ex.getMessage());
 
     return ResponseEntity.of(detail).build();
   }

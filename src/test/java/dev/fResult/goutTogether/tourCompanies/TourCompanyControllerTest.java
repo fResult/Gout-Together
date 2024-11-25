@@ -9,10 +9,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
-import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,8 +44,8 @@ class TourCompanyControllerTest {
   void whenRegisterCompanyThenSuccess() throws Exception {
     // Arrange
     var TOUR_ID = 1;
-    var body = TourCompanyRegistrationRequest.of(null, "My Tour", "MyTour", "mypassword", null);
-    var mockTourCompany = TourCompany.of(TOUR_ID, "My Tour", TourCompanyStatus.WAITING.name());
+    var body = TourCompanyRegistrationRequest.of("My Tour", "MyTour", "mypassword", null);
+    var mockTourCompany = TourCompanyResponse.of(TOUR_ID, "My Tour", TourCompanyStatus.WAITING);
     when(tourCompanyService.registerTourCompany(any(TourCompanyRegistrationRequest.class)))
         .thenReturn(mockTourCompany);
 
@@ -64,7 +64,7 @@ class TourCompanyControllerTest {
   void whenApproveCompanyThenSuccess() throws Exception {
     // Arrange
     var TOUR_ID = 1;
-    var mockTourCompany = TourCompany.of(TOUR_ID, "My Tour", TourCompanyStatus.APPROVED.name());
+    var mockTourCompany = TourCompanyResponse.of(TOUR_ID, "My Tour", TourCompanyStatus.APPROVED);
     when(tourCompanyService.approveTourCompany(anyInt())).thenReturn(mockTourCompany);
 
     // Actual
@@ -94,8 +94,8 @@ class TourCompanyControllerTest {
   @Test
   void whenApproveCompanyButCompanyNotFoundThenError() throws Exception {
     // Arrange
-    var TOUR_ID = 999;
-    when(tourCompanyService.approveTourCompany(anyInt())).thenThrow(new EntityNotFound());
+    var TOUR_ID = 99999;
+    when(tourCompanyService.approveTourCompany(anyInt())).thenThrow(new EntityNotFoundException());
 
     // Actual
     var resultActions = mockMvc.perform(post(TOUR_COMPANY_API + "/{id}/approve", TOUR_ID));

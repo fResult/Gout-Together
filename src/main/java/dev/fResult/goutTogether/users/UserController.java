@@ -27,7 +27,7 @@ public class UserController {
   }
 
   @GetMapping
-  public ResponseEntity<List<User>> getUsers() {
+  public ResponseEntity<List<UserInfoResponse>> getUsers() {
     return ResponseEntity.ok(userService.getUsers());
   }
 
@@ -39,15 +39,19 @@ public class UserController {
   @PostMapping
   public ResponseEntity<UserInfoResponse> register(
       @Validated @RequestBody UserRegistrationRequest body) {
+    logger.debug("[register] Registering a new {}", User.class.getSimpleName());
     var createdUser = userService.register(body);
     var createdUserUri = URI.create(String.format("/api/v1/users/%d", createdUser.id()));
+
     return ResponseEntity.created(createdUserUri).body(createdUser);
   }
 
   @PatchMapping("/{id}")
-  public ResponseEntity<UserInfoResponse> updateUser(
+  public ResponseEntity<UserInfoResponse> updateUserById(
       @PathVariable int id, @Validated @RequestBody UserUpdateRequest body) {
-    return ResponseEntity.ok(userService.updateUser(id, body));
+    logger.debug("[updateUserById] Updating {} by id [{}]", User.class.getSimpleName(), id);
+
+    return ResponseEntity.ok(userService.updateUserById(id, body));
   }
 
   // TODO: Re-think the forgot password flow
@@ -58,8 +62,11 @@ public class UserController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteUser(@PathVariable int id) {
-    userService.deleteUser(id);
-    return ResponseEntity.noContent().build();
+  public ResponseEntity<String> deleteUserById(@PathVariable int id) {
+    logger.debug("[deleteUserById] Deleting {} by id [{}]", User.class.getSimpleName(), id);
+    userService.deleteUserById(id);
+
+    return ResponseEntity.ok(
+        String.format("%s with id [%d] has been deleted", User.class.getSimpleName(), id));
   }
 }

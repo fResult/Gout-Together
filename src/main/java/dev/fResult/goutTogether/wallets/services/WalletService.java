@@ -1,6 +1,14 @@
 package dev.fResult.goutTogether.wallets.services;
 
-import org.springframework.stereotype.Service;
+import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
+import dev.fResult.goutTogether.wallets.entities.UserWallet;
 
-@Service
-public class WalletService {}
+public interface WalletService {
+  UserWallet createConsumerWallet(int userId);
+
+  UserWallet findConsumerWalletByUserId(int userId);
+
+  boolean deleteConsumerWalletById(int userId);
+
+  TourCompanyWallet createTourCompanyWallet(int tourCompanyId);
+}

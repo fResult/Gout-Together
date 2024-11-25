@@ -1,4 +1,4 @@
-package dev.fResult.goutTogether.auths;
+package dev.fResult.goutTogether.auths.entities;
 
 import dev.fResult.goutTogether.users.entities.User;
 import org.springframework.data.annotation.Id;

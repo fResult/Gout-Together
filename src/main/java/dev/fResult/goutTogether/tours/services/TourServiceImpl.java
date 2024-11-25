@@ -1,7 +1,7 @@
 package dev.fResult.goutTogether.tours.services;
 
 import dev.fResult.goutTogether.common.enumurations.TourStatus;
-import dev.fResult.goutTogether.common.exceptions.EntityNotFound;
+import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import dev.fResult.goutTogether.tours.dtos.TourRequest;
 import dev.fResult.goutTogether.tours.entities.Tour;
@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TourServiceImpl implements TourService {
   private final Logger logger = LoggerFactory.getLogger(TourServiceImpl.class);
+  private final ErrorHelper errorHelper = new ErrorHelper(TourServiceImpl.class);
 
   private final TourRepository tourRepository;
   private final TourCompanyService tourCompanyService;
@@ -30,6 +31,22 @@ public class TourServiceImpl implements TourService {
     this.tourRepository = tourRepository;
     this.tourCompanyService = tourCompanyService;
     this.tourCountService = tourCountService;
+  }
+
+  @Override
+  public Page<Tour> getTours(Pageable pageable) {
+    logger.debug("[getTours] Getting all {}", Tour.class.getSimpleName());
+
+    return tourRepository.findAll(pageable);
+  }
+
+  @Override
+  public Tour getTourById(Integer id) {
+    logger.debug("[getTourById] Getting {} id [{}]", Tour.class.getSimpleName(), id);
+
+    return tourRepository
+        .findById(id)
+        .orElseThrow(errorHelper.entityNotFound("getTourById", Tour.class, id));
   }
 
   @Override
@@ -48,22 +65,10 @@ public class TourServiceImpl implements TourService {
             TourStatus.PENDING.name());
 
     var createdTour = tourRepository.save(tourToCreate);
-    logger.debug("[createTour] new tour: {} is created", createdTour);
+    logger.debug("[createTour] New {} is created: {}", Tour.class.getSimpleName(), createdTour);
     tourCountService.createTourCount(
         TourCount.of(null, AggregateReference.to(createdTour.id()), 0));
 
     return createdTour;
-  }
-
-  @Override
-  public Tour getTourById(Integer id) {
-    return tourRepository
-        .findById(id)
-        .orElseThrow(() -> new EntityNotFound(String.format("Tour id [%s] not found", id)));
-  }
-
-  @Override
-  public Page<Tour> getTours(Pageable pageable) {
-    return tourRepository.findAll(pageable);
   }
 }
