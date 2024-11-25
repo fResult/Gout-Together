@@ -222,6 +222,24 @@ class TourCompanyControllerTest {
   }
 
   @Test
+  void whenUpdateCompanyByIdButCompanyNotFoundThenReturn404() throws Exception {
+    // Arrange
+    var body = TourCompanyUpdateRequest.of("My Tour", TourCompanyStatus.APPROVED);
+    when(tourCompanyService.updateTourCompanyById(anyInt(), any(TourCompanyUpdateRequest.class)))
+        .thenThrow(EntityNotFoundException.class);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            patch(TOUR_COMPANY_API + "/{id}", NOT_FOUND_TOUR_COMPANY_ID)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    resultActions.andExpect(status().isNotFound());
+  }
+
+  @Test
   void whenDeleteCompanyByIdThenSuccess() throws Exception {
     // Arrange
     var expectedResponseMessage =
