@@ -35,6 +35,8 @@ import org.springframework.web.context.WebApplicationContext;
 @WebMvcTest(TourController.class)
 class TourControllerTest {
   private static final String TOUR_API = "/api/v1/tours";
+  private static final int TOUR_ID = 1;
+  private static final int NOT_FOUND_TOUR_ID = 99999;
 
   @Autowired private WebApplicationContext webApplicationContext;
   @Autowired private ObjectMapper objectMapper;
@@ -51,7 +53,6 @@ class TourControllerTest {
   @Test
   void whenGetToursThenSuccess() throws Exception {
     // Arrange
-    var TOUR_ID = 1;
     var params = new LinkedMultiValueMap<>(Map.of("page", List.of("0"), "size", List.of("10")));
     var tours =
         List.of(
@@ -92,7 +93,6 @@ class TourControllerTest {
   @Test
   void whenGetTourByIdThenSuccess() throws Exception {
     // Arrange
-    var TOUR_ID = 1;
     var mockTour =
         Tour.of(
             TOUR_ID,
@@ -115,11 +115,10 @@ class TourControllerTest {
   @Test
   void whenGetTourByIdButTourNotFoundThen404() throws Exception {
     // Arrange
-    var TOUR_ID = 99999;
     when(tourService.getTourById(anyInt())).thenThrow(new EntityNotFoundException());
 
     // Actual
-    var resultActions = mockMvc.perform(get(TOUR_API + "/{id}", TOUR_ID));
+    var resultActions = mockMvc.perform(get(TOUR_API + "/{id}", NOT_FOUND_TOUR_ID));
 
     // Assert
     resultActions.andExpect(status().isNotFound());
@@ -128,12 +127,11 @@ class TourControllerTest {
   @Test
   void whenGetTourByIdButServerErrorThenReturn500() throws Exception {
     // Arrange
-    var TOUR_ID = 99999;
     when(tourService.getTourById(anyInt()))
         .thenThrow(new InternalServerErrorException("Mock Error"));
 
     // Actual
-    var resultActions = mockMvc.perform(get(TOUR_API + "/{id}", TOUR_ID));
+    var resultActions = mockMvc.perform(get(TOUR_API + "/{id}", NOT_FOUND_TOUR_ID));
 
     // Assert
     resultActions.andExpect(status().isInternalServerError());
@@ -142,7 +140,6 @@ class TourControllerTest {
   @Test
   void whenCreateTourThenSuccess() throws Exception {
     // Arrange
-    var TOUR_ID = 1;
     var TOUR_COMPANY_ID = 1;
     var body =
         TourRequest.of(
@@ -182,13 +179,7 @@ class TourControllerTest {
     var TOUR_COMPANY_ID = 1;
     var body =
         TourRequest.of(
-            TOUR_COMPANY_ID,
-            null,
-            "Go 12 places around Kunlun",
-            "Kunlun, China",
-            20,
-            null,
-            null);
+            TOUR_COMPANY_ID, null, "Go 12 places around Kunlun", "Kunlun, China", 20, null, null);
 
     // Actual
     var actualResults =
