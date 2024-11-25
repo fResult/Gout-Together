@@ -1,17 +1,21 @@
 package dev.fResult.goutTogether.users;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
 import dev.fResult.goutTogether.users.services.UserService;
 import jakarta.validation.ConstraintViolationException;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +43,49 @@ public class UserControllerTest {
   @BeforeEach
   public void setup() {
     mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+  }
+
+  @Test
+  void whenGetCompaniesThenSuccess() throws Exception {
+    // Arrange
+    var mockUserResp =
+        UserInfoResponse.of(USER_ID, "John", "Wick", "john.wick@exampl.com", "0999999999");
+    when(userService.getUsers()).thenReturn(List.of(mockUserResp));
+
+    // Actual
+    var resultActions = mockMvc.perform(get(USER_API));
+
+    // Assert
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$[0].id").value(USER_ID));
+  }
+
+  @Test
+  void whenGetUserByIdThenSuccess() throws Exception {
+    // Arrange
+    var mockUserResp =
+        UserInfoResponse.of(USER_ID, "John", "Wick", "john.wick@example.com", "0999999999");
+    when(userService.getUserById(USER_ID)).thenReturn(mockUserResp);
+
+    // Actual
+    var resultActions = mockMvc.perform(get(USER_API + "/{id}", USER_ID));
+
+    // Assert
+    resultActions.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(USER_ID));
+  }
+
+  @Test
+  void whenGetCompanyByIdButCompanyNotFoundThenReturn404() throws Exception {
+    // Arrange
+    when(userService.getUserById(anyInt())).thenThrow(EntityNotFoundException.class);
+
+    // Actual
+    var resultActions = mockMvc.perform(get(USER_API + "/{id}", NOT_FOUND_USER_ID));
+
+    // Assert
+    resultActions.andExpect(status().isNotFound());
   }
 
   @Test
