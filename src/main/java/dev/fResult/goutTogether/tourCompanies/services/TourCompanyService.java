@@ -2,9 +2,8 @@ package dev.fResult.goutTogether.tourCompanies.services;
 
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
-
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyUpdateRequest;
 import java.util.List;
-import java.util.stream.Stream;
 
 public interface TourCompanyService {
   List<TourCompanyResponse> getTourCompanies();
@@ -15,7 +14,7 @@ public interface TourCompanyService {
 
   TourCompanyResponse approveTourCompany(int id);
 
-  TourCompanyResponse updateTourCompanyById(int id, TourCompanyRegistrationRequest body);
+  TourCompanyResponse updateTourCompanyById(int id, TourCompanyUpdateRequest body);
 
   boolean deleteTourCompanyById(int id);
 }

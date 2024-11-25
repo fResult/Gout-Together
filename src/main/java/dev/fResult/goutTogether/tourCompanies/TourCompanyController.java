@@ -3,6 +3,7 @@ package dev.fResult.goutTogether.tourCompanies;
 import dev.fResult.goutTogether.common.utils.StringUtil;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyUpdateRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import java.net.URI;
@@ -62,7 +63,7 @@ public class TourCompanyController {
 
   @PatchMapping("/{id}")
   public ResponseEntity<TourCompanyResponse> updateTourCompanyById(
-      @PathVariable int id, @RequestBody @Validated TourCompanyRegistrationRequest body) {
+      @PathVariable int id, @RequestBody @Validated TourCompanyUpdateRequest body) {
     logger.debug(
         "[updateTourCompanyById] Updating a {} id [{}]", TourCompany.class.getSimpleName(), id);
 
