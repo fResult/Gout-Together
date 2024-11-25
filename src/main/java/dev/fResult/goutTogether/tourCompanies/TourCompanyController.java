@@ -78,6 +78,6 @@ public class TourCompanyController {
 
     return ResponseEntity.ok(
         String.format(
-            "Delete %s by id [%d] deleted successfully", TourCompany.class.getSimpleName(), id));
+            "Delete %s by id [%d] successfully", TourCompany.class.getSimpleName(), id));
   }
 }

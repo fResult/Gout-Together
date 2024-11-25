@@ -197,4 +197,33 @@ class TourCompanyControllerTest {
     // Assert
     resultActions.andExpect(status().isNotFound());
   }
+  @Test
+  void whenDeleteCompanyByIdThenSuccess() throws Exception {
+    // Arrange
+    var expectedResponseMessage =
+        String.format("Delete %s by id [%d] successfully", "TourCompany", TOUR_COMPANY_ID_1);
+    when(tourCompanyService.deleteTourCompanyById(TOUR_COMPANY_ID_1)).thenReturn(true);
+
+    // Actual
+    var resultActions = mockMvc.perform(delete(TOUR_COMPANY_API + "/{id}", TOUR_COMPANY_ID_1));
+
+    // Assert
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").value(expectedResponseMessage));
+  }
+
+  @Test
+  void whenDeleteCompanyByIdButCompanyNotFoundThenReturn404() throws Exception {
+    // Arrange
+    when(tourCompanyService.deleteTourCompanyById(anyInt()))
+        .thenThrow(new EntityNotFoundException());
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(delete(TOUR_COMPANY_API + "/{id}", NOT_FOUND_TOUR_COMPANY_ID));
+
+    // Assert
+    resultActions.andExpect(status().isNotFound());
+  }
 }
