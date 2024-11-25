@@ -74,6 +74,6 @@ public class UserController {
     userService.deleteUserById(id);
 
     return ResponseEntity.ok(
-        String.format("%s with id [%d] has been deleted", User.class.getSimpleName(), id));
+        String.format("Delete %s by id [%d] successfully", User.class.getSimpleName(), id));
   }
 }

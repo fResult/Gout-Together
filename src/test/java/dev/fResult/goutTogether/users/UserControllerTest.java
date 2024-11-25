@@ -12,6 +12,7 @@ import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
+import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.services.UserService;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
@@ -145,5 +146,19 @@ public class UserControllerTest {
 
     // Assert
     resultActions.andExpect(status().isConflict());
+  }
+
+  @Test
+  void whenDeleteUserByIdThenSuccess() throws Exception {
+    // Arrange
+    var responseMessage =
+        String.format("Delete %s by id [%d] successfully", User.class.getSimpleName(), USER_ID);
+    when(userService.deleteUserById(USER_ID)).thenReturn(true);
+
+    // Actual
+    var resultActions = mockMvc.perform(delete(USER_API + "/{id}", USER_ID));
+
+    // Assert
+    resultActions.andExpect(status().isOk()).andExpect(jsonPath("$").value(responseMessage));
   }
 }
