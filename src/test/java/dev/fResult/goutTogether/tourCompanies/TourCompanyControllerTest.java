@@ -9,11 +9,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
+import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +46,7 @@ class TourCompanyControllerTest {
   void whenRegisterCompanyThenSuccess() throws Exception {
     // Arrange
     var TOUR_ID = 1;
-    var body = TourCompanyRegistrationRequest.of("My Tour", "MyTour", "mypassword", null);
+    var body = TourCompanyRegistrationRequest.of("My Tour", "MyTour123", "mypassword", null);
     var mockTourCompany = TourCompanyResponse.of(TOUR_ID, "My Tour", TourCompanyStatus.WAITING);
     when(tourCompanyService.registerTourCompany(any(TourCompanyRegistrationRequest.class)))
         .thenReturn(mockTourCompany);
@@ -58,6 +60,43 @@ class TourCompanyControllerTest {
 
     // Assert
     resultActions.andExpect(status().isCreated()).andExpect(jsonPath("$.id").value(TOUR_ID));
+  }
+
+  @Test
+  void whenRegisterCompanyButUsernameIsInvalidThenReturn400() throws Exception {
+    // Arrange
+    var INVALID_USERNAME = "MyTour";
+    var body = TourCompanyRegistrationRequest.of("My Tour", INVALID_USERNAME, "mypassword", null);
+    when(tourCompanyService.registerTourCompany(any(TourCompanyRegistrationRequest.class)))
+        .thenThrow(ConstraintViolationException.class);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            post(TOUR_COMPANY_API)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    resultActions.andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void whenRegisterCompanyButCompanyUsernameIsAlreadyExistsThenReturn409() throws Exception {
+    // Arrange
+    var body = TourCompanyRegistrationRequest.of("My Tour", "MyTour123", "mypassword", null);
+    when(tourCompanyService.registerTourCompany(any(TourCompanyRegistrationRequest.class)))
+        .thenThrow(CredentialExistsException.class);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            post(TOUR_COMPANY_API)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    resultActions.andExpect(status().isConflict());
   }
 
   @Test
@@ -82,7 +121,7 @@ class TourCompanyControllerTest {
     // Arrange
     var TOUR_COMPANY_ID = 1;
     when(tourCompanyService.approveTourCompany(TOUR_COMPANY_ID))
-        .thenThrow(new ValidationException());
+        .thenThrow(ValidationException.class);
 
     // Actual
     var resultActions = mockMvc.perform(post(TOUR_COMPANY_API + "/{id}/approve", TOUR_COMPANY_ID));
