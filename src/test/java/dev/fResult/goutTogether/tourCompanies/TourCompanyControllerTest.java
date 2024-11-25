@@ -3,6 +3,7 @@ package dev.fResult.goutTogether.tourCompanies;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -16,6 +17,7 @@ import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationReques
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import jakarta.validation.ConstraintViolationException;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,43 @@ class TourCompanyControllerTest {
   @BeforeEach
   public void setup() {
     mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+  }
+
+  @Test
+  void whenGetToursThenSuccess() throws Exception {
+    // Arrange
+    var TOUR_ID_1 = 1;
+    var TOUR_ID_2 = 2;
+    var mockTourCompany1 =
+        TourCompanyResponse.of(TOUR_ID_1, "My Tour 1", TourCompanyStatus.WAITING);
+    var mockTourCompany2 =
+        TourCompanyResponse.of(TOUR_ID_2, "My Tour 2", TourCompanyStatus.APPROVED);
+    when(tourCompanyService.getTourCompanies())
+        .thenReturn(List.of(mockTourCompany1, mockTourCompany2));
+
+    // Actual
+    var resultActions = mockMvc.perform(get(TOUR_COMPANY_API));
+
+    // Assert
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$[0].id").value(TOUR_ID_1))
+        .andExpect(jsonPath("$[1].id").value(TOUR_ID_2));
+  }
+
+  @Test
+  void whenGetTourByIdThenSuccess() throws Exception {
+    // Arrange
+    var TOUR_ID = 1;
+    var mockTourCompany = TourCompanyResponse.of(TOUR_ID, "My Tour", TourCompanyStatus.APPROVED);
+    when(tourCompanyService.getTourCompanyById(TOUR_ID)).thenReturn(mockTourCompany);
+
+    // Actual
+    var resultActions = mockMvc.perform(get(TOUR_COMPANY_API + "/{id}", TOUR_ID));
+
+    // Assert
+    resultActions.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(TOUR_ID));
   }
 
   @Test
