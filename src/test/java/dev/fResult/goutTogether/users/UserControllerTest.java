@@ -12,6 +12,7 @@ import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
+import dev.fResult.goutTogether.users.dtos.UserUpdateRequest;
 import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.services.UserService;
 import jakarta.validation.ConstraintViolationException;
@@ -126,6 +127,33 @@ public class UserControllerTest {
 
     // Assert
     resultActions.andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void whenUpdateUserThenSuccess() throws Exception {
+    // Arrange
+    var LAST_NAME_TO_UPDATE = "Constantine";
+    var PHONE_NUMBER_TO_UPDATE = "0777777777";
+    var body = UserUpdateRequest.of(null, LAST_NAME_TO_UPDATE, PHONE_NUMBER_TO_UPDATE);
+    var mockTourCompany =
+        UserInfoResponse.of(
+            USER_ID, "John", LAST_NAME_TO_UPDATE, "john.wick@example.com", PHONE_NUMBER_TO_UPDATE);
+    when(userService.updateUserById(anyInt(), any(UserUpdateRequest.class)))
+        .thenReturn(mockTourCompany);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            patch(USER_API + "/{id}", USER_ID)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(USER_ID))
+        .andExpect(jsonPath("$.lastName").value(LAST_NAME_TO_UPDATE))
+        .andExpect(jsonPath("$.phoneNumber").value(PHONE_NUMBER_TO_UPDATE));
   }
 
   @Test
