@@ -2,7 +2,6 @@ package dev.fResult.goutTogether.users.dtos;
 
 import dev.fResult.goutTogether.users.entities.User;
 import jakarta.validation.constraints.Size;
-
 import java.util.Optional;
 import java.util.function.Function;
 

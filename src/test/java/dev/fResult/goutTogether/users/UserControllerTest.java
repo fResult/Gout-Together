@@ -3,8 +3,7 @@ package dev.fResult.goutTogether.users;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -20,8 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -36,7 +35,7 @@ public class UserControllerTest {
   @Autowired private WebApplicationContext webApplicationContext;
   @Autowired private ObjectMapper objectMapper;
 
-  @MockBean private UserService userService;
+  @MockitoBean private UserService userService;
 
   private MockMvc mockMvc;
 
@@ -46,7 +45,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenGetCompaniesThenSuccess() throws Exception {
+  void whenGetUsersThenSuccess() throws Exception {
     // Arrange
     var mockUserResp =
         UserInfoResponse.of(USER_ID, "John", "Wick", "john.wick@exampl.com", "0999999999");
@@ -77,7 +76,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenGetCompanyByIdButCompanyNotFoundThenReturn404() throws Exception {
+  void whenGetUserByIdButCompanyNotFoundThenReturn404() throws Exception {
     // Arrange
     when(userService.getUserById(anyInt())).thenThrow(EntityNotFoundException.class);
 
@@ -89,7 +88,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenRegisterCompanyThenSuccess() throws Exception {
+  void whenRegisterUserThenSuccess() throws Exception {
     // Arrange
     var body =
         UserRegistrationRequest.of(
@@ -111,7 +110,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenRegisterCompanyButEmailIsInvalidThenReturn400() throws Exception {
+  void whenRegisterUserButEmailIsInvalidThenReturn400() throws Exception {
     // Arrange
     var body = UserRegistrationRequest.of("John", "Wick", INVALID_EMAIL, "password", "0999999999");
     when(userService.register(any(UserRegistrationRequest.class)))
@@ -129,7 +128,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenRegisterCompanyButEmailIsAlreadyExistsThenReturn409() throws Exception {
+  void whenRegisterUserButEmailIsAlreadyExistsThenReturn409() throws Exception {
     // Arrange
     var body =
         UserRegistrationRequest.of(
