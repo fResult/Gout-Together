@@ -83,6 +83,18 @@ class TourCompanyControllerTest {
   }
 
   @Test
+  void whenGetCompanyByIdButCompanyNotFoundThenReturn404() throws Exception {
+    // Arrange
+    when(tourCompanyService.getTourCompanyById(anyInt())).thenThrow(new EntityNotFoundException());
+
+    // Actual
+    var resultActions = mockMvc.perform(get(TOUR_COMPANY_API + "/{id}", NOT_FOUND_TOUR_COMPANY_ID));
+
+    // Assert
+    resultActions.andExpect(status().isNotFound());
+  }
+
+  @Test
   void whenRegisterCompanyThenSuccess() throws Exception {
     // Arrange
     var body = TourCompanyRegistrationRequest.of("My Tour", "MyTour123", "mypassword", null);
