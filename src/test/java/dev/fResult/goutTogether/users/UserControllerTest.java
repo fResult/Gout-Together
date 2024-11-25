@@ -157,6 +157,24 @@ public class UserControllerTest {
   }
 
   @Test
+  void whenUpdateUserByIdButUserNotFoundThenReturn404() throws Exception {
+    // Arrange
+    var body = UserUpdateRequest.of(null, "Constantine", "0777777777");
+    when(userService.updateUserById(anyInt(), any(UserUpdateRequest.class)))
+        .thenThrow(EntityNotFoundException.class);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            patch(USER_API + "/{id}", NOT_FOUND_USER_ID)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    resultActions.andExpect(status().isNotFound());
+  }
+
+  @Test
   void whenRegisterUserButEmailIsAlreadyExistsThenReturn409() throws Exception {
     // Arrange
     var body =
