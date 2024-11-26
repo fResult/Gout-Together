@@ -57,19 +57,7 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   @Transactional
   public TourCompanyResponse registerTourCompany(TourCompanyRegistrationRequest body) {
     logger.debug("[registerTourCompany] New {} is registering", TourCompany.class.getSimpleName());
-
-    var existingCompanyCredential =
-        authService.findTourCompanyCredentialByUsername(body.username());
-    if (existingCompanyCredential.isPresent()) {
-      logger.warn(
-          "[registerTourCompany] {} username [{}] already exists",
-          TourCompanyLogin.class.getSimpleName(),
-          body.username());
-      throw new CredentialExistsException(
-          String.format(
-              "%s username [%s] already exists",
-              TourCompanyLogin.class.getSimpleName(), body.username()));
-    }
+    throwExceptionIfTourCompanyUserNameAlreadyExists(body.username());
 
     var companyToRegister = TourCompany.of(null, body.name(), TourCompanyStatus.WAITING.name());
     var registeredCompany = tourCompanyRepository.save(companyToRegister);
@@ -154,5 +142,18 @@ public class TourCompanyServiceImpl implements TourCompanyService {
     return tourCompanyRepository
         .findById(id)
         .flatMap(company -> Optional.of(TourCompanyResponse.fromDao(company)));
+  }
+
+  private void throwExceptionIfTourCompanyUserNameAlreadyExists(String username) {
+    var existingCompanyCredential = authService.findTourCompanyCredentialByUsername(username);
+    if (existingCompanyCredential.isPresent()) {
+      logger.warn(
+          "[registerTourCompany] {} username [{}] already exists",
+          TourCompanyLogin.class.getSimpleName(),
+          username);
+      throw new CredentialExistsException(
+          String.format(
+              "%s username [%s] already exists", TourCompanyLogin.class.getSimpleName(), username));
+    }
   }
 }
