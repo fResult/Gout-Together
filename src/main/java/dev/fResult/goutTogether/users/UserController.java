@@ -47,7 +47,7 @@ public class UserController {
   public ResponseEntity<UserInfoResponse> register(
       @Validated @RequestBody UserRegistrationRequest body) {
     logger.debug("[register] Registering a new {}", User.class.getSimpleName());
-    var createdUser = userService.register(body);
+    var createdUser = userService.registerUser(body);
     var createdUserUri = URI.create(String.format("/api/v1/users/%d", createdUser.id()));
 
     return ResponseEntity.created(createdUserUri).body(createdUser);
