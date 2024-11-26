@@ -245,4 +245,25 @@ class AuthServiceTest {
       assertEquals(mockCompanyLoginToCreate, actualCreatedUserLogin);
     }
   }
+
+  @Nested
+  class DeleteCompanyLoginTest {
+    @Test
+    void whenDeleteCompanyLoginByIdThenSuccess() {
+      // Arrange
+      var encryptedPassword = "encryptedPassword";
+      AggregateReference<TourCompany, Integer> companyRef = AggregateReference.to(USER_ID_1);
+      var mockCompanyLoginToDelete =
+          TourCompanyLogin.of(1, companyRef, "MyTour", "encryptedPassword");
+      when(tourCompanyLoginRepository.findById(TOUR_COMPANY_ID))
+          .thenReturn(Optional.of(mockCompanyLoginToDelete));
+
+      // Actual
+      var actualDeleteResult = authService.deleteTourCompanyLoginById(USER_ID_1);
+
+      // Assert
+      verify(tourCompanyLoginRepository, times(1)).delete(mockCompanyLoginToDelete);
+      assertTrue(actualDeleteResult);
+    }
+  }
 }
