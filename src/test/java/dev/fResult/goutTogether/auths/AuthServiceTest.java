@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
+import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.services.AuthServiceImpl;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
@@ -122,6 +123,42 @@ class AuthServiceTest {
       // Assert
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
+    }
+  }
+
+  @Nested
+  class FindTourCompanyLoginTest {
+    @Test
+    void whenFindCompanyLoginByUsernameThenSuccess() {
+      // Arrange
+      var TARGET_USERNAME = "target_username";
+      var mockTourCompanyLogin =
+          new TourCompanyLogin(1, AggregateReference.to(1), TARGET_USERNAME, "encryptedPassword");
+      when(tourCompanyLoginRepository.findOneByUsername(TARGET_USERNAME))
+          .thenReturn(Optional.of(mockTourCompanyLogin));
+
+      // Actual
+      var actualFoundCompanyLogin =
+          authService.findTourCompanyCredentialByUsername(TARGET_USERNAME);
+
+      // Assert
+      assertTrue(actualFoundCompanyLogin.isPresent());
+      assertEquals(mockTourCompanyLogin, actualFoundCompanyLogin.get());
+    }
+
+    @Test
+    void whenFindCompanyLoginByUsernameButNotFoundThenReturnEmpty() {
+      // Arrange
+      var NOT_FOUND_USERNAME = "in_existing_username";
+      when(tourCompanyLoginRepository.findOneByUsername(NOT_FOUND_USERNAME))
+          .thenReturn(Optional.empty());
+
+      // Actual
+      var actualFoundCompanyLogin =
+          authService.findTourCompanyCredentialByUsername(NOT_FOUND_USERNAME);
+
+      // Assert
+      assertTrue(actualFoundCompanyLogin.isEmpty());
     }
   }
 }
