@@ -42,6 +42,8 @@ class AuthServiceTest {
   private final String NOT_FOUND_EMAIL = "in_existing@email.com";
 
   private final int TOUR_COMPANY_ID = 1;
+  private final int NOT_FOUND_TOUR_COMPANY_ID = 99999;
+  private final String TARGET_USERNAME = "target_username";
   @Nested
   class FindUserCredentialTest {
     private final List<Integer> SOME_NOT_FOUND_USER_IDS =
@@ -134,7 +136,6 @@ class AuthServiceTest {
     @Test
     void whenFindCompanyLoginByUsernameThenSuccess() {
       // Arrange
-      var TARGET_USERNAME = "target_username";
       var mockTourCompanyLogin =
           TourCompanyLogin.of(1, AggregateReference.to(1), TARGET_USERNAME, "encryptedPassword");
       when(tourCompanyLoginRepository.findOneByUsername(TARGET_USERNAME))
