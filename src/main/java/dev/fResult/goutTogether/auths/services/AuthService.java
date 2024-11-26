@@ -7,9 +7,9 @@ import java.util.*;
 public interface AuthService {
   List<UserLogin> findUserCredentialsByUserIds(Collection<Integer> userIds);
 
-  Optional<UserLogin> findUserCredentialByEmail(String userEmail);
-
   UserLogin findUserCredentialByUserId(int userId);
+
+  Optional<UserLogin> findUserCredentialByEmail(String userEmail);
 
   UserLogin createUserCredential(int userId, String email, String password);
 
