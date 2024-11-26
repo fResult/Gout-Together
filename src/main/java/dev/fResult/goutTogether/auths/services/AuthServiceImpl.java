@@ -83,14 +83,14 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public boolean deleteUserCredentialById(int id) {
+  public boolean deleteUserCredentialById(int userId) {
     logger.debug(
-        "[deleteUserCredentialById] Deleting {} by id: {}", UserLogin.class.getSimpleName(), id);
-    var credentialToDelete = findUserCredentialByUserId(id);
+        "[deleteUserCredentialById] Deleting {} by id: {}", UserLogin.class.getSimpleName(), userId);
+    var credentialToDelete = findUserCredentialByUserId(userId);
 
     userLoginRepository.delete(credentialToDelete);
     logger.info(
-        "[deleteUserCredentialById] {} id [{}] is deleted", UserLogin.class.getSimpleName(), id);
+        "[deleteUserCredentialById] {} id [{}] is deleted", UserLogin.class.getSimpleName(), userId);
 
     return true;
   }
