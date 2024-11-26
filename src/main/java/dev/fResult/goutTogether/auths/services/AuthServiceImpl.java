@@ -83,7 +83,16 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
+  public boolean deleteUserCredentialById(int id) {
+    logger.debug(
+        "[deleteUserCredentialById] Deleting {} by id: {}", UserLogin.class.getSimpleName(), id);
+    var credentialToDelete = findUserCredentialByUserId(id);
 
+    userLoginRepository.delete(credentialToDelete);
+    logger.info(
+        "[deleteUserCredentialById] {} id [{}] is deleted", UserLogin.class.getSimpleName(), id);
+
+    return true;
   }
 
   @Override
@@ -132,14 +141,18 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public boolean deleteUserCredentialById(int id) {
+  public boolean deleteTourCompanyLoginById(int id) {
     logger.debug(
-        "[deleteUserCredentialById] Deleting {} by id: {}", UserLogin.class.getSimpleName(), id);
-    var credentialToDelete = findUserCredentialByUserId(id);
+        "[deleteTourCompanyLoginById] Deleting {} by id: {}",
+        TourCompanyLogin.class.getSimpleName(),
+        id);
+    var credentialToDelete = findTourCompanyCredentialByTourCompanyId(id);
 
-    userLoginRepository.delete(credentialToDelete);
+    tourCompanyLoginRepository.delete(credentialToDelete);
     logger.info(
-        "[deleteUserCredentialById] {} id [{}] is deleted", UserLogin.class.getSimpleName(), id);
+        "[deleteTourCompanyLoginById] {} id [{}] is deleted",
+        TourCompanyLogin.class.getSimpleName(),
+        id);
 
     return true;
   }

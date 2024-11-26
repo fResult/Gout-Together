@@ -20,4 +20,6 @@ public interface AuthService {
   TourCompanyLogin findTourCompanyCredentialByTourCompanyId(int id);
 
   TourCompanyLogin createTourCompanyLogin(int tourCompanyId, String username, String password);
+
+  boolean deleteTourCompanyLoginById(int tourCompanyId);
 }
