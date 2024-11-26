@@ -1,6 +1,9 @@
 package dev.fResult.goutTogether.helpers;
 
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
+import dev.fResult.goutTogether.common.utils.StringUtil;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +21,23 @@ public class ErrorHelper {
       logger.warn("[{}] {} id: {} not found", methodName, entityClass.getSimpleName(), id);
       return new EntityNotFoundException(
           String.format("%s id [%s] not found", entityClass.getSimpleName(), id));
+    };
+  }
+
+  public Supplier<EntityNotFoundException> someEntitiesMissing(
+      String methodName, Class<?> entityClass, Collection<Integer> ids) {
+
+    var uniqueIds = new HashSet<>(ids);
+    var idsToDisplay = uniqueIds.toString().replaceAll("[\\[\\]]", "");
+
+    return () -> {
+      logger.warn(
+          "[{}] {} ids: {} not found",
+          methodName,
+          StringUtil.pluralize(entityClass.getSimpleName()),
+          idsToDisplay);
+      return new EntityNotFoundException(
+          String.format("%s ids [%s] not found", entityClass.getSimpleName(), idsToDisplay));
     };
   }
 }
