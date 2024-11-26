@@ -50,11 +50,26 @@ class AuthServiceTest {
       when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
 
       // Actual
-        var actualFoundUserLogin = authService.findUserCredentialByEmail(TARGET_EMAIL);
+      var actualFoundUserLogin = authService.findUserCredentialByEmail(TARGET_EMAIL);
 
       // Assert
       assertTrue(actualFoundUserLogin.isPresent());
       assertEquals(mockUserLogin, actualFoundUserLogin.get());
+    }
+
+    @Test
+    void whenFindUserCredentialByEmailButNotFoundThenReturnEmpty() {
+      // Arrange
+      var NOT_FOUND_EMAIL = "in_existing@email.com";
+      var expectedFoundUserLogin = Optional.empty();
+
+      when(userLoginRepository.findOneByEmail(NOT_FOUND_EMAIL)).thenReturn(Optional.empty());
+
+      // Actual
+      var actualFoundUserLogin = authService.findUserCredentialByEmail(NOT_FOUND_EMAIL);
+
+      // Assert
+      assertEquals(expectedFoundUserLogin, actualFoundUserLogin);
     }
 
     @Test
