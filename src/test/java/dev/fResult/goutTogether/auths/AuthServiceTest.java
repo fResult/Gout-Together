@@ -32,14 +32,15 @@ class AuthServiceTest {
   @Mock private TourCompanyLoginRepository tourCompanyLoginRepository;
   @Mock private PasswordEncoder passwordEncoder;
 
+  private final int USER_ID_1 = 1;
+  private final int USER_ID_2 = 3;
+  private final int USER_ID_3 = 5;
+  private final int NOT_FOUND_USER_ID_1 = 88888;
+  private final int NOT_FOUND_USER_ID_2 = 99999;
+  private final List<Integer> USER_IDS = List.of(USER_ID_1, USER_ID_2, USER_ID_3);
+
   @Nested
   class FindUserCredentialTest {
-    private final int USER_ID_1 = 1;
-    private final int USER_ID_2 = 3;
-    private final int USER_ID_3 = 5;
-    private final int NOT_FOUND_USER_ID_1 = 88888;
-    private final int NOT_FOUND_USER_ID_2 = 99999;
-    private final List<Integer> USER_IDS = List.of(USER_ID_1, USER_ID_2, USER_ID_3);
     private final List<Integer> SOME_NOT_FOUND_USER_IDS =
         List.of(NOT_FOUND_USER_ID_2, USER_ID_1, NOT_FOUND_USER_ID_1, USER_ID_3);
 
@@ -169,18 +170,37 @@ class AuthServiceTest {
     @Test
     void whenDeleteUserCredentialByIdThenSuccess() {
       // Arrange
-      var USER_ID = 1;
-      AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID);
+      AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID_1);
       var mockCredentialToDelete = new UserLogin(1, userRef, "email@example.com", "password");
       when(userLoginRepository.findOneByUserId(userRef))
           .thenReturn(Optional.of(mockCredentialToDelete));
 
       // Actual
-      var actualDeleteResult = authService.deleteUserCredentialById(USER_ID);
+      var actualDeleteResult = authService.deleteUserCredentialById(USER_ID_1);
 
       // Assert
       verify(userLoginRepository, times(1)).delete(mockCredentialToDelete);
       assertTrue(actualDeleteResult);
+    }
+
+    @Test
+    void whenDeleteUserCredentialByIdButNotFoundThenThrowException() {
+      // Arrange
+      var expectedErrorMessage =
+          String.format(
+              "%s id [%d] not found", UserLogin.class.getSimpleName(), NOT_FOUND_USER_ID_1);
+
+      AggregateReference<User, Integer> notFoundUserRef =
+          AggregateReference.to(NOT_FOUND_USER_ID_1);
+      when(userLoginRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
+
+      // Actual
+      Executable actualExecutable =
+          () -> authService.findUserCredentialByUserId(NOT_FOUND_USER_ID_1);
+
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
 }
