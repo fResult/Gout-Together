@@ -9,8 +9,8 @@ import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.services.AuthServiceImpl;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,7 +70,7 @@ class AuthServiceTest {
           String.format(
               "%s ids [%s] not found",
               UserLogin.class.getSimpleName(),
-              Set.of(NOT_FOUND_USER_ID_2, NOT_FOUND_USER_ID_1)
+              new HashSet<>(List.of(NOT_FOUND_USER_ID_2, NOT_FOUND_USER_ID_1))
                   .toString()
                   .replaceAll("[\\[\\]]", ""));
       var mockUserLogin1 =
