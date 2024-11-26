@@ -62,5 +62,35 @@ class AuthServiceTest {
       // Assert
       assertEquals(mockFoundUserLogins, actualFoundUserLogins);
     }
+
+    @Test
+    void whenFindUserCredentialsByUserIdsButSomeAreNotFoundThenThrowXxxException() {
+      // Arrange
+      var expectedErrorMessage =
+          String.format(
+              "%s ids [%s] not found",
+              UserLogin.class.getSimpleName(),
+              Set.of(NOT_FOUND_USER_ID_2, NOT_FOUND_USER_ID_1)
+                  .toString()
+                  .replaceAll("[\\[\\]]", ""));
+      var mockUserLogin1 =
+          new UserLogin(
+              1, AggregateReference.to(USER_ID_1), "email1@example.com", "encryptedPassword");
+
+      var mockUserLogin3 =
+          UserLogin.of(
+              3, AggregateReference.to(USER_ID_3), "email3@example.com", "encryptedPassword");
+      var mockFoundUserLogins = List.of(mockUserLogin1, mockUserLogin3);
+
+      when(userLoginRepository.findByUserIdIn(anyList())).thenReturn(mockFoundUserLogins);
+
+      // Actual
+      Executable actualExecutable =
+          () -> authService.findUserCredentialsByUserIds(SOME_NOT_FOUND_USER_IDS);
+
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      assertEquals(expectedErrorMessage, exception.getMessage());
+    }
   }
 }
