@@ -44,6 +44,8 @@ class AuthServiceTest {
   private final int TOUR_COMPANY_ID = 1;
   private final int NOT_FOUND_TOUR_COMPANY_ID = 99999;
   private final String TARGET_USERNAME = "target_username";
+  private final String NOT_FOUND_USERNAME = "in_existing_username";
+
   @Nested
   class FindUserCredentialTest {
     private final List<Integer> SOME_NOT_FOUND_USER_IDS =
@@ -153,7 +155,6 @@ class AuthServiceTest {
     @Test
     void whenFindCompanyLoginByUsernameButNotFoundThenReturnEmpty() {
       // Arrange
-      var NOT_FOUND_USERNAME = "in_existing_username";
       when(tourCompanyLoginRepository.findOneByUsername(NOT_FOUND_USERNAME))
           .thenReturn(Optional.empty());
 
@@ -255,12 +256,12 @@ class AuthServiceTest {
       var encryptedPassword = "encryptedPassword";
       AggregateReference<TourCompany, Integer> companyRef = AggregateReference.to(USER_ID_1);
       var mockCompanyLoginToDelete =
-          TourCompanyLogin.of(1, companyRef, "MyTour", "encryptedPassword");
-      when(tourCompanyLoginRepository.findById(TOUR_COMPANY_ID))
+          TourCompanyLogin.of(1, companyRef, "MyTour", encryptedPassword);
+      when(tourCompanyLoginRepository.findOneByTourCompanyId(companyRef))
           .thenReturn(Optional.of(mockCompanyLoginToDelete));
 
       // Actual
-      var actualDeleteResult = authService.deleteTourCompanyLoginById(USER_ID_1);
+      var actualDeleteResult = authService.deleteTourCompanyLoginById(TOUR_COMPANY_ID);
 
       // Assert
       verify(tourCompanyLoginRepository, times(1)).delete(mockCompanyLoginToDelete);
