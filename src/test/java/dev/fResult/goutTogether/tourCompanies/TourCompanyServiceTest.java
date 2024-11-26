@@ -38,7 +38,7 @@ class TourCompanyServiceTest {
   @Mock private WalletService walletService;
 
   @Test
-  void whenGetToursThenSuccess() {
+  void whenGetTourCompaniesThenSuccess() {
     // Arrange
     var mockTourCompany1 = TourCompany.of(1, "My Tour 1", TourCompanyStatus.WAITING.name());
     var mockTourCompany2 = TourCompany.of(2, "My Tour 2", TourCompanyStatus.APPROVED.name());
@@ -214,7 +214,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenDeleteTourByIdThenSuccess() {
+  void whenDeleteCompanyByIdThenSuccess() {
     // Arrange
     var TOUR_COMPANY_ID = 1;
     var mockTourCompany =
@@ -230,7 +230,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenDeleteTourByIdButTourCompanyNotFoundThenThrowNotFoundException() {
+  void whenDeleteCompanyByIdButTourCompanyNotFoundThenThrowNotFoundException() {
     // Arrange
     var TOUR_COMPANY_ID = 99999;
     var expectedErrorMessage =
