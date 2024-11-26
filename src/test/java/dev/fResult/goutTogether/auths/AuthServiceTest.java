@@ -61,7 +61,6 @@ class AuthServiceTest {
     void whenFindUserCredentialByEmailButNotFoundThenReturnEmpty() {
       // Arrange
       var NOT_FOUND_EMAIL = "in_existing@email.com";
-      var expectedFoundUserLogin = Optional.empty();
 
       when(userLoginRepository.findOneByEmail(NOT_FOUND_EMAIL)).thenReturn(Optional.empty());
 
@@ -69,7 +68,7 @@ class AuthServiceTest {
       var actualFoundUserLogin = authService.findUserCredentialByEmail(NOT_FOUND_EMAIL);
 
       // Assert
-      assertEquals(expectedFoundUserLogin, actualFoundUserLogin);
+      assertTrue(actualFoundUserLogin.isEmpty());
     }
 
     @Test
