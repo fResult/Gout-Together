@@ -2,7 +2,7 @@ package dev.fResult.goutTogether.auths;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
@@ -12,6 +12,8 @@ import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepos
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+
+import dev.fResult.goutTogether.users.entities.User;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -159,6 +161,26 @@ class AuthServiceTest {
 
       // Assert
       assertTrue(actualFoundCompanyLogin.isEmpty());
+    }
+  }
+
+  @Nested
+  class DeleteUserCredentialTest {
+    @Test
+    void whenDeleteUserCredentialByIdThenSuccess() {
+      // Arrange
+      var USER_ID = 1;
+      AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID);
+      var mockCredentialToDelete = new UserLogin(1, userRef, "email@example.com", "password");
+      when(userLoginRepository.findOneByUserId(userRef))
+          .thenReturn(Optional.of(mockCredentialToDelete));
+
+      // Actual
+      var actualDeleteResult = authService.deleteUserCredentialById(USER_ID);
+
+      // Assert
+      verify(userLoginRepository, times(1)).delete(mockCredentialToDelete);
+      assertTrue(actualDeleteResult);
     }
   }
 }
