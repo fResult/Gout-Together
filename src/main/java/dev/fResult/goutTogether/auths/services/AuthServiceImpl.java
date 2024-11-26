@@ -6,9 +6,8 @@ import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
@@ -37,8 +36,16 @@ public class AuthServiceImpl implements AuthService {
   public List<UserLogin> findUserCredentialsByUserIds(Collection<Integer> userIds) {
     logger.debug(
         "[findUserCredentialsByUserIds] Finding {}s by userIds: {}", UserLogin.class, userIds);
+    var foundCredentials = userLoginRepository.findByUserIdIn(userIds);
 
-    return userLoginRepository.findByUserIdIn(userIds);
+    throwExceptionIfSomeUserIdsNotFound(userIds, foundCredentials);
+
+    logger.info(
+        "[findUserCredentialsByUserIds] Found {} {}s",
+        foundCredentials.size(),
+        UserLogin.class.getSimpleName());
+
+    return foundCredentials;
   }
 
   @Override
@@ -131,5 +138,23 @@ public class AuthServiceImpl implements AuthService {
         "[deleteUserCredentialById] {} id [{}] is deleted", UserLogin.class.getSimpleName(), id);
 
     return true;
+  }
+
+  private void throwExceptionIfSomeUserIdsNotFound(
+      Collection<Integer> userIds, List<UserLogin> foundCredentials) {
+    var foundCredentialUserIds =
+        foundCredentials.stream()
+            .map(credential -> credential.userId().getId())
+            .collect(Collectors.toSet());
+
+    // TODO: Refactor this part
+    var userIdsToFind = new HashSet<>(Set.copyOf(userIds));
+    userIdsToFind.removeAll(foundCredentialUserIds);
+    var notFoundUserIds = new HashSet<>(userIdsToFind);
+
+    if (!userIdsToFind.isEmpty())
+      throw errorHelper
+          .someEntitiesMissing("findUserCredentialsByUserIds", UserLogin.class, notFoundUserIds)
+          .get();
   }
 }
