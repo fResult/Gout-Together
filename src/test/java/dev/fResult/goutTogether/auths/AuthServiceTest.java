@@ -9,11 +9,10 @@ import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.services.AuthServiceImpl;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
+import dev.fResult.goutTogether.users.entities.User;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-
-import dev.fResult.goutTogether.users.entities.User;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +37,8 @@ class AuthServiceTest {
   private final int NOT_FOUND_USER_ID_1 = 88888;
   private final int NOT_FOUND_USER_ID_2 = 99999;
   private final List<Integer> USER_IDS = List.of(USER_ID_1, USER_ID_2, USER_ID_3);
+  private final String TARGET_EMAIL = "target@email.com";
+  private final String NOT_FOUND_EMAIL = "in_existing@email.com";
 
   @Nested
   class FindUserCredentialTest {
@@ -47,7 +48,6 @@ class AuthServiceTest {
     @Test
     void whenFindUserCredentialByEmailThenSuccess() {
       // Arrange
-      var TARGET_EMAIL = "target@email.com";
       var mockUserLogin =
           UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, "encryptedPassword");
 
@@ -64,8 +64,6 @@ class AuthServiceTest {
     @Test
     void whenFindUserCredentialByEmailButNotFoundThenReturnEmpty() {
       // Arrange
-      var NOT_FOUND_EMAIL = "in_existing@email.com";
-
       when(userLoginRepository.findOneByEmail(NOT_FOUND_EMAIL)).thenReturn(Optional.empty());
 
       // Actual
