@@ -8,6 +8,7 @@ import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.services.AuthServiceImpl;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
+import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import dev.fResult.goutTogether.users.entities.User;
 import java.util.HashSet;
@@ -40,6 +41,7 @@ class AuthServiceTest {
   private final String TARGET_EMAIL = "target@email.com";
   private final String NOT_FOUND_EMAIL = "in_existing@email.com";
 
+  private final int TOUR_COMPANY_ID = 1;
   @Nested
   class FindUserCredentialTest {
     private final List<Integer> SOME_NOT_FOUND_USER_IDS =
@@ -170,14 +172,13 @@ class AuthServiceTest {
       // Arrange
       var encryptedPassword = "encryptedPassword";
       AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID_1);
-      var mockUserLoginToCreate =
-          UserLogin.of(1, userRef, "email@example.com", encryptedPassword);
+      var mockUserLoginToCreate = UserLogin.of(1, userRef, "email@example.com", encryptedPassword);
       when(passwordEncoder.encode(anyString())).thenReturn(encryptedPassword);
       when(userLoginRepository.save(any(UserLogin.class))).thenReturn(mockUserLoginToCreate);
 
-
       // Actual
-      var actualCreatedUserLogin = authService.createUserCredential(USER_ID_1, TARGET_EMAIL, "password");
+      var actualCreatedUserLogin =
+          authService.createUserCredential(USER_ID_1, TARGET_EMAIL, "password");
 
       // Assert
       assertEquals(mockUserLoginToCreate, actualCreatedUserLogin);
@@ -220,6 +221,28 @@ class AuthServiceTest {
       // Assert
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
+    }
+  }
+
+  @Nested
+  class CreateTourCompanyLoginTest {
+    @Test
+    void whenCreateCompanyLoginThenSuccess() {
+      // Arrange
+      var encryptedPassword = "encryptedPassword";
+      AggregateReference<TourCompany, Integer> companyRef = AggregateReference.to(TOUR_COMPANY_ID);
+      var mockCompanyLoginToCreate =
+          TourCompanyLogin.of(1, companyRef, "MyTour", encryptedPassword);
+      when(passwordEncoder.encode(anyString())).thenReturn(encryptedPassword);
+      when(tourCompanyLoginRepository.save(any(TourCompanyLogin.class)))
+          .thenReturn(mockCompanyLoginToCreate);
+
+      // Actual
+      var actualCreatedUserLogin =
+          authService.createTourCompanyLogin(TOUR_COMPANY_ID, "MyTour", "password");
+
+      // Assert
+      assertEquals(mockCompanyLoginToCreate, actualCreatedUserLogin);
     }
   }
 }
