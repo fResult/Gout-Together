@@ -12,7 +12,7 @@ public interface UserService {
 
   UserInfoResponse getUserById(int id);
 
-  UserInfoResponse register(UserRegistrationRequest user);
+  UserInfoResponse registerUser(UserRegistrationRequest user);
 
   UserInfoResponse updateUserById(int id, UserUpdateRequest user);
 

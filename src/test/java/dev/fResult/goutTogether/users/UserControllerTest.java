@@ -98,7 +98,7 @@ public class UserControllerTest {
     var mockTourCompany =
         UserInfoResponse.of(
             USER_ID, body.firstName(), body.lastName(), body.email(), body.phoneNumber());
-    when(userService.register(any(UserRegistrationRequest.class))).thenReturn(mockTourCompany);
+    when(userService.registerUser(any(UserRegistrationRequest.class))).thenReturn(mockTourCompany);
 
     // Actual
     var resultActions =
@@ -115,7 +115,7 @@ public class UserControllerTest {
   void whenRegisterUserButEmailIsInvalidThenReturn400() throws Exception {
     // Arrange
     var body = UserRegistrationRequest.of("John", "Wick", INVALID_EMAIL, "password", "0999999999");
-    when(userService.register(any(UserRegistrationRequest.class)))
+    when(userService.registerUser(any(UserRegistrationRequest.class)))
         .thenThrow(ConstraintViolationException.class);
 
     // Actual
@@ -180,7 +180,7 @@ public class UserControllerTest {
     var body =
         UserRegistrationRequest.of(
             "John", "Wick", "john.wick@example.com", "password", "0999999999");
-    when(userService.register(any(UserRegistrationRequest.class)))
+    when(userService.registerUser(any(UserRegistrationRequest.class)))
         .thenThrow(CredentialExistsException.class);
 
     // Actual
