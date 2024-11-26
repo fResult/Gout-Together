@@ -2,7 +2,6 @@ package dev.fResult.goutTogether.wallets.services;
 
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
-import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
 import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import dev.fResult.goutTogether.wallets.repositories.TourCompanyWalletRepository;
@@ -33,7 +32,8 @@ public class WalletServiceImpl implements WalletService {
   public UserWallet createConsumerWallet(int userId) {
     logger.debug("[createConsumerWallet] New {} is creating", UserWallet.class.getSimpleName());
 
-    var walletToCreate = UserWallet.of(null, AggregateReference.to(userId), Instant.now(), BigDecimal.ZERO);
+    var walletToCreate =
+        UserWallet.of(null, AggregateReference.to(userId), Instant.now(), BigDecimal.ZERO);
     var createdWallet = userWalletRepository.save(walletToCreate);
 
     logger.info(
