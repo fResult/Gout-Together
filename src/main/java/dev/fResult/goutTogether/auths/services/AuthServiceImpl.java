@@ -137,7 +137,7 @@ public class AuthServiceImpl implements AuthService {
         TourCompanyLogin.class.getSimpleName(),
         createdCompanyCredential);
 
-    return companyCredentialToCreate;
+    return createdCompanyCredential;
   }
 
   @Override
