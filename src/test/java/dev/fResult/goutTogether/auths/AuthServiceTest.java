@@ -266,5 +266,27 @@ class AuthServiceTest {
       verify(tourCompanyLoginRepository, times(1)).delete(mockCompanyLoginToDelete);
       assertTrue(actualDeleteResult);
     }
+
+    @Test
+    void whenDeleteCompanyLoginByIdButNotFoundThenThrowException() {
+      // Arrange
+      var expectedErrorMessage =
+          String.format(
+              "%s id [%d] not found",
+              TourCompanyLogin.class.getSimpleName(), NOT_FOUND_TOUR_COMPANY_ID);
+
+      AggregateReference<TourCompany, Integer> notFoundCompanyRef =
+          AggregateReference.to(NOT_FOUND_TOUR_COMPANY_ID);
+      when(tourCompanyLoginRepository.findOneByTourCompanyId(notFoundCompanyRef))
+          .thenReturn(Optional.empty());
+
+      // Actual
+      Executable actualExecutable =
+          () -> authService.findTourCompanyCredentialByTourCompanyId(NOT_FOUND_TOUR_COMPANY_ID);
+
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      assertEquals(expectedErrorMessage, exception.getMessage());
+    }
   }
 }
