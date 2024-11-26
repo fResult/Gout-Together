@@ -64,7 +64,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void whenFindUserCredentialsByUserIdsButSomeAreNotFoundThenThrowXxxException() {
+    void whenFindUserCredentialsByUserIdsButSomeAreNotFoundThenThrowEntityNotFoundException() {
       // Arrange
       var expectedErrorMessage =
           String.format(
