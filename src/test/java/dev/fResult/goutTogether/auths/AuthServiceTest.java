@@ -1,7 +1,6 @@
 package dev.fResult.goutTogether.auths;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +10,7 @@ import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +30,7 @@ class AuthServiceTest {
   @Mock private PasswordEncoder passwordEncoder;
 
   @Nested
-  class FindUserCredentialsByUsersIdTest {
+  class FindUserCredentialTest {
     private final int USER_ID_1 = 1;
     private final int USER_ID_2 = 3;
     private final int USER_ID_3 = 5;
@@ -39,6 +39,23 @@ class AuthServiceTest {
     private final List<Integer> USER_IDS = List.of(USER_ID_1, USER_ID_2, USER_ID_3);
     private final List<Integer> SOME_NOT_FOUND_USER_IDS =
         List.of(NOT_FOUND_USER_ID_2, USER_ID_1, NOT_FOUND_USER_ID_1, USER_ID_3);
+
+    @Test
+    void whenFindUserCredentialByEmailThenSuccess() {
+      // Arrange
+      var TARGET_EMAIL = "target@email.com";
+      var mockUserLogin =
+          new UserLogin(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, "encryptedPassword");
+
+      when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
+
+      // Actual
+        var actualFoundUserLogin = authService.findUserCredentialByEmail(TARGET_EMAIL);
+
+      // Assert
+      assertTrue(actualFoundUserLogin.isPresent());
+      assertEquals(mockUserLogin, actualFoundUserLogin.get());
+    }
 
     @Test
     void whenFindUserCredentialsByUserIdsThenSuccess() {
