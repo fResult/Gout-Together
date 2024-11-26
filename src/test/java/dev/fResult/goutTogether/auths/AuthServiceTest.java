@@ -49,7 +49,7 @@ class AuthServiceTest {
       // Arrange
       var TARGET_EMAIL = "target@email.com";
       var mockUserLogin =
-          new UserLogin(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, "encryptedPassword");
+          UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, "encryptedPassword");
 
       when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
 
@@ -79,13 +79,13 @@ class AuthServiceTest {
     void whenFindUserCredentialsByUserIdsThenSuccess() {
       // Arrange
       var mockUserLogin1 =
-          new UserLogin(
+          UserLogin.of(
               1, AggregateReference.to(USER_ID_1), "email1@example.com", "encryptedPassword");
       var mockUserLogin2 =
-          new UserLogin(
+          UserLogin.of(
               2, AggregateReference.to(USER_ID_2), "email2@example.com", "encryptedPassword");
       var mockUserLogin3 =
-          new UserLogin(
+          UserLogin.of(
               3, AggregateReference.to(USER_ID_3), "email3@example.com", "encryptedPassword");
       var mockFoundUserLogins = List.of(mockUserLogin1, mockUserLogin2, mockUserLogin3);
 
@@ -109,7 +109,7 @@ class AuthServiceTest {
                   .toString()
                   .replaceAll("[\\[\\]]", ""));
       var mockUserLogin1 =
-          new UserLogin(
+          UserLogin.of(
               1, AggregateReference.to(USER_ID_1), "email1@example.com", "encryptedPassword");
 
       var mockUserLogin3 =
@@ -136,7 +136,7 @@ class AuthServiceTest {
       // Arrange
       var TARGET_USERNAME = "target_username";
       var mockTourCompanyLogin =
-          new TourCompanyLogin(1, AggregateReference.to(1), TARGET_USERNAME, "encryptedPassword");
+          TourCompanyLogin.of(1, AggregateReference.to(1), TARGET_USERNAME, "encryptedPassword");
       when(tourCompanyLoginRepository.findOneByUsername(TARGET_USERNAME))
           .thenReturn(Optional.of(mockTourCompanyLogin));
 
@@ -171,7 +171,7 @@ class AuthServiceTest {
     void whenDeleteUserCredentialByIdThenSuccess() {
       // Arrange
       AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID_1);
-      var mockCredentialToDelete = new UserLogin(1, userRef, "email@example.com", "password");
+      var mockCredentialToDelete = UserLogin.of(1, userRef, "email@example.com", "password");
       when(userLoginRepository.findOneByUserId(userRef))
           .thenReturn(Optional.of(mockCredentialToDelete));
 
