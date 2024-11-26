@@ -164,6 +164,27 @@ class AuthServiceTest {
   }
 
   @Nested
+  class CreateUserCredentialTest {
+    @Test
+    void whenCreateUserCredentialThenSuccess() {
+      // Arrange
+      var encryptedPassword = "encryptedPassword";
+      AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID_1);
+      var mockUserLoginToCreate =
+          UserLogin.of(1, userRef, "email@example.com", encryptedPassword);
+      when(passwordEncoder.encode(anyString())).thenReturn(encryptedPassword);
+      when(userLoginRepository.save(any(UserLogin.class))).thenReturn(mockUserLoginToCreate);
+
+
+      // Actual
+      var actualCreatedUserLogin = authService.createUserCredential(USER_ID_1, TARGET_EMAIL, "password");
+
+      // Assert
+      assertEquals(mockUserLoginToCreate, actualCreatedUserLogin);
+    }
+  }
+
+  @Nested
   class DeleteUserCredentialTest {
     @Test
     void whenDeleteUserCredentialByIdThenSuccess() {
