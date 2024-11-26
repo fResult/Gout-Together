@@ -33,11 +33,8 @@ public class WalletServiceImpl implements WalletService {
   public UserWallet createConsumerWallet(int userId) {
     logger.debug("[createConsumerWallet] New {} is creating", UserWallet.class.getSimpleName());
 
-    AggregateReference<User, Integer> userReference = AggregateReference.to(userId);
-    Instant currentTime = Instant.now();
-    BigDecimal initialBalance = BigDecimal.ZERO;
-    var createdWallet = UserWallet.of(null, userReference, currentTime, initialBalance);
-    userWalletRepository.save(createdWallet);
+    var walletToCreate = UserWallet.of(null, AggregateReference.to(userId), Instant.now(), BigDecimal.ZERO);
+    var createdWallet = userWalletRepository.save(walletToCreate);
 
     logger.info(
         "[createConsumerWallet] New {} is created: {}",
