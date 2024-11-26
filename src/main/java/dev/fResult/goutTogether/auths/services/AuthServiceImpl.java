@@ -49,6 +49,16 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
+  public UserLogin findUserCredentialByUserId(int userId) {
+    logger.debug("[findUserCredentialByUserId] Finding {} by id: {}", UserLogin.class, userId);
+
+    return userLoginRepository
+        .findOneByUserId(AggregateReference.to(userId))
+        .orElseThrow(
+            errorHelper.entityNotFound("findUserCredentialByUserId", UserLogin.class, userId));
+  }
+
+  @Override
   public Optional<UserLogin> findUserCredentialByEmail(String userEmail) {
     return userLoginRepository.findOneByEmail(userEmail);
   }
@@ -73,13 +83,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public UserLogin findUserCredentialByUserId(int userId) {
-    logger.debug("[findUserCredentialByUserId] Finding {} by id: {}", UserLogin.class, userId);
 
-    return userLoginRepository
-        .findOneByUserId(AggregateReference.to(userId))
-        .orElseThrow(
-            errorHelper.entityNotFound("findUserCredentialByUserId", UserLogin.class, userId));
   }
 
   @Override
