@@ -9,6 +9,7 @@ import dev.fResult.goutTogether.common.utils.StringUtil;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyUpdateRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
 import dev.fResult.goutTogether.wallets.services.WalletService;
@@ -111,8 +112,24 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   }
 
   @Override
-  public TourCompanyResponse updateTourCompanyById(int id, TourCompanyRegistrationRequest body) {
-    throw new UnsupportedOperationException("Not implemented yet");
+  public TourCompanyResponse updateTourCompanyById(int id, TourCompanyUpdateRequest body) {
+    logger.debug(
+        "[updateTourCompanyById] {} id [{}] is updating", TourCompany.class.getSimpleName(), id);
+    var toTourCompanyUpdate = TourCompanyUpdateRequest.dtoToTourCompanyUpdate(body);
+    var companyToUpdate =
+        tourCompanyRepository
+            .findById(id)
+            .map(toTourCompanyUpdate)
+            .orElseThrow(
+                errorHelper.entityNotFound("updateTourCompanyById", TourCompany.class, id));
+
+    var updatedCompany = tourCompanyRepository.save(companyToUpdate);
+    logger.info(
+        "[updateTourCompanyById] {} id [{}] is updated",
+        TourCompany.class.getSimpleName(),
+        updatedCompany.id());
+
+    return TourCompanyResponse.fromDao(updatedCompany);
   }
 
   @Override

@@ -13,7 +13,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -32,7 +39,7 @@ public class UserController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<UserInfoResponse> byId(@PathVariable int id) {
+  public ResponseEntity<UserInfoResponse> getUserById(@PathVariable int id) {
     return ResponseEntity.ok(userService.getUserById(id));
   }
 
@@ -67,6 +74,6 @@ public class UserController {
     userService.deleteUserById(id);
 
     return ResponseEntity.ok(
-        String.format("%s with id [%d] has been deleted", User.class.getSimpleName(), id));
+        String.format("Delete %s by id [%d] successfully", User.class.getSimpleName(), id));
   }
 }

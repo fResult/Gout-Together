@@ -71,7 +71,8 @@ public class AuthServiceImpl implements AuthService {
 
     return userLoginRepository
         .findOneByUserId(AggregateReference.to(userId))
-        .orElseThrow(errorHelper.entityNotFound("findUserCredentialByUserId", UserLogin.class, userId));
+        .orElseThrow(
+            errorHelper.entityNotFound("findUserCredentialByUserId", UserLogin.class, userId));
   }
 
   @Override

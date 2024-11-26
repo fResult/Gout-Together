@@ -1,6 +1,5 @@
 package dev.fResult.goutTogether.tours;
 
-import dev.fResult.goutTogether.tourCompanies.services.TourCompanyService;
 import dev.fResult.goutTogether.tours.dtos.TourRequest;
 import dev.fResult.goutTogether.tours.entities.Tour;
 import dev.fResult.goutTogether.tours.services.TourService;

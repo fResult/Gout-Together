@@ -1,8 +1,6 @@
 package dev.fResult.goutTogether.wallets.services;
 
 import dev.fResult.goutTogether.helpers.ErrorHelper;
-import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
-import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
 import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import dev.fResult.goutTogether.wallets.repositories.TourCompanyWalletRepository;
@@ -33,11 +31,9 @@ public class WalletServiceImpl implements WalletService {
   public UserWallet createConsumerWallet(int userId) {
     logger.debug("[createConsumerWallet] New {} is creating", UserWallet.class.getSimpleName());
 
-    AggregateReference<User, Integer> userReference = AggregateReference.to(userId);
-    Instant currentTime = Instant.now();
-    BigDecimal initialBalance = BigDecimal.ZERO;
-    var createdWallet = UserWallet.of(null, userReference, currentTime, initialBalance);
-    userWalletRepository.save(createdWallet);
+    var walletToCreate =
+        UserWallet.of(null, AggregateReference.to(userId), Instant.now(), BigDecimal.ZERO);
+    var createdWallet = userWalletRepository.save(walletToCreate);
 
     logger.info(
         "[createConsumerWallet] New {} is created: {}",
@@ -65,12 +61,11 @@ public class WalletServiceImpl implements WalletService {
     logger.debug(
         "[createTourCompanyWallet] New {} is creating", TourCompanyWallet.class.getSimpleName());
 
-    AggregateReference<TourCompany, Integer> tourCompanyReference =
-        AggregateReference.to(tourCompanyId);
-    var createdWallet =
-        TourCompanyWallet.of(null, tourCompanyReference, Instant.now(), BigDecimal.ZERO);
+    var walletToCreate =
+        TourCompanyWallet.of(
+            null, AggregateReference.to(tourCompanyId), Instant.now(), BigDecimal.ZERO);
 
-    tourCompanyWalletRepository.save(createdWallet);
+    var createdWallet = tourCompanyWalletRepository.save(walletToCreate);
     logger.info(
         "[createTourCompanyWallet] New {} is created: {}",
         TourCompanyWallet.class.getSimpleName(),
