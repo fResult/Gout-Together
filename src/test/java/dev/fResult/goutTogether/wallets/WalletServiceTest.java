@@ -95,4 +95,21 @@ class WalletServiceTest {
     verify(userWalletRepository, times(1)).delete(walletToDelete);
     assertTrue(actualIsSuccess);
   }
+
+  @Test
+  void whenCreateCompanyWalletThenSuccess() {
+    // Arrange
+    var COMPANY_ID = 1;
+    var mockCreatedCompanyWallet =
+        TourCompanyWallet.of(
+            WALLET_ID, AggregateReference.to(COMPANY_ID), Instant.now(), BigDecimal.ZERO);
+    when(tourCompanyWalletRepository.save(any(TourCompanyWallet.class)))
+        .thenReturn(mockCreatedCompanyWallet);
+
+    // Actual
+    var actualCreatedWallet = walletService.createTourCompanyWallet(COMPANY_ID);
+
+    // Assert
+    assertEquals(mockCreatedCompanyWallet, actualCreatedWallet);
+  }
 }
