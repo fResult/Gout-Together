@@ -106,15 +106,15 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public TourCompanyLogin findTourCompanyCredentialByTourCompanyId(int id) {
+  public TourCompanyLogin findTourCompanyCredentialByTourCompanyId(int tourCompanyId) {
     logger.debug(
-        "[findTourCompanyCredentialByUsername] Finding {} by id: {}", TourCompanyLogin.class, id);
+        "[findTourCompanyCredentialByUsername] Finding {} by id: {}", TourCompanyLogin.class, tourCompanyId);
 
     return tourCompanyLoginRepository
-        .findById(id)
+        .findOneByTourCompanyId(AggregateReference.to(tourCompanyId))
         .orElseThrow(
             errorHelper.entityNotFound(
-                "findTourCompanyCredentialByUsername", TourCompanyLogin.class, id));
+                "findTourCompanyCredentialByUsername", TourCompanyLogin.class, tourCompanyId));
   }
 
   @Override
