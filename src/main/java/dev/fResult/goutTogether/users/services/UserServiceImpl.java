@@ -59,14 +59,7 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public UserInfoResponse register(UserRegistrationRequest body) {
     logger.debug("[register] new {} is registering", User.class.getSimpleName());
-
-    var existingUserCredential = authService.findUserCredentialByEmail(body.email());
-    if (existingUserCredential.isPresent()) {
-      logger.warn(
-          "[register] {} email [{}] already exists", User.class.getSimpleName(), body.email());
-      throw new CredentialExistsException(
-          String.format("%s email [%s] already exists", User.class.getSimpleName(), body.email()));
-    }
+    throwExceptionIfUserEmailAlreadyExists(body.email());
 
     var userToRegister = User.of(null, body.firstName(), body.lastName(), body.phoneNumber());
     var registeredUser = userRepository.save(userToRegister);
@@ -135,5 +128,14 @@ public class UserServiceImpl implements UserService {
     var userCredential = authService.findUserCredentialByUserId(user.id());
 
     return UserInfoResponse.fromUserDao(user, userCredential);
+  }
+
+  private void throwExceptionIfUserEmailAlreadyExists(String email) {
+    var existingUserCredential = authService.findUserCredentialByEmail(email);
+    if (existingUserCredential.isPresent()) {
+      logger.warn("[register] {} email [{}] already exists", User.class.getSimpleName(), email);
+      throw new CredentialExistsException(
+          String.format("%s email [%s] already exists", User.class.getSimpleName(), email));
+    }
   }
 }
