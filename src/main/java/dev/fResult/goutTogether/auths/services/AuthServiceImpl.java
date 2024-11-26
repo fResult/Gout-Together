@@ -54,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public UserLogin createCredentialLogin(int userId, String email, String password) {
+  public UserLogin createUserCredential(int userId, String email, String password) {
     logger.debug(
         "[createUserLogin] Creating new {} for userId: {}",
         UserLogin.class.getSimpleName(),

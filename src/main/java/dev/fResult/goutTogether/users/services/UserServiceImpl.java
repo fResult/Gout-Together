@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
     logger.info("[register] New {} is registered: {}", User.class.getSimpleName(), registeredUser);
 
     var createdUserCredential =
-        authService.createCredentialLogin(registeredUser.id(), body.email(), body.password());
+        authService.createUserCredential(registeredUser.id(), body.email(), body.password());
     walletService.createConsumerWallet(registeredUser.id());
 
     return UserInfoResponse.fromUserDao(registeredUser, createdUserCredential);
