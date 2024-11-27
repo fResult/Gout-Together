@@ -195,4 +195,20 @@ class UserServiceTest {
     // Assert
     assertEquals(expectUpdatedUser, actualUpdatedUser);
   }
+
+  @Test
+  void whenUpdateUserByIdButNotFoundThenThrowException() {
+    // Arrange
+    var expectedErrorMessage =
+        String.format("%s id [%d] not found", User.class.getSimpleName(), NOT_FOUND_USER_ID);
+    var body = UserUpdateRequest.of(null, "Constantine", "0888888888");
+    when(userRepository.findById(NOT_FOUND_USER_ID)).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualExecutable = () -> userService.updateUserById(NOT_FOUND_USER_ID, body);
+
+    // Assert
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
+  }
 }
