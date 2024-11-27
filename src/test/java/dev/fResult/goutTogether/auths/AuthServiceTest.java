@@ -105,6 +105,22 @@ class AuthServiceTest {
     }
 
     @Test
+    void whenFindUserCredentialByUserIdThenSuccess() {
+      // Arrange
+      var mockUserLogin =
+          UserLogin.of(
+              1, AggregateReference.to(USER_ID_1), "email@example.com", "encryptedPassword");
+      AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID_1);
+      when(userLoginRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserLogin));
+
+      // Actual
+      var actualFoundUserLogin = authService.findUserCredentialByUserId(USER_ID_1);
+
+      // Assert
+      assertEquals(mockUserLogin, actualFoundUserLogin);
+    }
+
+    @Test
     void whenFindUserCredentialByUserIdButNotFoundThenThrowException() {
       // Arrange
       var expectedErrorMessage = String.format("", User.class);
