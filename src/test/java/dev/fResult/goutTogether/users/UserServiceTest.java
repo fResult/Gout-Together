@@ -12,6 +12,7 @@ import dev.fResult.goutTogether.users.repositories.UserRepository;
 import dev.fResult.goutTogether.users.services.UserServiceImpl;
 import dev.fResult.goutTogether.wallets.services.WalletService;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -71,5 +72,28 @@ class UserServiceTest {
 
     // Assert
     assertEquals(expectedUsersResp, actualUsersResp);
+  }
+
+  @Test
+  void whenGetUserByIdThenSuccess() {
+    // Arrange
+    var mockUser = User.of(USER_ID, "John", "Wick", "0999999999");
+    var mockUserCredential =
+        UserLogin.of(10, AggregateReference.to(USER_ID), "john.w@example.com", "encryptedPassword");
+    var expectedUserResp =
+        UserInfoResponse.of(
+            USER_ID,
+            mockUser.firstName(),
+            mockUser.lastName(),
+            mockUserCredential.email(),
+            mockUser.phoneNumber());
+    when(authService.findUserCredentialByUserId(USER_ID)).thenReturn(mockUserCredential);
+    when(userRepository.findById(USER_ID)).thenReturn(Optional.of(mockUser));
+
+    // Act
+    var actualUserResp = userService.getUserById(USER_ID);
+
+    // Assert
+    assertEquals(expectedUserResp, actualUserResp);
   }
 }
