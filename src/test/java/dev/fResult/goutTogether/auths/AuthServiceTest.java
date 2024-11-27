@@ -52,34 +52,6 @@ class AuthServiceTest {
         List.of(NOT_FOUND_USER_ID_2, USER_ID_1, NOT_FOUND_USER_ID_1, USER_ID_3);
 
     @Test
-    void whenFindUserCredentialByEmailThenSuccess() {
-      // Arrange
-      var mockUserLogin =
-          UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, "encryptedPassword");
-
-      when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
-
-      // Actual
-      var actualFoundUserLogin = authService.findUserCredentialByEmail(TARGET_EMAIL);
-
-      // Assert
-      assertTrue(actualFoundUserLogin.isPresent());
-      assertEquals(mockUserLogin, actualFoundUserLogin.get());
-    }
-
-    @Test
-    void whenFindUserCredentialByEmailButNotFoundThenReturnEmpty() {
-      // Arrange
-      when(userLoginRepository.findOneByEmail(NOT_FOUND_EMAIL)).thenReturn(Optional.empty());
-
-      // Actual
-      var actualFoundUserLogin = authService.findUserCredentialByEmail(NOT_FOUND_EMAIL);
-
-      // Assert
-      assertTrue(actualFoundUserLogin.isEmpty());
-    }
-
-    @Test
     void whenFindUserCredentialsByUserIdsThenSuccess() {
       // Arrange
       var mockUserLogin1 =
@@ -130,6 +102,44 @@ class AuthServiceTest {
       // Assert
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
+    }
+
+    @Test
+    void whenFindUserCredentialByUserIdButNotFoundThenThrowException() {
+      // Arrange
+      var expectedErrorMessage = String.format("", User.class);
+
+      // Actual
+
+      // Assert
+    }
+
+    @Test
+    void whenFindUserCredentialByEmailThenSuccess() {
+      // Arrange
+      var mockUserLogin =
+          UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, "encryptedPassword");
+
+      when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
+
+      // Actual
+      var actualFoundUserLogin = authService.findUserCredentialByEmail(TARGET_EMAIL);
+
+      // Assert
+      assertTrue(actualFoundUserLogin.isPresent());
+      assertEquals(mockUserLogin, actualFoundUserLogin.get());
+    }
+
+    @Test
+    void whenFindUserCredentialByEmailButNotFoundThenReturnEmpty() {
+      // Arrange
+      when(userLoginRepository.findOneByEmail(NOT_FOUND_EMAIL)).thenReturn(Optional.empty());
+
+      // Actual
+      var actualFoundUserLogin = authService.findUserCredentialByEmail(NOT_FOUND_EMAIL);
+
+      // Assert
+      assertTrue(actualFoundUserLogin.isEmpty());
     }
   }
 
