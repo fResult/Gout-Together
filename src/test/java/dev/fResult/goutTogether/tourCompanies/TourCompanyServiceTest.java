@@ -31,6 +31,10 @@ import org.springframework.data.jdbc.core.mapping.AggregateReference;
 
 @ExtendWith(MockitoExtension.class)
 class TourCompanyServiceTest {
+  private static final int TOUR_COMPANY_ID = 1;
+  private static final int NOT_FOUND_TOUR_COMPANY_ID = 99999;
+  private static final String TARGET_TOUR_COMPANY_USERNAME = "target_company_username";
+
   @InjectMocks private TourCompanyServiceImpl tourCompanyService;
 
   @Mock private TourCompanyRepository tourCompanyRepository;
@@ -89,11 +93,13 @@ class TourCompanyServiceTest {
   @Test
   void whenRegisterCompanyButUsernameAlreadyExistsThenThrowCredentialExistsException() {
     // Arrange
-    var USERNAME = "MyTour";
     var expectedErrorMessage =
         String.format(
-            "%s username [%s] already exists", TourCompanyLogin.class.getSimpleName(), USERNAME);
-    var body = TourCompanyRegistrationRequest.of("My Tour", USERNAME, "mypassword", null);
+            "%s username [%s] already exists",
+            TourCompanyLogin.class.getSimpleName(), TARGET_TOUR_COMPANY_USERNAME);
+    var body =
+        TourCompanyRegistrationRequest.of(
+            "My Tour", TARGET_TOUR_COMPANY_USERNAME, "mypassword", null);
 
     var mockTourCompany = TourCompany.of(1, "My Tour", TourCompanyStatus.WAITING.name());
     var mockCompanyCredential =
@@ -148,7 +154,6 @@ class TourCompanyServiceTest {
   @Test
   void whenApproveCompanyButCompanyIsAlreadyApprovedThenThrowValidationException() {
     // Arrange
-    var TOUR_COMPANY_ID = 1;
     var expectedErrorMessage =
         String.format("Tour company id [%d] is already approved", TOUR_COMPANY_ID);
     when(tourCompanyRepository.findById(anyInt()))
@@ -167,13 +172,14 @@ class TourCompanyServiceTest {
   @Test
   void whenApproveCompanyButCompanyNotFoundThrowEntityNotFoundException() {
     // Arrange
-    var TOUR_ID = 99999;
     var expectedErrorMessage =
-        String.format("%s id [%d] not found", TourCompany.class.getSimpleName(), TOUR_ID);
+        String.format(
+            "%s id [%d] not found", TourCompany.class.getSimpleName(), NOT_FOUND_TOUR_COMPANY_ID);
     when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> tourCompanyService.approveTourCompany(TOUR_ID);
+    Executable actualExecutable =
+        () -> tourCompanyService.approveTourCompany(NOT_FOUND_TOUR_COMPANY_ID);
 
     // Assert
     var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
@@ -183,7 +189,6 @@ class TourCompanyServiceTest {
   @Test
   void whenGetCompanyByIdThenSuccess() {
     // Arrange
-    var TOUR_COMPANY_ID = 1;
     var mockCompany = TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.WAITING.name());
     var expectedCompanyResponse =
         TourCompanyResponse.of(
@@ -200,7 +205,6 @@ class TourCompanyServiceTest {
   @Test
   void whenGetCompanyByIdButCompanyNotFoundThenThrowEntityNotFoundException() {
     // Arrange
-    var TOUR_COMPANY_ID = 99999;
     var expectedErrorMessage =
         String.format("%s id [%d] not found", TourCompany.class.getSimpleName(), TOUR_COMPANY_ID);
     when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.empty());
@@ -216,7 +220,6 @@ class TourCompanyServiceTest {
   @Test
   void whenDeleteCompanyByIdThenSuccess() {
     // Arrange
-    var TOUR_COMPANY_ID = 1;
     var mockTourCompany =
         TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.APPROVED.name());
     when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.of(mockTourCompany));
@@ -232,13 +235,14 @@ class TourCompanyServiceTest {
   @Test
   void whenDeleteCompanyByIdButTourCompanyNotFoundThenThrowNotFoundException() {
     // Arrange
-    var TOUR_COMPANY_ID = 99999;
     var expectedErrorMessage =
-        String.format("%s id [%d] not found", TourCompany.class.getSimpleName(), TOUR_COMPANY_ID);
+        String.format(
+            "%s id [%d] not found", TourCompany.class.getSimpleName(), NOT_FOUND_TOUR_COMPANY_ID);
     when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> tourCompanyService.deleteTourCompanyById(TOUR_COMPANY_ID);
+    Executable actualExecutable =
+        () -> tourCompanyService.deleteTourCompanyById(NOT_FOUND_TOUR_COMPANY_ID);
 
     // Assert
     var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
