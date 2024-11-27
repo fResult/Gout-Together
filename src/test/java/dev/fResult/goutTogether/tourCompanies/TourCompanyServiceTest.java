@@ -12,6 +12,7 @@ import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
+import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyUpdateRequest;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyRepository;
 import dev.fResult.goutTogether.tourCompanies.services.TourCompanyServiceImpl;
@@ -215,6 +216,28 @@ class TourCompanyServiceTest {
     // Assert
     var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
+  @Test
+  void whenUpdateCompanyByIdThenSuccess() {
+    // Arrange
+    var body = TourCompanyUpdateRequest.of("Your Tour", null);
+    var mockFoundTourCompany =
+        TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.APPROVED.name());
+    var mockUpdatedTourCompany =
+        TourCompany.of(TOUR_COMPANY_ID, body.name(), mockFoundTourCompany.status());
+    var expectedUpdatedCompany =
+        TourCompanyResponse.of(
+            TOUR_COMPANY_ID, body.name(), TourCompanyStatus.valueOf(mockFoundTourCompany.status()));
+
+    when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.of(mockFoundTourCompany));
+    when(tourCompanyRepository.save(any(TourCompany.class))).thenReturn(mockUpdatedTourCompany);
+
+    // Actual
+    var actualUpdatedCompany = tourCompanyService.updateTourCompanyById(TOUR_COMPANY_ID, body);
+
+    // Assert
+    assertEquals(expectedUpdatedCompany, actualUpdatedCompany);
   }
 
   @Test
