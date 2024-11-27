@@ -113,6 +113,7 @@ class UserServiceTest {
     Executable actualExecutable = () -> userService.getUserById(NOT_FOUND_USER_ID);
 
     // Assert
-    assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
   }
 }
