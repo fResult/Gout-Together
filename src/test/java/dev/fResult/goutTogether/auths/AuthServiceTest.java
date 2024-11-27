@@ -220,7 +220,8 @@ class AuthServiceTest {
       // Arrange
       var expectedErrorMessage =
           String.format(
-              "%s id [%d] not found", UserLogin.class.getSimpleName(), NOT_FOUND_USER_ID_1);
+              "%s with %s [%d] not found",
+              UserLogin.class.getSimpleName(), "userId", NOT_FOUND_USER_ID_1);
 
       AggregateReference<User, Integer> notFoundUserRef =
           AggregateReference.to(NOT_FOUND_USER_ID_1);
@@ -283,8 +284,8 @@ class AuthServiceTest {
       // Arrange
       var expectedErrorMessage =
           String.format(
-              "%s id [%d] not found",
-              TourCompanyLogin.class.getSimpleName(), NOT_FOUND_TOUR_COMPANY_ID);
+              "%s with %s [%d] not found",
+              TourCompanyLogin.class.getSimpleName(), "tourCompanyId", NOT_FOUND_TOUR_COMPANY_ID);
 
       AggregateReference<TourCompany, Integer> notFoundCompanyRef =
           AggregateReference.to(NOT_FOUND_TOUR_COMPANY_ID);
