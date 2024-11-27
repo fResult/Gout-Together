@@ -123,11 +123,21 @@ class AuthServiceTest {
     @Test
     void whenFindUserCredentialByUserIdButNotFoundThenThrowException() {
       // Arrange
-      var expectedErrorMessage = String.format("", User.class);
+      var expectedErrorMessage =
+          String.format(
+              "%s with %s [%d] not found",
+              UserLogin.class.getSimpleName(), "userId", NOT_FOUND_USER_ID_1);
+      AggregateReference<User, Integer> notFoundUserRef =
+          AggregateReference.to(NOT_FOUND_USER_ID_1);
+      when(userLoginRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
 
       // Actual
+      Executable actualExecutable =
+          () -> authService.findUserCredentialByUserId(NOT_FOUND_USER_ID_1);
 
       // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      assertEquals(expectedErrorMessage, exception.getMessage());
     }
 
     @Test
