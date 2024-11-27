@@ -50,12 +50,14 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public UserLogin findUserCredentialByUserId(int userId) {
-    logger.debug("[findUserCredentialByUserId] Finding {} by id: {}", UserLogin.class, userId);
+    logger.debug(
+        "[findUserCredentialByUserId] Finding {} by {}: {}", UserLogin.class, "userId", userId);
 
     return userLoginRepository
         .findOneByUserId(AggregateReference.to(userId))
         .orElseThrow(
-            errorHelper.entityNotFound("findUserCredentialByUserId", UserLogin.class, userId));
+            errorHelper.entityWithSubResourceNotFound(
+                "findUserCredentialByUserId", UserLogin.class, "userId", String.valueOf(userId)));
   }
 
   @Override
@@ -85,12 +87,16 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public boolean deleteUserCredentialById(int userId) {
     logger.debug(
-        "[deleteUserCredentialById] Deleting {} by id: {}", UserLogin.class.getSimpleName(), userId);
+        "[deleteUserCredentialById] Deleting {} by id: {}",
+        UserLogin.class.getSimpleName(),
+        userId);
     var credentialToDelete = findUserCredentialByUserId(userId);
 
     userLoginRepository.delete(credentialToDelete);
     logger.info(
-        "[deleteUserCredentialById] {} id [{}] is deleted", UserLogin.class.getSimpleName(), userId);
+        "[deleteUserCredentialById] {} id [{}] is deleted",
+        UserLogin.class.getSimpleName(),
+        userId);
 
     return true;
   }
@@ -108,13 +114,19 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public TourCompanyLogin findTourCompanyCredentialByTourCompanyId(int tourCompanyId) {
     logger.debug(
-        "[findTourCompanyCredentialByUsername] Finding {} by id: {}", TourCompanyLogin.class, tourCompanyId);
+        "[findTourCompanyCredentialByUsername] Finding {} by {}: {}",
+        TourCompanyLogin.class,
+        "tourCompanyId",
+        tourCompanyId);
 
     return tourCompanyLoginRepository
         .findOneByTourCompanyId(AggregateReference.to(tourCompanyId))
         .orElseThrow(
-            errorHelper.entityNotFound(
-                "findTourCompanyCredentialByUsername", TourCompanyLogin.class, tourCompanyId));
+            errorHelper.entityWithSubResourceNotFound(
+                "findTourCompanyCredentialByUsername",
+                TourCompanyLogin.class,
+                "tourCompanyId",
+                String.valueOf(tourCompanyId)));
   }
 
   @Override
