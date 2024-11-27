@@ -88,7 +88,7 @@ class UserServiceTest {
         UserLogin.of(10, AggregateReference.to(USER_ID), "john.w@example.com", "encryptedPassword");
     var expectedUserResp =
         UserInfoResponse.of(
-            USER_ID,
+            mockUser.id(),
             mockUser.firstName(),
             mockUser.lastName(),
             mockUserCredential.email(),
@@ -134,6 +134,7 @@ class UserServiceTest {
             body.lastName(),
             body.email(),
             body.phoneNumber());
+    when(authService.findUserCredentialByEmail(anyString())).thenReturn(Optional.empty());
     when(userRepository.save(any(User.class))).thenReturn(mockUserToRegister);
     when(authService.createUserCredential(anyInt(), anyString(), anyString()))
         .thenReturn(mockUserCredential);
