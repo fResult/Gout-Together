@@ -11,6 +11,7 @@ import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
+import dev.fResult.goutTogether.users.dtos.UserUpdateRequest;
 import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.repositories.UserRepository;
 import dev.fResult.goutTogether.users.services.UserServiceImpl;
@@ -165,5 +166,33 @@ class UserServiceTest {
     // Assert
     var exception = assertThrowsExactly(CredentialExistsException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
+  @Test
+  void whenUpdateUserByIdThenSuccess() {
+    // Arrange
+    var body = UserUpdateRequest.of(null, "Constantine", "0888888888");
+    var mockExistingUser = User.of(USER_ID, "John", "Wick", "0999999999");
+    var mockUpdatedUser =
+        User.of(USER_ID, mockExistingUser.firstName(), body.lastName(), body.phoneNumber());
+    var mockUserCredential =
+        UserLogin.of(10, AggregateReference.to(USER_ID), "john.w@example.com", "encryptedPassword");
+    var expectUpdatedUser =
+        UserInfoResponse.of(
+            mockUpdatedUser.id(),
+            mockUpdatedUser.firstName(),
+            mockUpdatedUser.lastName(),
+            mockUserCredential.email(),
+            mockUpdatedUser.phoneNumber());
+
+    when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockExistingUser));
+    when(userRepository.save(any(User.class))).thenReturn(mockUpdatedUser);
+    when(authService.findUserCredentialByUserId(anyInt())).thenReturn(mockUserCredential);
+
+    // Actual
+    var actualUpdatedUser = userService.updateUserById(USER_ID, body);
+
+    // Assert
+    assertEquals(expectUpdatedUser, actualUpdatedUser);
   }
 }
