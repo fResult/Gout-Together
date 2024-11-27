@@ -24,6 +24,22 @@ public class ErrorHelper {
     };
   }
 
+  public Supplier<EntityNotFoundException> entityWithSubResourceNotFound(
+      String methodName, Class<?> entityClass, String subResourceName, String subResourceValue) {
+    return () -> {
+      logger.warn(
+          "[{}] {} with {} id: {} not found",
+          methodName,
+          entityClass.getSimpleName(),
+          subResourceName,
+          subResourceValue);
+      return new EntityNotFoundException(
+          String.format(
+              "%s with %s [%s] not found",
+              entityClass.getSimpleName(), subResourceName, subResourceValue));
+    };
+  }
+
   public Supplier<EntityNotFoundException> someEntitiesMissing(
       String methodName, Class<?> entityClass, Collection<Integer> ids) {
 
