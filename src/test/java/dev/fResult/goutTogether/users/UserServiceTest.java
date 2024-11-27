@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.services.AuthService;
+import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
@@ -28,6 +29,7 @@ import org.springframework.data.jdbc.core.mapping.AggregateReference;
 class UserServiceTest {
   private static final int USER_ID = 1;
   private static final int NOT_FOUND_USER_ID = 99999;
+  private static final String EXISTING_EMAIL = "existing_email@example.com";
 
   @InjectMocks private UserServiceImpl userService;
 
@@ -144,5 +146,24 @@ class UserServiceTest {
 
     // Assert
     assertEquals(expectedRegisteredUser, actualRegisteredUser);
+  }
+
+  @Test
+  void whenRegisterUserButUserEmailExistsThenThrowException() {
+    // Arrange
+    var expectedErrorMessage =
+        String.format("%s email [%s] already exists", User.class.getSimpleName(), EXISTING_EMAIL);
+    var body = UserRegistrationRequest.of("John", "Wick", EXISTING_EMAIL, "password", "0999999999");
+    var existingUserCredential =
+        UserLogin.of(10, AggregateReference.to(USER_ID), EXISTING_EMAIL, "encryptedPassword");
+    when(authService.findUserCredentialByEmail(EXISTING_EMAIL))
+        .thenReturn(Optional.of(existingUserCredential));
+
+    // Actual
+    Executable actualExecutable = () -> userService.registerUser(body);
+
+    // Assert
+    var exception = assertThrowsExactly(CredentialExistsException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
   }
 }
