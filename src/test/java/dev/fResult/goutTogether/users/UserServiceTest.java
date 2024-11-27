@@ -1,11 +1,13 @@
 package dev.fResult.goutTogether.users;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.services.AuthService;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.repositories.UserRepository;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,6 +26,8 @@ import org.springframework.data.jdbc.core.mapping.AggregateReference;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
   private static final int USER_ID = 1;
+  private static final int NOT_FOUND_USER_ID = 99999;
+
   @InjectMocks private UserServiceImpl userService;
 
   @Mock UserRepository userRepository;
@@ -67,7 +72,7 @@ class UserServiceTest {
     when(userRepository.findAll()).thenReturn(mockUsers);
     when(authService.findUserCredentialsByUserIds(anyCollection())).thenReturn(mockUserCredentials);
 
-    // Act
+    // Actual
     var actualUsersResp = userService.getUsers();
 
     // Assert
@@ -90,10 +95,24 @@ class UserServiceTest {
     when(authService.findUserCredentialByUserId(USER_ID)).thenReturn(mockUserCredential);
     when(userRepository.findById(USER_ID)).thenReturn(Optional.of(mockUser));
 
-    // Act
+    // Actual
     var actualUserResp = userService.getUserById(USER_ID);
 
     // Assert
     assertEquals(expectedUserResp, actualUserResp);
+  }
+
+  @Test
+  void whenGetUserByIdButNotFoundThenThrowException() {
+    // Arrange
+    var expectedErrorMessage =
+        String.format("%s id [%d] not found", User.class.getSimpleName(), NOT_FOUND_USER_ID);
+    when(userRepository.findById(NOT_FOUND_USER_ID)).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualExecutable = () -> userService.getUserById(NOT_FOUND_USER_ID);
+
+    // Assert
+    assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
   }
 }
