@@ -241,6 +241,23 @@ class TourCompanyServiceTest {
   }
 
   @Test
+  void whenUpdateCompanyByIdButNotFoundThenThrowException() {
+    // Arrange
+    var expectedErrorMessage =
+        String.format(
+            "%s id [%d] not found", TourCompany.class.getSimpleName(), NOT_FOUND_TOUR_COMPANY_ID);
+    var body = TourCompanyUpdateRequest.of("Your Tour", null);
+    when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualExecutable = () -> tourCompanyService.updateTourCompanyById(NOT_FOUND_TOUR_COMPANY_ID, body);
+
+    // Assert
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
+  @Test
   void whenDeleteCompanyByIdThenSuccess() {
     // Arrange
     var mockTourCompany =
