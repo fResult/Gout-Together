@@ -2,13 +2,14 @@ package dev.fResult.goutTogether.users;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
-import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.services.AuthService;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
+import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
 import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.repositories.UserRepository;
 import dev.fResult.goutTogether.users.services.UserServiceImpl;
@@ -115,5 +116,32 @@ class UserServiceTest {
     // Assert
     var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
+  @Test
+  void whenRegisterUserThenSuccess() {
+    // Arrange
+    var body =
+        UserRegistrationRequest.of("John", "Wick", "john.w@example.com", "password", "0999999999");
+    var mockUserToRegister =
+        User.of(USER_ID, body.firstName(), body.lastName(), body.phoneNumber());
+    var mockUserCredential =
+        UserLogin.of(10, AggregateReference.to(USER_ID), body.email(), "encryptedPassword");
+    var expectedRegisteredUser =
+        UserInfoResponse.of(
+            mockUserToRegister.id(),
+            body.firstName(),
+            body.lastName(),
+            body.email(),
+            body.phoneNumber());
+    when(userRepository.save(any(User.class))).thenReturn(mockUserToRegister);
+    when(authService.createUserCredential(anyInt(), anyString(), anyString()))
+        .thenReturn(mockUserCredential);
+
+    // Actual
+    var actualRegisteredUser = userService.registerUser(body);
+
+    // Assert
+    assertEquals(expectedRegisteredUser, actualRegisteredUser);
   }
 }
