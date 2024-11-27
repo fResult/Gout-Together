@@ -222,15 +222,17 @@ class TourCompanyServiceTest {
   void whenUpdateCompanyByIdThenSuccess() {
     // Arrange
     var body = TourCompanyUpdateRequest.of("Your Tour", null);
-    var mockFoundTourCompany =
+    var mockExistingTourCompany =
         TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.APPROVED.name());
     var mockUpdatedTourCompany =
-        TourCompany.of(TOUR_COMPANY_ID, body.name(), mockFoundTourCompany.status());
+        TourCompany.of(TOUR_COMPANY_ID, body.name(), mockExistingTourCompany.status());
     var expectedUpdatedCompany =
         TourCompanyResponse.of(
-            TOUR_COMPANY_ID, body.name(), TourCompanyStatus.valueOf(mockFoundTourCompany.status()));
+            TOUR_COMPANY_ID,
+            body.name(),
+            TourCompanyStatus.valueOf(mockExistingTourCompany.status()));
 
-    when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.of(mockFoundTourCompany));
+    when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.of(mockExistingTourCompany));
     when(tourCompanyRepository.save(any(TourCompany.class))).thenReturn(mockUpdatedTourCompany);
 
     // Actual
@@ -250,7 +252,8 @@ class TourCompanyServiceTest {
     when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> tourCompanyService.updateTourCompanyById(NOT_FOUND_TOUR_COMPANY_ID, body);
+    Executable actualExecutable =
+        () -> tourCompanyService.updateTourCompanyById(NOT_FOUND_TOUR_COMPANY_ID, body);
 
     // Assert
     var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
