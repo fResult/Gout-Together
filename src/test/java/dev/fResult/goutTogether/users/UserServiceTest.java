@@ -17,6 +17,7 @@ import dev.fResult.goutTogether.users.services.UserServiceImpl;
 import dev.fResult.goutTogether.wallets.services.WalletService;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -209,6 +210,16 @@ class UserServiceTest {
     // Assert
     var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
+  @Disabled("Test not implemented yet.")
+  @Test()
+  void whenChangePasswordThenSuccess() {
+    // Arrange
+
+    // Actual
+
+    // Assert
   }
 
   @Test
