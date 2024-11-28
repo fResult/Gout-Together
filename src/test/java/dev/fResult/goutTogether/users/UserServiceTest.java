@@ -1,9 +1,8 @@
 package dev.fResult.goutTogether.users;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.services.AuthService;
@@ -210,5 +209,24 @@ class UserServiceTest {
     // Assert
     var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
+  @Test
+  void whenDeleteUserByIdThenSuccess() {
+    // Arrange
+    var mockUserToDelete = User.of(USER_ID, "John", "Wick", "0999999999");
+    var mockDeleteCredentialSuccess = true;
+    var mockDeleteWalletWalletSuccess = true;
+    when(authService.deleteUserCredentialByUserId(USER_ID)).thenReturn(mockDeleteCredentialSuccess);
+    when(walletService.deleteConsumerWalletByUserId(USER_ID))
+        .thenReturn(mockDeleteWalletWalletSuccess);
+    when(userRepository.findById(USER_ID)).thenReturn(Optional.of(mockUserToDelete));
+
+    // Actual
+    var actualIsDeleteSuccess = userService.deleteUserById(USER_ID);
+
+    // Assert
+    verify(userRepository, times(1)).deleteById(USER_ID);
+    assertTrue(actualIsDeleteSuccess);
   }
 }
