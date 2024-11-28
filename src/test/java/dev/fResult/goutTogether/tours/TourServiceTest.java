@@ -41,6 +41,69 @@ class TourServiceTest {
   @Mock private TourCountService tourCountService;
 
   @Test
+  void whenGetToursThenSuccess() {
+    // Arrange
+    var tours =
+        List.of(
+            Tour.of(
+                1,
+                AggregateReference.to(1),
+                "Kunlun 7 days",
+                "Go 12 places around Kunlun",
+                "Kunlun, China",
+                20,
+                Instant.now().plus(Duration.ofDays(45)),
+                TourStatus.APPROVED.name()));
+    var pageTours = new PageImpl<>(tours);
+    when(tourRepository.findAll(any(Pageable.class))).thenReturn(pageTours);
+
+    // Actual
+    var actualTours = tourService.getTours(PageRequest.of(0, 3));
+
+    // Assert
+    assertEquals(pageTours, actualTours);
+  }
+
+  @Test
+  void whenGetTourByIdThenSuccess() {
+    // Arrange
+    var TOUR_ID = 1;
+    var mockTour =
+        Tour.of(
+            TOUR_ID,
+            AggregateReference.to(1),
+            "Kunlun 7 days",
+            "Go 12 places around Kunlun",
+            "Kunlun, China",
+            20,
+            Instant.now().plus(Duration.ofDays(45)),
+            TourStatus.APPROVED.name());
+    when(tourRepository.findById(TOUR_ID)).thenReturn(Optional.of(mockTour));
+
+    // Actual
+    var actualTour = tourService.getTourById(TOUR_ID);
+
+    // Assert
+    assertEquals(mockTour, actualTour);
+  }
+
+  @Test
+  void whenGetTourByIdButTourNotFoundThenThrowEntityNotfoundException() {
+    // Arrange
+    var TOUR_ID = 99999;
+    var expectedErrorMessage =
+        String.format("%s id [%d] not found", Tour.class.getSimpleName(), TOUR_ID);
+    when(tourRepository.findById(TOUR_ID)).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualExecutable = () -> tourService.getTourById(TOUR_ID);
+
+    // Assert
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
+  @Test
   void whenCreateTourThenSuccess() {
     // Arrange
     var TOUR_COMPANY_ID = 1;
@@ -103,68 +166,5 @@ class TourServiceTest {
     // Assert
     var actualException = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, actualException.getMessage());
-  }
-
-  @Test
-  void whenGetTourByIdThenSuccess() {
-    // Arrange
-    var TOUR_ID = 1;
-    var mockTour =
-        Tour.of(
-            TOUR_ID,
-            AggregateReference.to(1),
-            "Kunlun 7 days",
-            "Go 12 places around Kunlun",
-            "Kunlun, China",
-            20,
-            Instant.now().plus(Duration.ofDays(45)),
-            TourStatus.APPROVED.name());
-    when(tourRepository.findById(TOUR_ID)).thenReturn(Optional.of(mockTour));
-
-    // Actual
-    var actualTour = tourService.getTourById(TOUR_ID);
-
-    // Assert
-    assertEquals(mockTour, actualTour);
-  }
-
-  @Test
-  void whenGetTourByIdButTourNotFoundThenThrowEntityNotfoundException() {
-    // Arrange
-    var TOUR_ID = 99999;
-    var expectedErrorMessage =
-        String.format("%s id [%d] not found", Tour.class.getSimpleName(), TOUR_ID);
-    when(tourRepository.findById(TOUR_ID)).thenReturn(Optional.empty());
-
-    // Actual
-    Executable actualExecutable = () -> tourService.getTourById(TOUR_ID);
-
-    // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
-    assertEquals(expectedErrorMessage, exception.getMessage());
-  }
-
-  @Test
-  void whenGetToursThenSuccess() {
-    // Arrange
-    var tours =
-        List.of(
-            Tour.of(
-                1,
-                AggregateReference.to(1),
-                "Kunlun 7 days",
-                "Go 12 places around Kunlun",
-                "Kunlun, China",
-                20,
-                Instant.now().plus(Duration.ofDays(45)),
-                TourStatus.APPROVED.name()));
-    var pageTours = new PageImpl<>(tours);
-    when(tourRepository.findAll(any(Pageable.class))).thenReturn(pageTours);
-
-    // Actual
-    var actualTours = tourService.getTours(PageRequest.of(0, 3));
-
-    // Assert
-    assertEquals(pageTours, actualTours);
   }
 }
