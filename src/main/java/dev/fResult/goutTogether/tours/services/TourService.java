@@ -6,9 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface TourService {
-    Tour createTour(TourRequest body);
+  Page<Tour> getTours(Pageable pageable);
 
-    Tour getTourById(Integer id);
+  Tour getTourById(Integer id);
 
-    Page<Tour> getTours(Pageable pageable);
+  Tour createTour(TourRequest body);
 }
