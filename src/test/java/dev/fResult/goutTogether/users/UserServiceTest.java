@@ -171,19 +171,21 @@ class UserServiceTest {
   @Test
   void whenUpdateUserByIdThenSuccess() {
     // Arrange
-    var body = UserUpdateRequest.of(null, "Constantine", "0888888888");
+    var LAST_NAME_TO_UPDATE = "Constantine";
+    var PHONE_NUMBER_TO_UPDATE = "0888888888";
+    var body = UserUpdateRequest.of(null, LAST_NAME_TO_UPDATE, PHONE_NUMBER_TO_UPDATE);
     var mockExistingUser = User.of(USER_ID, "John", "Wick", "0999999999");
     var mockUpdatedUser =
-        User.of(USER_ID, mockExistingUser.firstName(), body.lastName(), body.phoneNumber());
+        User.of(USER_ID, mockExistingUser.firstName(), LAST_NAME_TO_UPDATE, PHONE_NUMBER_TO_UPDATE);
     var mockUserCredential =
         UserLogin.of(10, AggregateReference.to(USER_ID), "john.w@example.com", "encryptedPassword");
     var expectUpdatedUser =
         UserInfoResponse.of(
             mockUpdatedUser.id(),
             mockUpdatedUser.firstName(),
-            mockUpdatedUser.lastName(),
+            LAST_NAME_TO_UPDATE,
             mockUserCredential.email(),
-            mockUpdatedUser.phoneNumber());
+            PHONE_NUMBER_TO_UPDATE);
 
     when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockExistingUser));
     when(userRepository.save(any(User.class))).thenReturn(mockUpdatedUser);
