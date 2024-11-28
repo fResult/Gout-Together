@@ -302,8 +302,8 @@ class AuthServiceTest {
       AggregateReference<TourCompany, Integer> notFoundTourCompanyRef =
           AggregateReference.to(NOT_FOUND_TOUR_COMPANY_ID);
 
-          .thenThrow(EntityNotFoundException.class);
       when(tourCompanyLoginRepository.findOneByTourCompanyId(notFoundTourCompanyRef))
+          .thenReturn(Optional.empty());
 
       // Actual
       Executable actualExecutable =
