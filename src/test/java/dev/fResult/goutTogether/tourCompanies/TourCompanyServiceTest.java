@@ -221,15 +221,16 @@ class TourCompanyServiceTest {
   @Test
   void whenUpdateCompanyByIdThenSuccess() {
     // Arrange
-    var body = TourCompanyUpdateRequest.of("Your Tour", null);
+    var TOUR_NAME_TO_UPDATE = "Your Tour";
+    var body = TourCompanyUpdateRequest.of(TOUR_NAME_TO_UPDATE, null);
     var mockExistingTourCompany =
         TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.APPROVED.name());
     var mockUpdatedTourCompany =
-        TourCompany.of(TOUR_COMPANY_ID, body.name(), mockExistingTourCompany.status());
+        TourCompany.of(TOUR_COMPANY_ID, TOUR_NAME_TO_UPDATE, mockExistingTourCompany.status());
     var expectedUpdatedCompany =
         TourCompanyResponse.of(
             TOUR_COMPANY_ID,
-            body.name(),
+            TOUR_NAME_TO_UPDATE,
             TourCompanyStatus.valueOf(mockExistingTourCompany.status()));
 
     when(tourCompanyRepository.findById(anyInt())).thenReturn(Optional.of(mockExistingTourCompany));
