@@ -41,3 +41,8 @@ logs/
 
 ### App Environment ###
 .env
+
+### Keys ###
+private_key_pkcs8.pem
+private_key.pem
+public_key.pem
