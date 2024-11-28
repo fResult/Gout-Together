@@ -303,8 +303,9 @@ class AuthServiceTest {
       AggregateReference<TourCompany, Integer> companyRef = AggregateReference.to(USER_ID_1);
       var mockCompanyLoginToDelete =
           TourCompanyLogin.of(1, companyRef, "MyTour", encryptedPassword);
-      when(tourCompanyLoginRepository.findOneByTourCompanyId(companyRef))
-          .thenReturn(Optional.of(mockCompanyLoginToDelete));
+      doReturn(mockCompanyLoginToDelete)
+          .when(authService)
+          .findTourCompanyCredentialByTourCompanyId(anyInt());
 
       // Actual
       var actualDeleteResult = authService.deleteTourCompanyLoginById(TOUR_COMPANY_ID);
@@ -324,12 +325,21 @@ class AuthServiceTest {
 
       AggregateReference<TourCompany, Integer> notFoundCompanyRef =
           AggregateReference.to(NOT_FOUND_TOUR_COMPANY_ID);
-      when(tourCompanyLoginRepository.findOneByTourCompanyId(notFoundCompanyRef))
-          .thenReturn(Optional.empty());
+
+      doAnswer(
+              invocation -> {
+                var targetCompanyId = invocation.getArgument(0, Integer.class);
+                throw new EntityNotFoundException(
+                    String.format(
+                        "%s with %s [%d] not found",
+                        TourCompanyLogin.class.getSimpleName(), "tourCompanyId", targetCompanyId));
+              })
+          .when(authService)
+          .findTourCompanyCredentialByTourCompanyId(anyInt());
 
       // Actual
       Executable actualExecutable =
-          () -> authService.findTourCompanyCredentialByTourCompanyId(NOT_FOUND_TOUR_COMPANY_ID);
+          () -> authService.deleteTourCompanyLoginById(NOT_FOUND_TOUR_COMPANY_ID);
 
       // Assert
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
