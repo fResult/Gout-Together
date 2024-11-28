@@ -20,13 +20,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
-  @InjectMocks private AuthServiceImpl authService;
+  @InjectMocks @Spy private AuthServiceImpl authService;
 
   @Mock private UserLoginRepository userLoginRepository;
   @Mock private TourCompanyLoginRepository tourCompanyLoginRepository;
@@ -230,8 +231,8 @@ class AuthServiceTest {
       // Arrange
       AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID_1);
       var mockCredentialToDelete = UserLogin.of(1, userRef, "email@example.com", "password");
-      when(userLoginRepository.findOneByUserId(userRef))
-          .thenReturn(Optional.of(mockCredentialToDelete));
+      doReturn(mockCredentialToDelete).when(authService).findUserCredentialByUserId(anyInt());
+      doNothing().when(userLoginRepository).delete(any(UserLogin.class));
 
       // Actual
       var actualDeleteResult = authService.deleteUserCredentialById(USER_ID_1);
@@ -251,11 +252,17 @@ class AuthServiceTest {
 
       AggregateReference<User, Integer> notFoundUserRef =
           AggregateReference.to(NOT_FOUND_USER_ID_1);
-      when(userLoginRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
+      doAnswer(
+              invocation -> {
+                var targetUserId = invocation.getArgument(0, Integer.class);
+                throw new EntityNotFoundException(
+                    String.format("UserLogin with userId [%d] not found", targetUserId));
+              })
+          .when(authService)
+          .findUserCredentialByUserId(anyInt());
 
       // Actual
-      Executable actualExecutable =
-          () -> authService.findUserCredentialByUserId(NOT_FOUND_USER_ID_1);
+      Executable actualExecutable = () -> authService.deleteUserCredentialById(NOT_FOUND_USER_ID_1);
 
       // Assert
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
