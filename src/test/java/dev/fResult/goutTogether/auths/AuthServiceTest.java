@@ -277,11 +277,11 @@ class AuthServiceTest {
     @Test
     void whenFindCompanyCredentialByCompanyIdThenSuccess() {
       // Arrange
+      AggregateReference<TourCompany, Integer> tourCompanyRef =
+          AggregateReference.to(TOUR_COMPANY_ID);
       var mockTourCompanyLogin =
-          TourCompanyLogin.of(
-              1, AggregateReference.to(TOUR_COMPANY_ID), "MyTour", ENCRYPTED_PASSWORD);
-      when(tourCompanyLoginRepository.findOneByTourCompanyId(
-              AggregateReference.to(TOUR_COMPANY_ID)))
+          TourCompanyLogin.of(1, tourCompanyRef, "MyTour", ENCRYPTED_PASSWORD);
+      when(tourCompanyLoginRepository.findOneByTourCompanyId(tourCompanyRef))
           .thenReturn(Optional.of(mockTourCompanyLogin));
 
       // Actual
@@ -299,11 +299,11 @@ class AuthServiceTest {
           String.format(
               "%s with %s [%d] not found",
               TourCompanyLogin.class.getSimpleName(), "tourCompanyId", NOT_FOUND_TOUR_COMPANY_ID);
-      AggregateReference<TourCompany, Integer> tourCompanyRef =
+      AggregateReference<TourCompany, Integer> notFoundTourCompanyRef =
           AggregateReference.to(NOT_FOUND_TOUR_COMPANY_ID);
 
-      when(tourCompanyLoginRepository.findOneByTourCompanyId(tourCompanyRef))
           .thenThrow(EntityNotFoundException.class);
+      when(tourCompanyLoginRepository.findOneByTourCompanyId(notFoundTourCompanyRef))
 
       // Actual
       Executable actualExecutable =
