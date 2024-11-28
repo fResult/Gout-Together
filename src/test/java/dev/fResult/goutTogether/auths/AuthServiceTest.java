@@ -256,7 +256,9 @@ class AuthServiceTest {
               invocation -> {
                 var targetUserId = invocation.getArgument(0, Integer.class);
                 throw new EntityNotFoundException(
-                    String.format("UserLogin with userId [%d] not found", targetUserId));
+                    String.format(
+                        "%s with %s [%d] not found",
+                        UserLogin.class.getSimpleName(), "userId", targetUserId));
               })
           .when(authService)
           .findUserCredentialByUserId(anyInt());
