@@ -171,40 +171,6 @@ class AuthServiceTest {
   }
 
   @Nested
-  class FindTourCompanyLoginTest {
-    @Test
-    void whenFindCompanyLoginByUsernameThenSuccess() {
-      // Arrange
-      var mockTourCompanyLogin =
-          TourCompanyLogin.of(1, AggregateReference.to(1), TARGET_USERNAME, "encryptedPassword");
-      when(tourCompanyLoginRepository.findOneByUsername(TARGET_USERNAME))
-          .thenReturn(Optional.of(mockTourCompanyLogin));
-
-      // Actual
-      var actualFoundCompanyLogin =
-          authService.findTourCompanyCredentialByUsername(TARGET_USERNAME);
-
-      // Assert
-      assertTrue(actualFoundCompanyLogin.isPresent());
-      assertEquals(mockTourCompanyLogin, actualFoundCompanyLogin.get());
-    }
-
-    @Test
-    void whenFindCompanyLoginByUsernameButNotFoundThenReturnEmpty() {
-      // Arrange
-      when(tourCompanyLoginRepository.findOneByUsername(NOT_FOUND_USERNAME))
-          .thenReturn(Optional.empty());
-
-      // Actual
-      var actualFoundCompanyLogin =
-          authService.findTourCompanyCredentialByUsername(NOT_FOUND_USERNAME);
-
-      // Assert
-      assertTrue(actualFoundCompanyLogin.isEmpty());
-    }
-  }
-
-  @Nested
   class CreateUserCredentialTest {
     @Test
     void whenCreateUserCredentialThenSuccess() {
@@ -265,6 +231,80 @@ class AuthServiceTest {
 
       // Actual
       Executable actualExecutable = () -> authService.deleteUserCredentialById(NOT_FOUND_USER_ID_1);
+
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      assertEquals(expectedErrorMessage, exception.getMessage());
+    }
+  }
+
+  @Nested
+  class FindTourCompanyCredentialTest {
+    @Test
+    void whenFindCompanyCredentialByUsernameThenSuccess() {
+      // Arrange
+      var mockTourCompanyLogin =
+          TourCompanyLogin.of(1, AggregateReference.to(1), TARGET_USERNAME, "encryptedPassword");
+      when(tourCompanyLoginRepository.findOneByUsername(TARGET_USERNAME))
+          .thenReturn(Optional.of(mockTourCompanyLogin));
+
+      // Actual
+      var actualFoundCompanyLogin =
+          authService.findTourCompanyCredentialByUsername(TARGET_USERNAME);
+
+      // Assert
+      assertTrue(actualFoundCompanyLogin.isPresent());
+      assertEquals(mockTourCompanyLogin, actualFoundCompanyLogin.get());
+    }
+
+    @Test
+    void whenFindCompanyCredentialByUsernameButNotFoundThenReturnEmpty() {
+      // Arrange
+      when(tourCompanyLoginRepository.findOneByUsername(NOT_FOUND_USERNAME))
+          .thenReturn(Optional.empty());
+
+      // Actual
+      var actualFoundCompanyLogin =
+          authService.findTourCompanyCredentialByUsername(NOT_FOUND_USERNAME);
+
+      // Assert
+      assertTrue(actualFoundCompanyLogin.isEmpty());
+    }
+
+    @Test
+    void whenFindCompanyCredentialByCompanyIdThenSuccess() {
+      // Arrange
+      var mockTourCompanyLogin =
+          TourCompanyLogin.of(
+              1, AggregateReference.to(TOUR_COMPANY_ID), "MyTour", "encryptedPassword");
+      when(tourCompanyLoginRepository.findOneByTourCompanyId(
+              AggregateReference.to(TOUR_COMPANY_ID)))
+          .thenReturn(Optional.of(mockTourCompanyLogin));
+
+      // Actual
+      var actualFoundCompanyLogin =
+          authService.findTourCompanyCredentialByTourCompanyId(TOUR_COMPANY_ID);
+
+      // Assert
+      assertEquals(mockTourCompanyLogin, actualFoundCompanyLogin);
+    }
+
+    @Test
+    void whenFindCompanyCredentialByCompanyIdButNotFoundThenThrowException() {
+      // Arrange
+      var expectedErrorMessage =
+          String.format(
+              "%s with %s [%d] not found",
+              TourCompanyLogin.class.getSimpleName(), "tourCompanyId", NOT_FOUND_TOUR_COMPANY_ID);
+      AggregateReference<TourCompany, Integer> tourCompanyRef =
+          AggregateReference.to(NOT_FOUND_TOUR_COMPANY_ID);
+
+      when(tourCompanyLoginRepository.findOneByTourCompanyId(tourCompanyRef))
+          .thenThrow(EntityNotFoundException.class);
+
+      // Actual
+      Executable actualExecutable =
+          () -> authService.findTourCompanyCredentialByTourCompanyId(NOT_FOUND_TOUR_COMPANY_ID);
 
       // Assert
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
