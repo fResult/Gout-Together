@@ -229,4 +229,19 @@ class UserServiceTest {
     verify(userRepository, times(1)).deleteById(USER_ID);
     assertTrue(actualIsDeleteSuccess);
   }
+
+  @Test
+  void whenDeleteUserByIdButNotFoundThenThrowException() {
+    // Arrange
+    var expectedErrorMessage =
+        String.format("%s id [%d] not found", User.class.getSimpleName(), NOT_FOUND_USER_ID);
+    when(userRepository.findById(NOT_FOUND_USER_ID)).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualExecutable = () -> userService.deleteUserById(NOT_FOUND_USER_ID);
+
+    // Assert
+    var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
+  }
 }
