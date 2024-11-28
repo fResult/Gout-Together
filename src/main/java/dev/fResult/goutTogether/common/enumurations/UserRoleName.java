@@ -1,8 +1,8 @@
 package dev.fResult.goutTogether.common.enumurations;
 
 public enum UserRoleName {
-  CONSUMER(1),
-  ADMIN(2),
+  ADMIN(1),
+  CONSUMER(2),
   COMPANY(3);
 
   private final int id;
