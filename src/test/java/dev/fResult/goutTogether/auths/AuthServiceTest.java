@@ -188,6 +188,7 @@ class AuthServiceTest {
           authService.createUserCredential(USER_ID_1, TARGET_EMAIL, "password");
 
       // Assert
+      assertEquals(ENCRYPTED_PASSWORD, mockUserLoginToCreate.password());
       assertEquals(mockUserLoginToCreate, actualCreatedUserLogin);
     }
   }
@@ -331,6 +332,7 @@ class AuthServiceTest {
           authService.createTourCompanyLogin(TOUR_COMPANY_ID, "MyTour", "password");
 
       // Assert
+      assertEquals(ENCRYPTED_PASSWORD, mockCompanyLoginToCreate.password());
       assertEquals(mockCompanyLoginToCreate, actualCreatedUserLogin);
     }
   }
