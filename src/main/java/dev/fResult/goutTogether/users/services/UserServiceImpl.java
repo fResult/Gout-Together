@@ -51,7 +51,9 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserInfoResponse getUserById(int id) {
-    return getOptUserInfoById(id)
+    return userRepository
+        .findById(id)
+        .map(this::toResponseWithUserCredential)
         .orElseThrow(errorHelper.entityNotFound("getUserById", User.class, id));
   }
 
@@ -119,12 +121,6 @@ public class UserServiceImpl implements UserService {
 
     return authService.findUserCredentialsByUserIds(userIds).stream()
         .collect(Collectors.toMap(cred -> cred.userId().getId(), Function.identity()));
-  }
-
-  private Optional<UserInfoResponse> getOptUserInfoById(int id) {
-    return userRepository
-        .findById(id)
-        .flatMap(opt -> Optional.of(this.toResponseWithUserCredential(opt)));
   }
 
   private UserInfoResponse toResponseWithUserCredential(User user) {
