@@ -204,7 +204,7 @@ class AuthServiceTest {
       doNothing().when(userLoginRepository).delete(any(UserLogin.class));
 
       // Actual
-      var actualDeleteResult = authService.deleteUserCredentialById(USER_ID_1);
+      var actualDeleteResult = authService.deleteUserCredentialByUserId(USER_ID_1);
 
       // Assert
       verify(userLoginRepository, times(1)).delete(mockCredentialToDelete);
@@ -233,7 +233,7 @@ class AuthServiceTest {
           .findUserCredentialByUserId(anyInt());
 
       // Actual
-      Executable actualExecutable = () -> authService.deleteUserCredentialById(NOT_FOUND_USER_ID_1);
+      Executable actualExecutable = () -> authService.deleteUserCredentialByUserId(NOT_FOUND_USER_ID_1);
 
       // Assert
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
@@ -350,7 +350,7 @@ class AuthServiceTest {
           .findTourCompanyCredentialByTourCompanyId(anyInt());
 
       // Actual
-      var actualDeleteResult = authService.deleteTourCompanyLoginById(TOUR_COMPANY_ID);
+      var actualDeleteResult = authService.deleteTourCompanyLoginByTourCompanyId(TOUR_COMPANY_ID);
 
       // Assert
       verify(tourCompanyLoginRepository, times(1)).delete(mockCompanyLoginToDelete);
@@ -381,7 +381,7 @@ class AuthServiceTest {
 
       // Actual
       Executable actualExecutable =
-          () -> authService.deleteTourCompanyLoginById(NOT_FOUND_TOUR_COMPANY_ID);
+          () -> authService.deleteTourCompanyLoginByTourCompanyId(NOT_FOUND_TOUR_COMPANY_ID);
 
       // Assert
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);

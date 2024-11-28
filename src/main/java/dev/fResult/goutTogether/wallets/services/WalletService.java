@@ -8,7 +8,7 @@ public interface WalletService {
 
   UserWallet findConsumerWalletByUserId(int userId);
 
-  boolean deleteConsumerWalletById(int userId);
+  boolean deleteConsumerWalletByUserId(int userId);
 
   TourCompanyWallet createTourCompanyWallet(int tourCompanyId);
 }

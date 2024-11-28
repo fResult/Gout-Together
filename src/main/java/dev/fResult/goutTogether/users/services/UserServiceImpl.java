@@ -98,8 +98,8 @@ public class UserServiceImpl implements UserService {
     logger.debug("[deleteUser] {} id [{}] is deleting", userEntityName, id);
     getOptUserInfoById(id).orElseThrow(errorHelper.entityNotFound("deleteUser", User.class, id));
 
-    authService.deleteUserCredentialById(id);
-    walletService.deleteConsumerWalletById(id);
+    authService.deleteUserCredentialByUserId(id);
+    walletService.deleteConsumerWalletByUserId(id);
     userRepository.deleteById(id);
 
     logger.info("[deleteUser] {} id [{}] is deleted", userEntityName, id);

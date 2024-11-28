@@ -85,7 +85,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public boolean deleteUserCredentialById(int userId) {
+  public boolean deleteUserCredentialByUserId(int userId) {
     logger.debug(
         "[deleteUserCredentialById] Deleting {} by id: {}",
         UserLogin.class.getSimpleName(),
@@ -153,7 +153,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public boolean deleteTourCompanyLoginById(int id) {
+  public boolean deleteTourCompanyLoginByTourCompanyId(int id) {
     logger.debug(
         "[deleteTourCompanyLoginById] Deleting {} by id: {}",
         TourCompanyLogin.class.getSimpleName(),
