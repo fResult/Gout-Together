@@ -96,8 +96,8 @@ class UserServiceTest {
             mockUser.lastName(),
             mockUserCredential.email(),
             mockUser.phoneNumber());
-    when(authService.findUserCredentialByUserId(USER_ID)).thenReturn(mockUserCredential);
-    when(userRepository.findById(USER_ID)).thenReturn(Optional.of(mockUser));
+    when(authService.findUserCredentialByUserId(anyInt())).thenReturn(mockUserCredential);
+    when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
 
     // Actual
     var actualUserResp = userService.getUserById(USER_ID);
@@ -111,7 +111,7 @@ class UserServiceTest {
     // Arrange
     var expectedErrorMessage =
         String.format("%s id [%d] not found", User.class.getSimpleName(), NOT_FOUND_USER_ID);
-    when(userRepository.findById(NOT_FOUND_USER_ID)).thenReturn(Optional.empty());
+    when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
 
     // Actual
     Executable actualExecutable = () -> userService.getUserById(NOT_FOUND_USER_ID);
@@ -157,7 +157,7 @@ class UserServiceTest {
     var body = UserRegistrationRequest.of("John", "Wick", EXISTING_EMAIL, "password", "0999999999");
     var existingUserCredential =
         UserLogin.of(10, AggregateReference.to(USER_ID), EXISTING_EMAIL, "encryptedPassword");
-    when(authService.findUserCredentialByEmail(EXISTING_EMAIL))
+    when(authService.findUserCredentialByEmail(anyString()))
         .thenReturn(Optional.of(existingUserCredential));
 
     // Actual
@@ -202,7 +202,7 @@ class UserServiceTest {
     var expectedErrorMessage =
         String.format("%s id [%d] not found", User.class.getSimpleName(), NOT_FOUND_USER_ID);
     var body = UserUpdateRequest.of(null, "Constantine", "0888888888");
-    when(userRepository.findById(NOT_FOUND_USER_ID)).thenReturn(Optional.empty());
+    when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
 
     // Actual
     Executable actualExecutable = () -> userService.updateUserById(NOT_FOUND_USER_ID, body);
