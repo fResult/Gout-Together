@@ -217,16 +217,19 @@ class UserServiceTest {
     var mockUserToDelete = User.of(USER_ID, "John", "Wick", "0999999999");
     var mockDeleteCredentialSuccess = true;
     var mockDeleteWalletWalletSuccess = true;
-    when(authService.deleteUserCredentialByUserId(USER_ID)).thenReturn(mockDeleteCredentialSuccess);
-    when(walletService.deleteConsumerWalletByUserId(USER_ID))
+
+    when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUserToDelete));
+    when(authService.deleteUserCredentialByUserId(anyInt()))
+        .thenReturn(mockDeleteCredentialSuccess);
+    when(walletService.deleteConsumerWalletByUserId(anyInt()))
         .thenReturn(mockDeleteWalletWalletSuccess);
-    when(userRepository.findById(USER_ID)).thenReturn(Optional.of(mockUserToDelete));
+    doNothing().when(userRepository).delete(any(User.class));
 
     // Actual
     var actualIsDeleteSuccess = userService.deleteUserById(USER_ID);
 
     // Assert
-    verify(userRepository, times(1)).deleteById(USER_ID);
+    verify(userRepository, times(1)).delete(mockUserToDelete);
     assertTrue(actualIsDeleteSuccess);
   }
 

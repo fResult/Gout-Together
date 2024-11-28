@@ -96,15 +96,14 @@ public class UserServiceImpl implements UserService {
   public boolean deleteUserById(int id) {
     var userEntityName = User.class.getSimpleName();
     logger.debug("[deleteUser] {} id [{}] is deleting", userEntityName, id);
-    var userIdToDelete =
+    var userToDelete =
         userRepository
             .findById(id)
-            .orElseThrow(errorHelper.entityNotFound("deleteUser", User.class, id))
-            .id();
+            .orElseThrow(errorHelper.entityNotFound("deleteUser", User.class, id));
 
-    authService.deleteUserCredentialByUserId(userIdToDelete);
-    walletService.deleteConsumerWalletByUserId(userIdToDelete);
-    userRepository.deleteById(userIdToDelete);
+    authService.deleteUserCredentialByUserId(id);
+    walletService.deleteConsumerWalletByUserId(id);
+    userRepository.delete(userToDelete);
 
     logger.info("[deleteUser] {} id [{}] is deleted", userEntityName, id);
 
