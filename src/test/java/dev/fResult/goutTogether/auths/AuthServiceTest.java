@@ -179,7 +179,7 @@ class AuthServiceTest {
     void whenCreateUserCredentialThenSuccess() {
       // Arrange
       AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID_1);
-      var mockUserLoginToCreate = UserLogin.of(1, userRef, "email@example.com", ENCRYPTED_PASSWORD);
+      var mockUserLoginToCreate = UserLogin.of(1, userRef, TARGET_EMAIL, ENCRYPTED_PASSWORD);
       when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
       when(userLoginRepository.save(any(UserLogin.class))).thenReturn(mockUserLoginToCreate);
 
