@@ -13,7 +13,7 @@ public interface AuthService {
 
   UserLogin createUserCredential(int userId, String email, String password);
 
-  boolean deleteUserCredentialById(int userId);
+  boolean deleteUserCredentialByUserId(int userId);
 
   Optional<TourCompanyLogin> findTourCompanyCredentialByUsername(String username);
 
@@ -21,5 +21,5 @@ public interface AuthService {
 
   TourCompanyLogin createTourCompanyLogin(int tourCompanyId, String username, String password);
 
-  boolean deleteTourCompanyLoginById(int tourCompanyId);
+  boolean deleteTourCompanyLoginByTourCompanyId(int tourCompanyId);
 }

@@ -74,7 +74,7 @@ public class WalletServiceImpl implements WalletService {
     return createdWallet;
   }
 
-  public boolean deleteConsumerWalletById(int userId) {
+  public boolean deleteConsumerWalletByUserId(int userId) {
     logger.debug(
         "[deleteUserWalletById] Deleting {} by id: {}", UserWallet.class.getSimpleName(), userId);
     var walletToDelete = findConsumerWalletByUserId(userId);

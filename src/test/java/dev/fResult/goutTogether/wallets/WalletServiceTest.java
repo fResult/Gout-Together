@@ -89,7 +89,7 @@ class WalletServiceTest {
     doNothing().when(userWalletRepository).delete(any(UserWallet.class));
 
     // Actual
-    var actualIsSuccess = walletService.deleteConsumerWalletById(WALLET_ID);
+    var actualIsSuccess = walletService.deleteConsumerWalletByUserId(WALLET_ID);
 
     // Assert
     verify(userWalletRepository, times(1)).delete(walletToDelete);
