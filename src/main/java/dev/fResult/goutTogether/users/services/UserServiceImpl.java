@@ -4,6 +4,7 @@ import dev.fResult.goutTogether.auths.UserForgotPasswordRequest;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.services.AuthService;
 import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
+import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
@@ -14,7 +15,6 @@ import dev.fResult.goutTogether.users.repositories.UserRepository;
 import dev.fResult.goutTogether.wallets.services.WalletService;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -31,12 +31,17 @@ public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
   private final AuthService authService;
   private final WalletService walletService;
+  private final RoleService roleService;
 
   public UserServiceImpl(
-      UserRepository userRepository, AuthService authService, WalletService walletService) {
+      UserRepository userRepository,
+      AuthService authService,
+      WalletService walletService,
+      RoleService roleService) {
     this.userRepository = userRepository;
     this.authService = authService;
     this.walletService = walletService;
+    this.roleService = roleService;
   }
 
   @Override
@@ -67,6 +72,7 @@ public class UserServiceImpl implements UserService {
     var registeredUser = userRepository.save(userToRegister);
     logger.info("[register] New {} is registered: {}", User.class.getSimpleName(), registeredUser);
 
+    var boundUserRole = roleService.bindNewUser(registeredUser.id(), UserRoleName.CONSUMER);
     var createdUserCredential =
         authService.createUserCredential(registeredUser.id(), body.email(), body.password());
     walletService.createConsumerWallet(registeredUser.id());
