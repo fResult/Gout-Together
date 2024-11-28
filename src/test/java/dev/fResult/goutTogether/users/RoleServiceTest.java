@@ -3,7 +3,7 @@ package dev.fResult.goutTogether.users;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-import dev.fResult.goutTogether.common.enumurations.UserRole;
+import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.users.entities.Role;
 import dev.fResult.goutTogether.users.repositories.RoleRepository;
 import dev.fResult.goutTogether.users.services.RoleService;
@@ -22,8 +22,8 @@ class RoleServiceTest {
   @Test
   void shouldReturnRoles() {
     var mockRoles =
-        Arrays.stream(UserRole.values())
-            .map(userRole -> Role.of(userRole.getId(), userRole.name()))
+        Arrays.stream(UserRoleName.values())
+            .map(roleName -> Role.of(roleName.getId(), roleName.name()))
             .toList();
     when(roleRepository.findAll()).thenReturn(mockRoles);
 
