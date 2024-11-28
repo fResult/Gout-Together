@@ -47,6 +47,9 @@ class AuthServiceTest {
   private final String TARGET_USERNAME = "target_username";
   private final String NOT_FOUND_USERNAME = "in_existing_username";
 
+  private final String ENCRYPTED_PASSWORD =
+      "$argon2id$v=19$m=16384,t=2,p=1$NDMxQRhx/yCgg2uNT4GMfA$DZEh4+dJNDDtv8DHxvw7Tm1rXSHWlG/Wxf8S/rrAtTI";
+
   @Nested
   class FindUserCredentialTest {
     private final List<Integer> SOME_NOT_FOUND_USER_IDS =
@@ -57,13 +60,13 @@ class AuthServiceTest {
       // Arrange
       var mockUserLogin1 =
           UserLogin.of(
-              1, AggregateReference.to(USER_ID_1), "email1@example.com", "encryptedPassword");
+              1, AggregateReference.to(USER_ID_1), "email1@example.com", ENCRYPTED_PASSWORD);
       var mockUserLogin2 =
           UserLogin.of(
-              2, AggregateReference.to(USER_ID_2), "email2@example.com", "encryptedPassword");
+              2, AggregateReference.to(USER_ID_2), "email2@example.com", ENCRYPTED_PASSWORD);
       var mockUserLogin3 =
           UserLogin.of(
-              3, AggregateReference.to(USER_ID_3), "email3@example.com", "encryptedPassword");
+              3, AggregateReference.to(USER_ID_3), "email3@example.com", ENCRYPTED_PASSWORD);
       var mockFoundUserLogins = List.of(mockUserLogin1, mockUserLogin2, mockUserLogin3);
 
       when(userLoginRepository.findByUserIdIn(anyList())).thenReturn(mockFoundUserLogins);
@@ -87,11 +90,11 @@ class AuthServiceTest {
                   .replaceAll("[\\[\\]]", ""));
       var mockUserLogin1 =
           UserLogin.of(
-              1, AggregateReference.to(USER_ID_1), "email1@example.com", "encryptedPassword");
+              1, AggregateReference.to(USER_ID_1), "email1@example.com", ENCRYPTED_PASSWORD);
 
       var mockUserLogin3 =
           UserLogin.of(
-              3, AggregateReference.to(USER_ID_3), "email3@example.com", "encryptedPassword");
+              3, AggregateReference.to(USER_ID_3), "email3@example.com", ENCRYPTED_PASSWORD);
       var mockFoundUserLogins = List.of(mockUserLogin1, mockUserLogin3);
 
       when(userLoginRepository.findByUserIdIn(anyList())).thenReturn(mockFoundUserLogins);
@@ -110,7 +113,7 @@ class AuthServiceTest {
       // Arrange
       var mockUserLogin =
           UserLogin.of(
-              1, AggregateReference.to(USER_ID_1), "email@example.com", "encryptedPassword");
+              1, AggregateReference.to(USER_ID_1), "email@example.com", ENCRYPTED_PASSWORD);
       AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID_1);
       when(userLoginRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserLogin));
 
@@ -145,7 +148,7 @@ class AuthServiceTest {
     void whenFindUserCredentialByEmailThenSuccess() {
       // Arrange
       var mockUserLogin =
-          UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, "encryptedPassword");
+          UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, ENCRYPTED_PASSWORD);
 
       when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
 
@@ -175,10 +178,9 @@ class AuthServiceTest {
     @Test
     void whenCreateUserCredentialThenSuccess() {
       // Arrange
-      var encryptedPassword = "encryptedPassword";
       AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID_1);
-      var mockUserLoginToCreate = UserLogin.of(1, userRef, "email@example.com", encryptedPassword);
-      when(passwordEncoder.encode(anyString())).thenReturn(encryptedPassword);
+      var mockUserLoginToCreate = UserLogin.of(1, userRef, "email@example.com", ENCRYPTED_PASSWORD);
+      when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
       when(userLoginRepository.save(any(UserLogin.class))).thenReturn(mockUserLoginToCreate);
 
       // Actual
@@ -244,7 +246,7 @@ class AuthServiceTest {
     void whenFindCompanyCredentialByUsernameThenSuccess() {
       // Arrange
       var mockTourCompanyLogin =
-          TourCompanyLogin.of(1, AggregateReference.to(1), TARGET_USERNAME, "encryptedPassword");
+          TourCompanyLogin.of(1, AggregateReference.to(1), TARGET_USERNAME, ENCRYPTED_PASSWORD);
       when(tourCompanyLoginRepository.findOneByUsername(TARGET_USERNAME))
           .thenReturn(Optional.of(mockTourCompanyLogin));
 
@@ -276,7 +278,7 @@ class AuthServiceTest {
       // Arrange
       var mockTourCompanyLogin =
           TourCompanyLogin.of(
-              1, AggregateReference.to(TOUR_COMPANY_ID), "MyTour", "encryptedPassword");
+              1, AggregateReference.to(TOUR_COMPANY_ID), "MyTour", ENCRYPTED_PASSWORD);
       when(tourCompanyLoginRepository.findOneByTourCompanyId(
               AggregateReference.to(TOUR_COMPANY_ID)))
           .thenReturn(Optional.of(mockTourCompanyLogin));
@@ -317,11 +319,10 @@ class AuthServiceTest {
     @Test
     void whenCreateCompanyLoginThenSuccess() {
       // Arrange
-      var encryptedPassword = "encryptedPassword";
       AggregateReference<TourCompany, Integer> companyRef = AggregateReference.to(TOUR_COMPANY_ID);
       var mockCompanyLoginToCreate =
-          TourCompanyLogin.of(1, companyRef, "MyTour", encryptedPassword);
-      when(passwordEncoder.encode(anyString())).thenReturn(encryptedPassword);
+          TourCompanyLogin.of(1, companyRef, "MyTour", ENCRYPTED_PASSWORD);
+      when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
       when(tourCompanyLoginRepository.save(any(TourCompanyLogin.class)))
           .thenReturn(mockCompanyLoginToCreate);
 
@@ -339,10 +340,9 @@ class AuthServiceTest {
     @Test
     void whenDeleteCompanyLoginByIdThenSuccess() {
       // Arrange
-      var encryptedPassword = "encryptedPassword";
       AggregateReference<TourCompany, Integer> companyRef = AggregateReference.to(USER_ID_1);
       var mockCompanyLoginToDelete =
-          TourCompanyLogin.of(1, companyRef, "MyTour", encryptedPassword);
+          TourCompanyLogin.of(1, companyRef, "MyTour", ENCRYPTED_PASSWORD);
       doReturn(mockCompanyLoginToDelete)
           .when(authService)
           .findTourCompanyCredentialByTourCompanyId(anyInt());
