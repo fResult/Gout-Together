@@ -1,18 +1,17 @@
 package dev.fResult.goutTogether.tours;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
 import dev.fResult.goutTogether.tours.entities.TourCount;
 import dev.fResult.goutTogether.tours.repositories.TourCountRepository;
 import dev.fResult.goutTogether.tours.services.TourCountService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TourCountServiceTest {

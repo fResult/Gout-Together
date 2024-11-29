@@ -1,13 +1,11 @@
 package dev.fResult.goutTogether.users.services;
 
-import java.util.List;
-
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.users.entities.Role;
-import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.entities.UserRole;
 import dev.fResult.goutTogether.users.repositories.RoleRepository;
 import dev.fResult.goutTogether.users.repositories.UserRoleRepository;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
