@@ -28,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
+
   @InjectMocks @Spy private AuthServiceImpl authService;
 
   @Mock private UserLoginRepository userLoginRepository;
@@ -220,8 +221,6 @@ class AuthServiceTest {
               "%s with %s [%d] not found",
               UserLogin.class.getSimpleName(), "userId", NOT_FOUND_USER_ID_1);
 
-      AggregateReference<User, Integer> notFoundUserRef =
-          AggregateReference.to(NOT_FOUND_USER_ID_1);
       doAnswer(
               invocation -> {
                 var targetUserId = invocation.getArgument(0, Integer.class);
