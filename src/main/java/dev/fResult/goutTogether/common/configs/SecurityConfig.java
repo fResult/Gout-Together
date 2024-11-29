@@ -91,11 +91,6 @@ public class SecurityConfig {
   }
 
   @Bean
-  public InMemoryUserDetailsManager userDetailsService() {
-    return new InMemoryUserDetailsManager();
-  }
-
-  @Bean
   public PasswordEncoder passwordEncoder() {
     return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
   }
