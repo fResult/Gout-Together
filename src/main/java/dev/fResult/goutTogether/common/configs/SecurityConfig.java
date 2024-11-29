@@ -19,12 +19,16 @@ import java.util.Base64;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -75,6 +79,17 @@ public class SecurityConfig {
 
     return jwtConverter;
   }
+
+  @Bean
+  public AuthenticationManager authenticationManager(
+      PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
+
+    var daoProvider = new DaoAuthenticationProvider(passwordEncoder);
+    daoProvider.setUserDetailsService(userDetailsService);
+
+    return new ProviderManager(daoProvider);
+  }
+
   @Bean
   public InMemoryUserDetailsManager userDetailsService() {
     return new InMemoryUserDetailsManager();
