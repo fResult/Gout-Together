@@ -1,6 +1,6 @@
 package dev.fResult.goutTogether.users.services;
 
-import dev.fResult.goutTogether.auths.UserForgotPasswordRequest;
+import dev.fResult.goutTogether.auths.dtos.UserForgotPasswordRequest;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.services.AuthService;
 import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
