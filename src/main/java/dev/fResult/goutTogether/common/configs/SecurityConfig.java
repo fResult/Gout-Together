@@ -22,12 +22,17 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -54,9 +59,22 @@ public class SecurityConfig {
         .cors(AbstractHttpConfigurer::disable)
         .httpBasic(AbstractHttpConfigurer::disable)
         .formLogin(AbstractHttpConfigurer::disable)
+        .oauth2ResourceServer(this::configureJwtResourceServer)
+        .sessionManagement(this::configureStatelessSession)
         .build();
   }
 
+  @Bean
+  public JwtAuthenticationConverter jwtAuthenticationConverter() {
+    var jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+    jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
+    jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+
+    var jwtConverter = new JwtAuthenticationConverter();
+    jwtConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+
+    return jwtConverter;
+  }
   @Bean
   public InMemoryUserDetailsManager userDetailsService() {
     return new InMemoryUserDetailsManager();
@@ -69,7 +87,8 @@ public class SecurityConfig {
 
   @Bean
   public JwtEncoder jwtEncoder(RSAKeyProperties rsaInstance) {
-    var jwk = new RSAKey.Builder(rsaInstance.publicKey()).privateKey(rsaInstance.privateKey()).build();
+    var jwk =
+        new RSAKey.Builder(rsaInstance.publicKey()).privateKey(rsaInstance.privateKey()).build();
     var jwkSource = new ImmutableJWKSet<SecurityContext>(new JWKSet(jwk));
     return new NimbusJwtEncoder(jwkSource);
   }
@@ -109,5 +128,23 @@ public class SecurityConfig {
     var publicKey = (RSAPublicKey) keyFactory.generatePublic(keySpecX509);
 
     return new RSAKeyProperties(publicKey, privateKey);
+  }
+
+  private OAuth2ResourceServerConfigurer<HttpSecurity> configureJwtResourceServer(
+      OAuth2ResourceServerConfigurer<HttpSecurity> resourceServerConfig) {
+
+    return resourceServerConfig.jwt(this::configureJwt);
+  }
+
+  private OAuth2ResourceServerConfigurer<HttpSecurity>.JwtConfigurer configureJwt(
+      OAuth2ResourceServerConfigurer<HttpSecurity>.JwtConfigurer jwtConfig) {
+
+    return jwtConfig.jwtAuthenticationConverter(jwtAuthenticationConverter());
+  }
+
+  private SessionManagementConfigurer<HttpSecurity> configureStatelessSession(
+      SessionManagementConfigurer<HttpSecurity> session) {
+
+    return session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
   }
 }
