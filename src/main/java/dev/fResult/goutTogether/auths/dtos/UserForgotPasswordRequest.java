@@ -1,4 +1,4 @@
-package dev.fResult.goutTogether.auths;
+package dev.fResult.goutTogether.auths.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 

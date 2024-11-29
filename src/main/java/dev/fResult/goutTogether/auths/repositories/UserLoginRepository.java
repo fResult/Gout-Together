@@ -1,4 +1,4 @@
-package dev.fResult.goutTogether.auths;
+package dev.fResult.goutTogether.auths.repositories;
 
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.users.entities.User;
