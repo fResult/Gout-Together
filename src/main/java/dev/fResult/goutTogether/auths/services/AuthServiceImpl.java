@@ -1,8 +1,11 @@
 package dev.fResult.goutTogether.auths.services;
 
-import dev.fResult.goutTogether.auths.UserLoginRepository;
+import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
+import dev.fResult.goutTogether.auths.dtos.LoginRequest;
+import dev.fResult.goutTogether.auths.dtos.LoginResponse;
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
+import dev.fResult.goutTogether.auths.repositories.UserLoginRepository;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
@@ -11,6 +14,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,15 +26,22 @@ public class AuthServiceImpl implements AuthService {
 
   private final UserLoginRepository userLoginRepository;
   private final TourCompanyLoginRepository tourCompanyLoginRepository;
+  private final TokenService tokenService;
   private final PasswordEncoder passwordEncoder;
+  private final AuthenticationManager authenticationManager;
 
   public AuthServiceImpl(
       UserLoginRepository userLoginRepository,
       TourCompanyLoginRepository tourCompanyLoginRepository,
-      PasswordEncoder passwordEncoder) {
+      TokenService tokenService,
+      PasswordEncoder passwordEncoder,
+      AuthenticationManager authenticationManager) {
+
     this.userLoginRepository = userLoginRepository;
     this.tourCompanyLoginRepository = tourCompanyLoginRepository;
+    this.tokenService = tokenService;
     this.passwordEncoder = passwordEncoder;
+    this.authenticationManager = authenticationManager;
   }
 
   @Override
@@ -167,6 +179,20 @@ public class AuthServiceImpl implements AuthService {
         id);
 
     return true;
+  }
+
+  @Override
+  public LoginResponse login(LoginRequest body) {
+    logger.debug("[login] Logging in by username [{}]", body.username());
+    var authInfo = new UsernamePasswordAuthenticationToken(body.username(), body.password());
+    var authentication = authenticationManager.authenticate(authInfo);
+    var authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
+    var token = tokenService.generateToken(authentication);
+
+    var loggedIn = new LoginResponse(authenticatedUser.userId(), token);
+    logger.info("[login] {} is logged in", loggedIn);
+
+    return loggedIn;
   }
 
   private void throwExceptionIfSomeUserIdsNotFound(
