@@ -1,5 +1,7 @@
 package dev.fResult.goutTogether.auths.services;
 
+import dev.fResult.goutTogether.auths.dtos.LoginRequest;
+import dev.fResult.goutTogether.auths.dtos.LoginResponse;
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import java.util.*;
@@ -22,4 +24,6 @@ public interface AuthService {
   TourCompanyLogin createTourCompanyLogin(int tourCompanyId, String username, String password);
 
   boolean deleteTourCompanyLoginByTourCompanyId(int tourCompanyId);
+
+  LoginResponse login(LoginRequest body);
 }
