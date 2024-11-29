@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
+import dev.fResult.goutTogether.auths.repositories.UserLoginRepository;
 import dev.fResult.goutTogether.auths.services.AuthServiceImpl;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
@@ -233,7 +234,8 @@ class AuthServiceTest {
           .findUserCredentialByUserId(anyInt());
 
       // Actual
-      Executable actualExecutable = () -> authService.deleteUserCredentialByUserId(NOT_FOUND_USER_ID_1);
+      Executable actualExecutable =
+          () -> authService.deleteUserCredentialByUserId(NOT_FOUND_USER_ID_1);
 
       // Assert
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
