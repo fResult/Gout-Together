@@ -5,6 +5,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.proc.SecurityContext;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
+import dev.fResult.goutTogether.common.models.RSAKeyProperties;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.KeyFactory;
@@ -68,15 +69,14 @@ public class SecurityConfig {
 
   @Bean
   public JwtEncoder jwtEncoder(RSAKeyProperties rsaInstance) {
-    var jwk =
-        new RSAKey.Builder(rsaInstance.publicKey).privateKey(rsaInstance.privateKey).build();
+    var jwk = new RSAKey.Builder(rsaInstance.publicKey()).privateKey(rsaInstance.privateKey()).build();
     var jwkSource = new ImmutableJWKSet<SecurityContext>(new JWKSet(jwk));
     return new NimbusJwtEncoder(jwkSource);
   }
 
   @Bean
   public JwtDecoder jwtDecoder(RSAKeyProperties rsaInstance) {
-    return NimbusJwtDecoder.withPublicKey(rsaInstance.publicKey).build();
+    return NimbusJwtDecoder.withPublicKey(rsaInstance.publicKey()).build();
   }
 
   @Bean
@@ -110,6 +110,4 @@ public class SecurityConfig {
 
     return new RSAKeyProperties(publicKey, privateKey);
   }
-
-  public static record RSAKeyProperties(RSAPublicKey publicKey, RSAPrivateKey privateKey) {}
 }
