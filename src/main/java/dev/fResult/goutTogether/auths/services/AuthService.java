@@ -6,6 +6,7 @@ import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import java.util.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 public interface AuthService {
   List<UserLogin> findUserCredentialsByUserIds(Collection<Integer> userIds);
@@ -29,4 +30,6 @@ public interface AuthService {
   LoginResponse login(LoginRequest body);
 
   boolean logout(Authentication authentication);
+
+  boolean logout(Jwt jwt);
 }
