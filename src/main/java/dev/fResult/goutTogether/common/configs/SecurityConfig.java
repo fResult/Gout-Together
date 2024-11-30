@@ -1,5 +1,7 @@
 package dev.fResult.goutTogether.common.configs;
 
+import static dev.fResult.goutTogether.common.Constants.*;
+
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -71,7 +73,8 @@ public class SecurityConfig {
   @Bean
   public JwtAuthenticationConverter jwtAuthenticationConverter() {
     var jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-    jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
+    jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName(ROLE_CLAIM);
+    jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName(RESOURCE_ID_CLAIM);
     jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
 
     var jwtConverter = new JwtAuthenticationConverter();

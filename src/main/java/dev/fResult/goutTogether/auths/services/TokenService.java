@@ -1,5 +1,6 @@
 package dev.fResult.goutTogether.auths.services;
 
+import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
 import java.time.Instant;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,10 +11,12 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
+import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
+import static dev.fResult.goutTogether.common.Constants.ROLE_CLAIM;
+
 @Service
 public class TokenService {
   private static final String ISSUER = "gout-together";
-  private static final String ROLE_CLAIM = "roles";
 
   private final long accessTokenExpiredInSeconds;
   private final long refreshTokenExpiredInSeconds;
@@ -45,6 +48,7 @@ public class TokenService {
             .collect(Collectors.joining(" "));
 
     var expiresAt = issuedAt.plusSeconds(expiredInSeconds);
+    var authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
 
     var claims =
         JwtClaimsSet.builder()
@@ -52,6 +56,7 @@ public class TokenService {
             .issuedAt(issuedAt)
             .subject(authentication.getName())
             .claim(ROLE_CLAIM, scope)
+            .claim(RESOURCE_ID_CLAIM, authenticatedUser.userId())
             .expiresAt(expiresAt)
             .build();
 
