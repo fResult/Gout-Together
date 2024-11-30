@@ -233,9 +233,8 @@ public class AuthServiceImpl implements AuthService {
     logger.debug("[logout] Logging out by username [{}]", authentication.getName());
     var authPrincipal = authentication.getPrincipal();
 
-    if (authPrincipal instanceof AuthenticatedUser) {
-      var authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
-      refreshTokenRepository.updateRefreshTokenByResource(
+    if (authPrincipal instanceof AuthenticatedUser authenticatedUser) {
+        refreshTokenRepository.updateRefreshTokenByResource(
           authenticatedUser.roleName(), authenticatedUser.userId(), true);
     } else if (authPrincipal instanceof Jwt jwt) {
       var claims = jwt.getClaims();
