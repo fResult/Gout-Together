@@ -28,22 +28,23 @@ public class TokenService {
     this.jwtEncoder = jwtEncoder;
   }
 
-  public String issueAccessToken(Authentication authentication) {
-    return generateToken(authentication, accessTokenExpiredInSeconds);
+  public String issueAccessToken(Authentication authentication, Instant issuedAt) {
+    return generateToken(authentication, issuedAt, accessTokenExpiredInSeconds);
   }
 
-  public String issueRefreshToken(Authentication authentication) {
-    return generateToken(authentication, refreshTokenExpiredInSeconds);
+  public String issueRefreshToken(Authentication authentication, Instant issuedAt) {
+    return generateToken(authentication, issuedAt, refreshTokenExpiredInSeconds);
   }
 
-  public String generateToken(Authentication authentication, long expiredInSeconds) {
+  public String generateToken(
+      Authentication authentication, Instant issuedAt, long expiredInSeconds) {
+
     var scope =
         authentication.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.joining(" "));
 
-    var issuedAt = Instant.now();
-    var expireAt = issuedAt.plusSeconds(expiredInSeconds);
+    var expiresAt = issuedAt.plusSeconds(expiredInSeconds);
 
     var claims =
         JwtClaimsSet.builder()
@@ -51,7 +52,7 @@ public class TokenService {
             .issuedAt(issuedAt)
             .subject(authentication.getName())
             .claim(ROLE_CLAIM, scope)
-            .expiresAt(expireAt)
+            .expiresAt(expiresAt)
             .build();
 
     return encodeClaimToJwt(claims);
