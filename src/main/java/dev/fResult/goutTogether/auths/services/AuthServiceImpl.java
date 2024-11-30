@@ -7,6 +7,7 @@ import dev.fResult.goutTogether.auths.dtos.LoginRequest;
 import dev.fResult.goutTogether.auths.dtos.LoginResponse;
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
+import dev.fResult.goutTogether.auths.repositories.RefreshTokenRepository;
 import dev.fResult.goutTogether.auths.repositories.UserLoginRepository;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
@@ -33,19 +34,22 @@ public class AuthServiceImpl implements AuthService {
   private final TokenService tokenService;
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
+  private final RefreshTokenRepository refreshTokenRepository;
 
   public AuthServiceImpl(
       UserLoginRepository userLoginRepository,
       TourCompanyLoginRepository tourCompanyLoginRepository,
       TokenService tokenService,
       PasswordEncoder passwordEncoder,
-      AuthenticationManager authenticationManager) {
+      AuthenticationManager authenticationManager,
+      RefreshTokenRepository refreshTokenRepository) {
 
     this.userLoginRepository = userLoginRepository;
     this.tourCompanyLoginRepository = tourCompanyLoginRepository;
     this.tokenService = tokenService;
     this.passwordEncoder = passwordEncoder;
     this.authenticationManager = authenticationManager;
+    this.refreshTokenRepository = refreshTokenRepository;
   }
 
   @Override
@@ -191,9 +195,10 @@ public class AuthServiceImpl implements AuthService {
     var authInfo = new UsernamePasswordAuthenticationToken(body.username(), body.password());
     var authentication = authenticationManager.authenticate(authInfo);
     var authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
-    var token = tokenService.generateToken(authentication);
+    var accessToken = tokenService.issueAccessToken(authentication);
+    var refreshToken = tokenService.issueRefreshToken(authentication);
 
-    var loggedIn = new LoginResponse(authenticatedUser.userId(), token);
+    var loggedIn = LoginResponse.of(authenticatedUser.userId(), accessToken, refreshToken);
     logger.info("[login] {} is logged in", loggedIn);
 
     return loggedIn;
