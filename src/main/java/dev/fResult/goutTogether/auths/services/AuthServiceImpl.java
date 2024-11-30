@@ -13,6 +13,7 @@ import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -205,10 +206,10 @@ public class AuthServiceImpl implements AuthService {
             .map(credential -> credential.userId().getId())
             .collect(Collectors.toMap(Function.identity(), x -> true));
 
+    Predicate<Integer> foundUserIdInDb = id -> foundCredentialUserIds.getOrDefault(id, false);
+
     var notFoundUserIds =
-        userIdsToFind.stream()
-            .filter(not(id -> foundCredentialUserIds.getOrDefault(id, false)))
-            .collect(Collectors.toUnmodifiableSet());
+        userIdsToFind.stream().filter(not(foundUserIdInDb)).collect(Collectors.toUnmodifiableSet());
 
     if (!notFoundUserIds.isEmpty())
       throw errorHelper
