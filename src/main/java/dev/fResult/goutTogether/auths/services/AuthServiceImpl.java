@@ -231,22 +231,23 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public boolean logout(Authentication authentication) {
     logger.debug("[logout] Logging out by username [{}]", authentication.getName());
-    var authPrincipal = authentication.getPrincipal();
 
-    if (authPrincipal instanceof AuthenticatedUser authenticatedUser) {
-        refreshTokenRepository.updateRefreshTokenByResource(
-          authenticatedUser.roleName(), authenticatedUser.userId(), true);
-    } else if (authPrincipal instanceof Jwt jwt) {
-      var claims = jwt.getClaims();
-      var roleName = (String) claims.get(ROLE_CLAIM);
-      var userId = (Long) claims.get(RESOURCE_ID_CLAIM);
+    var authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
+    refreshTokenRepository.updateRefreshTokenByResource(
+        authenticatedUser.roleName(), authenticatedUser.userId(), true);
 
-      refreshTokenRepository.updateRefreshTokenByResource(
-          UserRoleName.valueOf(roleName), Math.toIntExact(userId), true);
-    } else {
-      throw new IllegalStateException(
-          String.format("Unsupported principal type: %s", authPrincipal.getClass()));
-    }
+    return true;
+  }
+
+  @Override
+  public boolean logout(Jwt jwt) {
+    var claims = jwt.getClaims();
+    logger.debug("[logout] Logging out by username [{}]", claims.get("sub"));
+
+    var roleName = (String) claims.get(ROLE_CLAIM);
+    var resourceId = (Long) claims.get(RESOURCE_ID_CLAIM);
+    refreshTokenRepository.updateRefreshTokenByResource(
+        UserRoleName.valueOf(roleName), Math.toIntExact(resourceId), true);
 
     return true;
   }
