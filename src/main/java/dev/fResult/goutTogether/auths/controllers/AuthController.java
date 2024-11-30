@@ -6,6 +6,7 @@ import dev.fResult.goutTogether.auths.services.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,5 +29,13 @@ public class AuthController {
     logger.debug("[login] Logging in by username [{}]", body.username());
 
     return ResponseEntity.ok(authService.login(body));
+  }
+
+  @PostMapping("/logout")
+  public ResponseEntity<Void> logout(Authentication body) {
+    logger.debug("[logout] Logging out by username [{}]", body.getName());
+
+    authService.logout(body);
+    return ResponseEntity.noContent().build();
   }
 }

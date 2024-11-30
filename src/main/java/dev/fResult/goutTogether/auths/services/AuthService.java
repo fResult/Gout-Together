@@ -5,6 +5,7 @@ import dev.fResult.goutTogether.auths.dtos.LoginResponse;
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import java.util.*;
+import org.springframework.security.core.Authentication;
 
 public interface AuthService {
   List<UserLogin> findUserCredentialsByUserIds(Collection<Integer> userIds);
@@ -26,4 +27,6 @@ public interface AuthService {
   boolean deleteTourCompanyLoginByTourCompanyId(int tourCompanyId);
 
   LoginResponse login(LoginRequest body);
+
+  boolean logout(Authentication authentication);
 }

@@ -1,6 +1,6 @@
 package dev.fResult.goutTogether.auths.services;
 
-import static dev.fResult.goutTogether.common.Constants.TOKEN_TYPE;
+import static dev.fResult.goutTogether.common.Constants.*;
 import static java.util.function.Predicate.not;
 
 import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
@@ -11,6 +11,7 @@ import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.repositories.RefreshTokenRepository;
 import dev.fResult.goutTogether.auths.repositories.UserLoginRepository;
+import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
@@ -24,7 +25,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -205,8 +208,7 @@ public class AuthServiceImpl implements AuthService {
     var accessToken = tokenService.issueAccessToken(authentication, now);
     var refreshToken = tokenService.issueRefreshToken(authentication, now);
 
-    refreshTokenRepository.updateRefreshTokenByResource(
-        authenticatedUser.roleName(), authenticatedUser.userId(), true);
+    logout(authentication);
 
     var refreshTokenToCreate =
         RefreshToken.of(
@@ -221,9 +223,33 @@ public class AuthServiceImpl implements AuthService {
 
     var loggedInInfo =
         LoginResponse.of(authenticatedUser.userId(), TOKEN_TYPE, accessToken, refreshToken);
-    logger.info("[login] {} is logged in", loggedInInfo);
+    logger.info("[login] {} is logged in: {}", UserLogin.class.getSimpleName(), loggedInInfo);
 
     return loggedInInfo;
+  }
+
+  @Override
+  public boolean logout(Authentication authentication) {
+    logger.debug("[logout] Logging out by username [{}]", authentication.getName());
+    var authPrincipal = authentication.getPrincipal();
+
+    if (authPrincipal instanceof AuthenticatedUser) {
+      var authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
+      refreshTokenRepository.updateRefreshTokenByResource(
+          authenticatedUser.roleName(), authenticatedUser.userId(), true);
+    } else if (authPrincipal instanceof Jwt jwt) {
+      var claims = jwt.getClaims();
+      var roleName = (String) claims.get(ROLE_CLAIM);
+      var userId = (Long) claims.get(RESOURCE_ID_CLAIM);
+
+      refreshTokenRepository.updateRefreshTokenByResource(
+          UserRoleName.valueOf(roleName), Math.toIntExact(userId), true);
+    } else {
+      throw new IllegalStateException(
+          String.format("Unsupported principal type: %s", authPrincipal.getClass()));
+    }
+
+    return true;
   }
 
   private void throwExceptionIfSomeUserIdsNotFound(
