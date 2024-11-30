@@ -1,10 +1,12 @@
 package dev.fResult.goutTogether.auths.services;
 
+import static dev.fResult.goutTogether.common.Constants.TOKEN_TYPE;
 import static java.util.function.Predicate.not;
 
 import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
 import dev.fResult.goutTogether.auths.dtos.LoginRequest;
 import dev.fResult.goutTogether.auths.dtos.LoginResponse;
+import dev.fResult.goutTogether.auths.entities.RefreshToken;
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.repositories.RefreshTokenRepository;
@@ -12,6 +14,7 @@ import dev.fResult.goutTogether.auths.repositories.UserLoginRepository;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -23,6 +26,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -190,18 +194,36 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
+  @Transactional
   public LoginResponse login(LoginRequest body) {
     logger.debug("[login] Logging in by username [{}]", body.username());
     var authInfo = new UsernamePasswordAuthenticationToken(body.username(), body.password());
     var authentication = authenticationManager.authenticate(authInfo);
     var authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
-    var accessToken = tokenService.issueAccessToken(authentication);
-    var refreshToken = tokenService.issueRefreshToken(authentication);
 
-    var loggedIn = LoginResponse.of(authenticatedUser.userId(), accessToken, refreshToken);
-    logger.info("[login] {} is logged in", loggedIn);
+    var now = Instant.now();
+    var accessToken = tokenService.issueAccessToken(authentication, now);
+    var refreshToken = tokenService.issueRefreshToken(authentication, now);
 
-    return loggedIn;
+    refreshTokenRepository.updateRefreshTokenByResource(
+        authenticatedUser.roleName(), authenticatedUser.userId(), true);
+
+    var refreshTokenToCreate =
+        RefreshToken.of(
+            null,
+            refreshToken,
+            now,
+            authenticatedUser.roleName(),
+            authenticatedUser.userId(),
+            false);
+
+    refreshTokenRepository.save(refreshTokenToCreate);
+
+    var loggedInInfo =
+        LoginResponse.of(authenticatedUser.userId(), TOKEN_TYPE, accessToken, refreshToken);
+    logger.info("[login] {} is logged in", loggedInInfo);
+
+    return loggedInInfo;
   }
 
   private void throwExceptionIfSomeUserIdsNotFound(
