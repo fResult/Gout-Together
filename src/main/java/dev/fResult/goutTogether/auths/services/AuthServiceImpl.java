@@ -1,5 +1,7 @@
 package dev.fResult.goutTogether.auths.services;
 
+import static java.util.function.Predicate.not;
+
 import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
 import dev.fResult.goutTogether.auths.dtos.LoginRequest;
 import dev.fResult.goutTogether.auths.dtos.LoginResponse;
@@ -10,6 +12,7 @@ import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,18 +199,18 @@ public class AuthServiceImpl implements AuthService {
   }
 
   private void throwExceptionIfSomeUserIdsNotFound(
-      Collection<Integer> userIds, List<UserLogin> foundCredentials) {
+      Collection<Integer> userIdsToFind, List<UserLogin> foundCredentials) {
     var foundCredentialUserIds =
         foundCredentials.stream()
             .map(credential -> credential.userId().getId())
-            .collect(Collectors.toSet());
+            .collect(Collectors.toMap(Function.identity(), x -> true));
 
-    // TODO: Refactor this part
-    var userIdsToFind = new HashSet<>(Set.copyOf(userIds));
-    userIdsToFind.removeAll(foundCredentialUserIds);
-    var notFoundUserIds = new HashSet<>(userIdsToFind);
+    var notFoundUserIds =
+        userIdsToFind.stream()
+            .filter(not(id -> foundCredentialUserIds.getOrDefault(id, false)))
+            .collect(Collectors.toUnmodifiableSet());
 
-    if (!userIdsToFind.isEmpty())
+    if (!notFoundUserIds.isEmpty())
       throw errorHelper
           .someEntitiesMissing("findUserCredentialsByUserIds", UserLogin.class, notFoundUserIds)
           .get();
