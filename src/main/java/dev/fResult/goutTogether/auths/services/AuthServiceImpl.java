@@ -3,6 +3,7 @@ package dev.fResult.goutTogether.auths.services;
 import static dev.fResult.goutTogether.common.Constants.*;
 import static java.util.function.Predicate.not;
 
+import dev.fResult.goutTogether.auths.controllers.RefreshTokenRequest;
 import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
 import dev.fResult.goutTogether.auths.dtos.LoginRequest;
 import dev.fResult.goutTogether.auths.dtos.LoginResponse;
@@ -13,6 +14,7 @@ import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.repositories.RefreshTokenRepository;
 import dev.fResult.goutTogether.auths.repositories.UserLoginRepository;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
+import dev.fResult.goutTogether.common.exceptions.RefreshTokenExpiredException;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
@@ -27,7 +29,6 @@ import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,11 +38,11 @@ public class AuthServiceImpl implements AuthService {
   private final ErrorHelper errorHelper = new ErrorHelper(AuthServiceImpl.class);
 
   private final UserLoginRepository userLoginRepository;
+  private final RefreshTokenRepository refreshTokenRepository;
   private final TourCompanyLoginRepository tourCompanyLoginRepository;
   private final TokenService tokenService;
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
-  private final RefreshTokenRepository refreshTokenRepository;
 
   public AuthServiceImpl(
       UserLoginRepository userLoginRepository,
@@ -229,6 +230,35 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
+  public LoginResponse refreshToken(RefreshTokenRequest body) {
+    var refreshToken =
+        refreshTokenRepository
+            .findOneByToken(body.refreshToken())
+            .orElseThrow(
+                errorHelper.entityWithSubResourceNotFound(
+                    "issueNewAccessToken", RefreshToken.class, "token", body.refreshToken()));
+
+    var refreshTokenExpired = tokenService.isRefreshTokenExpired(refreshToken);
+    if (refreshTokenExpired) {
+      logger.info(
+          "[refreshToken] {} token [{}] is already expired, please re-login",
+          refreshToken.token(),
+          RefreshToken.class.getSimpleName());
+      var logoutInfo = LogoutInfo.of(refreshToken.resourceId(), refreshToken.usage().name());
+      logout(logoutInfo);
+
+      throw new RefreshTokenExpiredException(
+          String.format(
+              "[refreshToken] %s is already expired, please re-login",
+              RefreshToken.class.getSimpleName()));
+    }
+
+    var userCredential = findUserCredentialByUserId(body.resourceId());
+    var refreshedAccessToken = tokenService.issueAccessToken(userCredential, Instant.now());
+    return LoginResponse.of(
+        refreshToken.resourceId(), TOKEN_TYPE, refreshedAccessToken, refreshToken.token());
+  }
+
   @Override
   public boolean logout(AuthenticatedUser authenticatedUser) {
     logger.debug("[logout] Logging out by username [{}]", authenticatedUser.email());
