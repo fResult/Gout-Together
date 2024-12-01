@@ -1,7 +1,11 @@
 package dev.fResult.goutTogether.auths.controllers;
 
+import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
+import static dev.fResult.goutTogether.common.Constants.ROLES_CLAIM;
+
 import dev.fResult.goutTogether.auths.dtos.LoginRequest;
 import dev.fResult.goutTogether.auths.dtos.LoginResponse;
+import dev.fResult.goutTogether.auths.dtos.LogoutInfo;
 import dev.fResult.goutTogether.auths.services.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +38,13 @@ public class AuthController {
 
   @PostMapping("/logout")
   public ResponseEntity<Void> logout(Authentication authentication) {
+    var jwt = (Jwt) authentication.getPrincipal();
+    var claims = jwt.getClaims();
+    var resourceId = (long) claims.get(RESOURCE_ID_CLAIM);
+    var roles = (String) claims.get(ROLES_CLAIM);
+    var logoutInfo = LogoutInfo.of(Math.toIntExact(resourceId), roles);
     logger.debug("[logout] Logging out by username [{}]", authentication.getName());
-    authService.logout((Jwt) authentication.getPrincipal());
+    authService.logout(logoutInfo);
 
     return ResponseEntity.noContent().build();
   }

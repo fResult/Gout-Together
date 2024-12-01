@@ -1,7 +1,7 @@
 package dev.fResult.goutTogether.auths.services;
 
 import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
-import static dev.fResult.goutTogether.common.Constants.ROLE_CLAIM;
+import static dev.fResult.goutTogether.common.Constants.ROLES_CLAIM;
 
 import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
 import dev.fResult.goutTogether.common.utils.UUIDV7;
@@ -56,7 +56,7 @@ public class TokenService {
             .issuer(ISSUER)
             .issuedAt(issuedAt)
             .subject(authentication.getName())
-            .claim(ROLE_CLAIM, scope)
+            .claim(ROLES_CLAIM, scope)
             .claim(RESOURCE_ID_CLAIM, authenticatedUser.userId())
             .expiresAt(expiresAt)
             .build();
