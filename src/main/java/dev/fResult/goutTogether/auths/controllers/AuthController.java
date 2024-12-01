@@ -36,6 +36,15 @@ public class AuthController {
     return ResponseEntity.ok(authService.login(body));
   }
 
+  @PostMapping("/refresh")
+  public ResponseEntity<LoginResponse> refreshToken(
+      // TODO: Check about Authentication, bec we may be able to pass token to this API
+      @RequestBody @Validated RefreshTokenRequest body) {
+    logger.debug("[refreshToken] Refreshing in by refresh token");
+
+    return ResponseEntity.ok(authService.refreshToken(body));
+  }
+
   @PostMapping("/logout")
   public ResponseEntity<Void> logout(Authentication authentication) {
     var jwt = (Jwt) authentication.getPrincipal();

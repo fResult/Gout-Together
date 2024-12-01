@@ -1,5 +1,6 @@
 package dev.fResult.goutTogether.auths.services;
 
+import dev.fResult.goutTogether.auths.controllers.RefreshTokenRequest;
 import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
 import dev.fResult.goutTogether.auths.dtos.LoginRequest;
 import dev.fResult.goutTogether.auths.dtos.LoginResponse;
@@ -28,6 +29,8 @@ public interface AuthService {
   boolean deleteTourCompanyLoginByTourCompanyId(int tourCompanyId);
 
   LoginResponse login(LoginRequest body);
+
+  LoginResponse refreshToken(RefreshTokenRequest body);
 
   boolean logout(AuthenticatedUser authenticatedUser);
 
