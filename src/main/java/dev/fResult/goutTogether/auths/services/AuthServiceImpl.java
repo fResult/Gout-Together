@@ -6,6 +6,7 @@ import static java.util.function.Predicate.not;
 import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
 import dev.fResult.goutTogether.auths.dtos.LoginRequest;
 import dev.fResult.goutTogether.auths.dtos.LoginResponse;
+import dev.fResult.goutTogether.auths.dtos.LogoutInfo;
 import dev.fResult.goutTogether.auths.entities.RefreshToken;
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
@@ -235,18 +236,22 @@ public class AuthServiceImpl implements AuthService {
     refreshTokenRepository.updateRefreshTokenByResource(
         authenticatedUser.roleName(), authenticatedUser.userId(), true);
 
+    logger.info("[logout] username [{}]'s tokens all are expired", authenticatedUser.email());
+
     return true;
   }
 
   @Override
-  public boolean logout(Jwt jwt) {
-    var claims = jwt.getClaims();
-    logger.debug("[logout] Logging out by username [{}]", claims.get("sub"));
+  public boolean logout(LogoutInfo logoutInfo) {
+    logger.debug("[logout] Logging out by resourceId [{}]", logoutInfo.resourceId());
 
-    var roleName = (String) claims.get(ROLE_CLAIM);
-    var resourceId = (Long) claims.get(RESOURCE_ID_CLAIM);
-    refreshTokenRepository.updateRefreshTokenByResource(
-        UserRoleName.valueOf(roleName), Math.toIntExact(resourceId), true);
+    var roleName = UserRoleName.valueOf(logoutInfo.roles());
+    refreshTokenRepository.updateRefreshTokenByResource(roleName, logoutInfo.resourceId(), true);
+
+    logger.info(
+        "[logout] {} resourceId [{}]'s tokens all are expired",
+        RefreshToken.class.getSimpleName(),
+        logoutInfo.resourceId());
 
     return true;
   }
