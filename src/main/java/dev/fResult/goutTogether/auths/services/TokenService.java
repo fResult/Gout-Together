@@ -1,6 +1,10 @@
 package dev.fResult.goutTogether.auths.services;
 
+import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
+import static dev.fResult.goutTogether.common.Constants.ROLE_CLAIM;
+
 import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
+import dev.fResult.goutTogether.common.utils.UUIDV7;
 import java.time.Instant;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,9 +14,6 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
-
-import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
-import static dev.fResult.goutTogether.common.Constants.ROLE_CLAIM;
 
 @Service
 public class TokenService {
@@ -35,8 +36,8 @@ public class TokenService {
     return generateToken(authentication, issuedAt, accessTokenExpiredInSeconds);
   }
 
-  public String issueRefreshToken(Authentication authentication, Instant issuedAt) {
-    return generateToken(authentication, issuedAt, refreshTokenExpiredInSeconds);
+  public String issueRefreshToken() {
+    return UUIDV7.randomUUID().toString();
   }
 
   public String generateToken(

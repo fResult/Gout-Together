@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -206,9 +205,9 @@ public class AuthServiceImpl implements AuthService {
 
     var now = Instant.now();
     var accessToken = tokenService.issueAccessToken(authentication, now);
-    var refreshToken = tokenService.issueRefreshToken(authentication, now);
+    var refreshToken = tokenService.issueRefreshToken();
 
-    logout(authentication);
+    logout(authenticatedUser);
 
     var refreshTokenToCreate =
         RefreshToken.of(
@@ -229,10 +228,10 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public boolean logout(Authentication authentication) {
-    logger.debug("[logout] Logging out by username [{}]", authentication.getName());
+  @Override
+  public boolean logout(AuthenticatedUser authenticatedUser) {
+    logger.debug("[logout] Logging out by username [{}]", authenticatedUser.email());
 
-    var authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
     refreshTokenRepository.updateRefreshTokenByResource(
         authenticatedUser.roleName(), authenticatedUser.userId(), true);
 
