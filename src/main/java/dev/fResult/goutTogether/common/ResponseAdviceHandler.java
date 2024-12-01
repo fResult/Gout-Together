@@ -2,6 +2,7 @@ package dev.fResult.goutTogether.common;
 
 import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
+import dev.fResult.goutTogether.common.exceptions.RefreshTokenExpiredException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import java.util.HashMap;
 import org.slf4j.Logger;
@@ -58,6 +59,14 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
   protected ResponseEntity<?> handleCredentialExistsException(CredentialExistsException ex) {
     var detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     logger.info("Credential exists: {}", ex.getMessage());
+
+    return ResponseEntity.of(detail).build();
+  }
+
+  @ExceptionHandler(RefreshTokenExpiredException.class)
+  protected ResponseEntity<?> handleRefreshTokenExpiredException(RefreshTokenExpiredException ex) {
+    var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    logger.info("Refresh token expired: {}", ex.getMessage());
 
     return ResponseEntity.of(detail).build();
   }
