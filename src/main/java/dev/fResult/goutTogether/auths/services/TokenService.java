@@ -10,7 +10,6 @@ import dev.fResult.goutTogether.common.utils.UUIDV7;
 import java.time.Instant;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TokenService {
   private static final String ISSUER = "gout-together";
+  private static final int TIME_FOR_ROTATE_IN_SECONDS = 120;
 
   private final CustomUserDetailsService userDetailsService;
   private final long accessTokenExpiredInSeconds;
@@ -37,8 +37,8 @@ public class TokenService {
     this.jwtEncoder = jwtEncoder;
   }
 
-  public String issueAccessToken(Authentication authentication, Instant issuedAt) {
-    return generateToken(authentication, issuedAt, accessTokenExpiredInSeconds);
+  public String issueAccessToken(AuthenticatedUser authenticatedUser, Instant issuedAt) {
+    return generateToken(authenticatedUser, issuedAt, accessTokenExpiredInSeconds);
   }
 
   public String issueAccessToken(UserLogin userLogin, Instant issuedAt) {
@@ -51,32 +51,8 @@ public class TokenService {
   public String issueRefreshToken() {
     return UUIDV7.randomUUID().toString();
   }
-
-  public String generateToken(
-      Authentication authentication, Instant issuedAt, long expiredInSeconds) {
-
-    var scope =
-        authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.joining(" "));
-
-    var expiresAt = issuedAt.plusSeconds(expiredInSeconds);
-    var authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
-
-    var claims =
-        JwtClaimsSet.builder()
-            .issuer(ISSUER)
-            .issuedAt(issuedAt)
-            .subject(authentication.getName())
-            .claim(ROLES_CLAIM, scope)
-            .claim(RESOURCE_ID_CLAIM, authenticatedUser.userId())
-            .expiresAt(expiresAt)
-            .build();
-
-    return encodeClaimToJwt(claims);
-  }
-
-  public String generateToken(
+  
+  private String generateToken(
       AuthenticatedUser authenticatedUser, Instant issuedAt, long expiredInSeconds) {
     var scope =
         authenticatedUser.getAuthorities().stream()
@@ -106,5 +82,13 @@ public class TokenService {
     var expiredAt = refreshToken.issuedDate().plusSeconds(refreshTokenExpiredInSeconds);
 
     return Instant.now().isAfter(expiredAt);
+  }
+
+  public String rotateRefreshTokenIfNeed(RefreshToken refreshToken) {
+    var expiredAt = refreshToken.issuedDate().plusSeconds(refreshTokenExpiredInSeconds);
+    var threadHoldToRotate = expiredAt.minusSeconds(TIME_FOR_ROTATE_IN_SECONDS);
+
+    if (Instant.now().isAfter(threadHoldToRotate)) return issueRefreshToken();
+    return refreshToken.token();
   }
 }
