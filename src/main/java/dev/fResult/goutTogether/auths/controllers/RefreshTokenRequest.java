@@ -7,7 +7,7 @@ import org.springframework.lang.NonNull;
 
 public record RefreshTokenRequest(
     @NotBlank String usage,
-    @NonNull @Min(0) Integer resourceId,
+    @NonNull @Min(1) Integer resourceId,
     @NotBlank @UUID(message = "invalid format") String refreshToken) {
 
   public static RefreshTokenRequest of(String usage, Integer resourceId, String refreshToken) {
