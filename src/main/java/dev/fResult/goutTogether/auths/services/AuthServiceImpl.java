@@ -206,7 +206,7 @@ public class AuthServiceImpl implements AuthService {
     var authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
 
     var now = Instant.now();
-    var accessToken = tokenService.issueAccessToken(authentication, now);
+    var accessToken = tokenService.issueAccessToken(authenticatedUser, now);
     var refreshToken = tokenService.issueRefreshToken();
 
     logout(authenticatedUser);
@@ -230,21 +230,24 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
+  @Transactional
   public LoginResponse refreshToken(RefreshTokenRequest body) {
+    logger.debug("[refreshToken] {} token [{}] is refreshing", RefreshToken.class.getSimpleName(), body.refreshToken());
     var refreshToken =
         refreshTokenRepository
             .findOneByToken(body.refreshToken())
             .orElseThrow(
                 errorHelper.entityWithSubResourceNotFound(
-                    "issueNewAccessToken", RefreshToken.class, "token", body.refreshToken()));
+                    "refreshToken", RefreshToken.class, "token", body.refreshToken()));
 
+    var userId = body.resourceId();
     var refreshTokenExpired = tokenService.isRefreshTokenExpired(refreshToken);
     if (refreshTokenExpired) {
       logger.info(
           "[refreshToken] {} token [{}] is already expired, please re-login",
           refreshToken.token(),
           RefreshToken.class.getSimpleName());
-      var logoutInfo = LogoutInfo.of(refreshToken.resourceId(), refreshToken.usage().name());
+      var logoutInfo = LogoutInfo.of(userId, refreshToken.usage().name());
       logout(logoutInfo);
 
       throw new RefreshTokenExpiredException(
@@ -253,8 +256,32 @@ public class AuthServiceImpl implements AuthService {
               RefreshToken.class.getSimpleName()));
     }
 
-    var userCredential = findUserCredentialByUserId(body.resourceId());
+    var userCredential = findUserCredentialByUserId(userId);
     var refreshedAccessToken = tokenService.issueAccessToken(userCredential, Instant.now());
+    var refreshTokenRotation = tokenService.rotateRefreshTokenIfNeed(refreshToken);
+
+    if (!refreshTokenRotation.equals(refreshToken.token())) {
+      var refreshTokenToUpdate =
+          RefreshToken.of(
+              refreshToken.id(),
+              refreshToken.token(),
+              refreshToken.issuedDate(),
+              refreshToken.usage(),
+              refreshToken.resourceId(),
+              true);
+      refreshTokenRepository.save(refreshTokenToUpdate);
+
+      var newRefreshToken =
+          RefreshToken.of(
+              null,
+              refreshTokenRotation,
+              Instant.now(),
+              refreshToken.usage(),
+              refreshToken.resourceId(),
+              false);
+      refreshTokenRepository.save(newRefreshToken);
+    }
+
     return LoginResponse.of(
         refreshToken.resourceId(), TOKEN_TYPE, refreshedAccessToken, refreshToken.token());
   }
