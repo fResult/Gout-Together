@@ -83,7 +83,6 @@ public class SecurityConfig {
   public JwtAuthenticationConverter jwtAuthenticationConverter() {
     var jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
     jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName(ROLES_CLAIM);
-    jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName(RESOURCE_ID_CLAIM);
     jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
 
     var jwtConverter = new JwtAuthenticationConverter();
@@ -122,7 +121,7 @@ public class SecurityConfig {
 
   @Bean
   public RSAKeyProperties rsaInstance()
-      throws InvalidKeySpecException, IOException, NoSuchAlgorithmException, URISyntaxException {
+      throws InvalidKeySpecException, IOException, NoSuchAlgorithmException {
 
     var privateKeyPkcs8Resource = resourceLoader.getResource("classPath:private_key_pkcs8.pem");
     var publicKeyResource = resourceLoader.getResource("classPath:public_key.pem");
