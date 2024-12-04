@@ -6,6 +6,7 @@ import static dev.fResult.goutTogether.common.Constants.ROLES_CLAIM;
 import dev.fResult.goutTogether.auths.dtos.LoginRequest;
 import dev.fResult.goutTogether.auths.dtos.LoginResponse;
 import dev.fResult.goutTogether.auths.dtos.LogoutInfo;
+import dev.fResult.goutTogether.auths.dtos.RefreshTokenRequest;
 import dev.fResult.goutTogether.auths.services.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

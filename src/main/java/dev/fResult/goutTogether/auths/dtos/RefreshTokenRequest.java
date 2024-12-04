@@ -1,16 +1,18 @@
-package dev.fResult.goutTogether.auths.controllers;
+package dev.fResult.goutTogether.auths.dtos;
 
+import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.UUID;
 import org.springframework.lang.NonNull;
 
 public record RefreshTokenRequest(
-    @NotBlank String usage,
+    @NotNull UserRoleName usage,
     @NonNull @Min(1) Integer resourceId,
     @NotBlank @UUID(message = "invalid format") String refreshToken) {
 
-  public static RefreshTokenRequest of(String usage, Integer resourceId, String refreshToken) {
+  public static RefreshTokenRequest of(UserRoleName usage, Integer resourceId, String refreshToken) {
     return new RefreshTokenRequest(usage, resourceId, refreshToken);
   }
 }

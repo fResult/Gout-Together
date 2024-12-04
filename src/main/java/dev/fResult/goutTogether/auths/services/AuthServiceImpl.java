@@ -3,11 +3,11 @@ package dev.fResult.goutTogether.auths.services;
 import static dev.fResult.goutTogether.common.Constants.*;
 import static java.util.function.Predicate.not;
 
-import dev.fResult.goutTogether.auths.controllers.RefreshTokenRequest;
 import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
 import dev.fResult.goutTogether.auths.dtos.LoginRequest;
 import dev.fResult.goutTogether.auths.dtos.LoginResponse;
 import dev.fResult.goutTogether.auths.dtos.LogoutInfo;
+import dev.fResult.goutTogether.auths.dtos.RefreshTokenRequest;
 import dev.fResult.goutTogether.auths.entities.RefreshToken;
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
