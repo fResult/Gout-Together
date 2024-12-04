@@ -259,14 +259,12 @@ public class AuthServiceImpl implements AuthService {
               RefreshToken.class.getSimpleName()));
     }
 
-    String refreshedAccessToken;
-    if (body.usage() == UserRoleName.COMPANY) {
-      var companyCredential = findTourCompanyCredentialByTourCompanyId(resourceId);
-      refreshedAccessToken = tokenService.issueAccessToken(companyCredential, Instant.now());
-    } else {
-      var userCredential = findUserCredentialByUserId(resourceId);
-      refreshedAccessToken = tokenService.issueAccessToken(userCredential, Instant.now());
-    }
+    var refreshedAccessToken =
+        switch (body.usage()) {
+          case UserRoleName.COMPANY -> issueTourCompanyAccessToken(resourceId);
+          case UserRoleName.ADMIN, UserRoleName.CONSUMER -> issueUserAccessToken(resourceId);
+        };
+
     var refreshTokenRotation = tokenService.rotateRefreshTokenIfNeed(refreshToken);
 
     if (!refreshTokenRotation.equals(refreshToken.token())) {
@@ -338,5 +336,15 @@ public class AuthServiceImpl implements AuthService {
       throw errorHelper
           .someEntitiesMissing("findUserCredentialsByUserIds", UserLogin.class, notFoundUserIds)
           .get();
+  }
+
+  private String issueUserAccessToken(int userId) {
+    var userCredential = findUserCredentialByUserId(userId);
+    return tokenService.issueAccessToken(userCredential, Instant.now());
+  }
+
+  private String issueTourCompanyAccessToken(int tourCompanyId) {
+    var companyCredential = findTourCompanyCredentialByTourCompanyId(tourCompanyId);
+    return tokenService.issueAccessToken(companyCredential, Instant.now());
   }
 }
