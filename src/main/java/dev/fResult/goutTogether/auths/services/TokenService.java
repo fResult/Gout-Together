@@ -5,6 +5,7 @@ import static dev.fResult.goutTogether.common.Constants.ROLES_CLAIM;
 
 import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
 import dev.fResult.goutTogether.auths.entities.RefreshToken;
+import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.common.utils.UUIDV7;
 import java.time.Instant;
@@ -48,10 +49,17 @@ public class TokenService {
     return generateToken(authenticatedUser, issuedAt, accessTokenExpiredInSeconds);
   }
 
+  public String issueAccessToken(TourCompanyLogin tourCompanyLogin, Instant issuedAt) {
+    var authenticatedUser =
+        (AuthenticatedUser) userDetailsService.loadUserByUsername(tourCompanyLogin.username());
+
+    return generateToken(authenticatedUser, issuedAt, accessTokenExpiredInSeconds);
+  }
+
   public String issueRefreshToken() {
     return UUIDV7.randomUUID().toString();
   }
-  
+
   private String generateToken(
       AuthenticatedUser authenticatedUser, Instant issuedAt, long expiredInSeconds) {
     var scope =

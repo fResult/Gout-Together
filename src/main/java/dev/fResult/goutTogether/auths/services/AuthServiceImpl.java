@@ -232,7 +232,10 @@ public class AuthServiceImpl implements AuthService {
   @Override
   @Transactional
   public LoginResponse refreshToken(RefreshTokenRequest body) {
-    logger.debug("[refreshToken] {} token [{}] is refreshing", RefreshToken.class.getSimpleName(), body.refreshToken());
+    logger.debug(
+        "[refreshToken] {} token [{}] is refreshing",
+        RefreshToken.class.getSimpleName(),
+        body.refreshToken());
     var refreshToken =
         refreshTokenRepository
             .findOneByToken(body.refreshToken())
@@ -240,14 +243,14 @@ public class AuthServiceImpl implements AuthService {
                 errorHelper.entityWithSubResourceNotFound(
                     "refreshToken", RefreshToken.class, "token", body.refreshToken()));
 
-    var userId = body.resourceId();
+    var resourceId = body.resourceId();
     var refreshTokenExpired = tokenService.isRefreshTokenExpired(refreshToken);
     if (refreshTokenExpired) {
       logger.info(
           "[refreshToken] {} token [{}] is already expired, please re-login",
           refreshToken.token(),
           RefreshToken.class.getSimpleName());
-      var logoutInfo = LogoutInfo.of(userId, refreshToken.usage().name());
+      var logoutInfo = LogoutInfo.of(resourceId, refreshToken.usage().name());
       logout(logoutInfo);
 
       throw new RefreshTokenExpiredException(
@@ -256,8 +259,14 @@ public class AuthServiceImpl implements AuthService {
               RefreshToken.class.getSimpleName()));
     }
 
-    var userCredential = findUserCredentialByUserId(userId);
-    var refreshedAccessToken = tokenService.issueAccessToken(userCredential, Instant.now());
+    String refreshedAccessToken;
+    if (body.usage() == UserRoleName.COMPANY) {
+      var companyCredential = findTourCompanyCredentialByTourCompanyId(resourceId);
+      refreshedAccessToken = tokenService.issueAccessToken(companyCredential, Instant.now());
+    } else {
+      var userCredential = findUserCredentialByUserId(resourceId);
+      refreshedAccessToken = tokenService.issueAccessToken(userCredential, Instant.now());
+    }
     var refreshTokenRotation = tokenService.rotateRefreshTokenIfNeed(refreshToken);
 
     if (!refreshTokenRotation.equals(refreshToken.token())) {
