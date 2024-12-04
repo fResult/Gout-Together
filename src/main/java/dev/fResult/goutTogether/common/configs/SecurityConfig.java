@@ -9,7 +9,6 @@ import com.nimbusds.jose.proc.SecurityContext;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.common.models.RSAKeyProperties;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;

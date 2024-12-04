@@ -19,6 +19,7 @@ public record AuthenticatedUser(int userId, String email, String password, UserR
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return switch (roleName) {
+      case UserRoleName.COMPANY -> List.of(new SimpleGrantedAuthority(UserRoleName.COMPANY.name()));
       case UserRoleName.ADMIN -> List.of(new SimpleGrantedAuthority(UserRoleName.ADMIN.name()));
       default -> List.of(new SimpleGrantedAuthority(UserRoleName.CONSUMER.name()));
     };
