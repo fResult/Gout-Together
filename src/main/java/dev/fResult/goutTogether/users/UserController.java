@@ -1,5 +1,7 @@
 package dev.fResult.goutTogether.users;
 
+import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
+
 import dev.fResult.goutTogether.auths.dtos.UserForgotPasswordRequest;
 import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
@@ -12,6 +14,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +45,15 @@ public class UserController {
   @GetMapping("/{id}")
   public ResponseEntity<UserInfoResponse> getUserById(@PathVariable int id) {
     return ResponseEntity.ok(userService.getUserById(id));
+  }
+
+  @GetMapping("/me")
+  public ResponseEntity<UserInfoResponse> getMyUser(Authentication authentication) {
+    var jwt = (Jwt) authentication.getPrincipal();
+    var claims = jwt.getClaims();
+    var userId = (long) claims.get(RESOURCE_ID_CLAIM);
+
+    return ResponseEntity.ok(userService.getUserById(Math.toIntExact(userId)));
   }
 
   @PostMapping

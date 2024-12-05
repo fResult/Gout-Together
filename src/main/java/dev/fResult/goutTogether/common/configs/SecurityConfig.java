@@ -167,6 +167,8 @@ public class SecurityConfig {
             "/api/v1/tour-companies/{id:\\d+}",
             "/api/v1/tour-companies/{id:\\d+}/approve")
         .hasRole(UserRoleName.ADMIN.name())
+        .requestMatchers(HttpMethod.GET, "/api/v1/tour-companies/me")
+          .hasRole(UserRoleName.COMPANY.name())
         .requestMatchers(HttpMethod.DELETE, "/api/v1/tour-companies/{id:\\d+}")
           .hasRole(UserRoleName.ADMIN.name())
 
@@ -179,6 +181,8 @@ public class SecurityConfig {
 
         // Users
         .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+        .requestMatchers(HttpMethod.GET, "/api/v1/users/me")
+          .hasAnyRole(UserRoleName.ADMIN.name(), UserRoleName.CONSUMER.name())
         .requestMatchers("/api/v1/users/**").hasRole(UserRoleName.ADMIN.name())
 
         // Administration purposes
