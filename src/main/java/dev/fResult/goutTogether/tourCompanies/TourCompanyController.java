@@ -1,5 +1,7 @@
 package dev.fResult.goutTogether.tourCompanies;
 
+import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
+
 import dev.fResult.goutTogether.common.utils.StringUtil;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
@@ -11,6 +13,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +43,15 @@ public class TourCompanyController {
     logger.debug("[getTourCompanyById] Getting {} id [{}]", TourCompany.class.getSimpleName(), id);
 
     return ResponseEntity.ok(tourCompanyService.getTourCompanyById(id));
+  }
+
+  @GetMapping("/me")
+  public ResponseEntity<TourCompanyResponse> getMyTourCompany(Authentication authentication) {
+    var jwt = (Jwt) authentication.getPrincipal();
+    var claims = jwt.getClaims();
+    var tourCompanyId = (long) claims.get(RESOURCE_ID_CLAIM);
+
+    return ResponseEntity.ok(tourCompanyService.getTourCompanyById(Math.toIntExact(tourCompanyId)));
   }
 
   @PostMapping
@@ -77,7 +90,6 @@ public class TourCompanyController {
     tourCompanyService.deleteTourCompanyById(id);
 
     return ResponseEntity.ok(
-        String.format(
-            "Delete %s by id [%d] successfully", TourCompany.class.getSimpleName(), id));
+        String.format("Delete %s by id [%d] successfully", TourCompany.class.getSimpleName(), id));
   }
 }
