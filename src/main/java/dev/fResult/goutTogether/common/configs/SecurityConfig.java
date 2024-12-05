@@ -20,12 +20,14 @@ import java.util.Base64;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -53,22 +55,7 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
     return httpSecurity
-        .authorizeHttpRequests(
-            authorize ->
-                authorize
-                    .requestMatchers("/api/v1/auths/login")
-                    .permitAll()
-                    .requestMatchers("/api/v1/auths/refresh")
-                    .permitAll()
-                    .requestMatchers("/api/v1/auths/logout")
-                    .hasAnyRole(
-                        UserRoleName.ADMIN.name(),
-                        UserRoleName.CONSUMER.name(),
-                        UserRoleName.COMPANY.name())
-                    .requestMatchers("/api/v1/admins/**")
-                    .hasRole(UserRoleName.ADMIN.name())
-                    .anyRequest()
-                    .permitAll())
+        .authorizeHttpRequests(this::configureRequestAuthorization)
         .csrf(AbstractHttpConfigurer::disable)
         .cors(AbstractHttpConfigurer::disable)
         .httpBasic(AbstractHttpConfigurer::disable)
@@ -148,6 +135,51 @@ public class SecurityConfig {
     var publicKey = (RSAPublicKey) keyFactory.generatePublic(keySpecX509);
 
     return new RSAKeyProperties(publicKey, privateKey);
+  }
+
+  /**
+   * NOTE:
+   * Alternative solution, we can set by `@PreAuthorize("hasRole('ROLE_XXX')")` on the @GetMapping, @XMapping
+   * or `@PreAuthorize("hasRole('ROLE_XXX') and hasRole('ROLE_YYY')")` if many roles to set
+   */
+  private void configureRequestAuthorization(
+      AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry
+          authorize) {
+
+    authorize
+        // Actuator
+        .requestMatchers("/actuator/health").permitAll()
+        .requestMatchers("/actuator/metrics").permitAll()
+        // Auth
+        .requestMatchers("/api/v1/auths/login").permitAll()
+        .requestMatchers("/api/v1/auths/refresh").permitAll()
+        // Tour Companies
+        .requestMatchers(
+                HttpMethod.GET,
+                "/api/v1/tour-companies",
+                "/api/v1/tour-companies/{id:\\d+}")
+        .hasRole(UserRoleName.ADMIN.name())
+        .requestMatchers(HttpMethod.POST, "/api/v1/tour-companies").permitAll()
+        .requestMatchers(
+                HttpMethod.PATCH,
+                "/api/v1/tour-companies/{id:\\d+}",
+                "/api/v1/tour-companies/{id:\\d+}/approve")
+        .hasRole(UserRoleName.ADMIN.name())
+        .requestMatchers(HttpMethod.DELETE, "/api/v1/tour-companies/{id:\\d+}")
+        .hasRole(UserRoleName.ADMIN.name())
+        // Tours
+        .requestMatchers(HttpMethod.GET, "/api/v1/tours").permitAll()
+        .requestMatchers(HttpMethod.GET, "/api/v1/tours/{id:\\d+}").permitAll()
+        .requestMatchers(HttpMethod.DELETE, "/api/v1/tours/{id:\\d+}")
+        .hasRole(UserRoleName.ADMIN.name())
+        .requestMatchers("/api/v1/tours").hasRole(UserRoleName.COMPANY.name())
+        // Users
+        .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+        .requestMatchers("/api/v1/users/**").hasRole(UserRoleName.ADMIN.name())
+        // Administration purposes
+        .requestMatchers("/api/v1/admins/**").hasRole(UserRoleName.ADMIN.name())
+        // The rest endpoints
+        .anyRequest().authenticated();
   }
 
   private OAuth2ResourceServerConfigurer<HttpSecurity> configureJwtResourceServer(
