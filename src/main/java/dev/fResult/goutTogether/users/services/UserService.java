@@ -16,6 +16,8 @@ public interface UserService {
 
   UserInfoResponse updateUserById(int id, UserUpdateRequest user);
 
+  UpdatePasswordResult changePasswordByUserId(int id, UserChangePasswordRequest body);
+
   UpdatePasswordResult changePassword(String email, UserChangePasswordRequest body);
 
   boolean deleteUserById(int id);

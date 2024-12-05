@@ -183,9 +183,10 @@ public class SecurityConfig {
         .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
         .requestMatchers(HttpMethod.GET, "/api/v1/users/me")
           .hasAnyRole(UserRoleName.ADMIN.name(), UserRoleName.CONSUMER.name())
-        .requestMatchers(HttpMethod.PATCH, "/api/v1/users/change-password")
-          .hasAnyRole(UserRoleName.ADMIN.name(), UserRoleName.CONSUMER.name())
         .requestMatchers("/api/v1/users/**").hasRole(UserRoleName.ADMIN.name())
+
+        // Self Managed Users
+        .requestMatchers("api/v1/me/**").hasRole(UserRoleName.CONSUMER.name())
 
         // Administration purposes
         .requestMatchers("/api/v1/admins/**").hasRole(UserRoleName.ADMIN.name())

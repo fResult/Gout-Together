@@ -20,6 +20,8 @@ public interface AuthService {
 
   UserLogin createUserCredential(int userId, String email, String password);
 
+  UserLogin updateUserPasswordByUserId(int userId, String oldPassword, String newPassword);
+
   UserLogin updateUserPassword(String email, String oldPassword, String newPassword);
 
   boolean deleteUserCredentialByUserId(int userId);

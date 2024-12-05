@@ -75,15 +75,14 @@ public class UserController {
   }
 
   // TODO: Re-think the forgot password flow
-  @PatchMapping("/change-password")
-  public ResponseEntity<UpdatePasswordResult> changePassword(
-      Authentication authentication, @Validated @RequestBody UserChangePasswordRequest body) {
+  @PatchMapping("/{id}/password")
+  public ResponseEntity<UpdatePasswordResult> changePasswordByUserId(
+      @PathVariable int id, @Validated @RequestBody UserChangePasswordRequest body) {
 
-    var jwt = (Jwt) authentication.getPrincipal();
-    var claims = jwt.getClaims();
-    var email = (String) claims.get("sub");
+    logger.debug(
+        "[changePasswordByUserId] Changing {} password by id [{}]", User.class.getSimpleName(), id);
 
-    return ResponseEntity.ok(userService.changePassword(email, body));
+    return ResponseEntity.ok(userService.changePasswordByUserId(id, body));
   }
 
   @DeleteMapping("/{id}")
