@@ -150,34 +150,40 @@ public class SecurityConfig {
         // Actuator
         .requestMatchers("/actuator/health").permitAll()
         .requestMatchers("/actuator/metrics").permitAll()
+
         // Auth
         .requestMatchers("/api/v1/auths/login").permitAll()
         .requestMatchers("/api/v1/auths/refresh").permitAll()
+
         // Tour Companies
         .requestMatchers(
-                HttpMethod.GET,
-                "/api/v1/tour-companies",
-                "/api/v1/tour-companies/{id:\\d+}")
-        .hasRole(UserRoleName.ADMIN.name())
+            HttpMethod.GET,
+            "/api/v1/tour-companies",
+            "/api/v1/tour-companies/{id:\\d+}")
+          .hasRole(UserRoleName.ADMIN.name())
         .requestMatchers(HttpMethod.POST, "/api/v1/tour-companies").permitAll()
         .requestMatchers(
-                HttpMethod.PATCH,
-                "/api/v1/tour-companies/{id:\\d+}",
-                "/api/v1/tour-companies/{id:\\d+}/approve")
+            HttpMethod.PATCH,
+            "/api/v1/tour-companies/{id:\\d+}",
+            "/api/v1/tour-companies/{id:\\d+}/approve")
         .hasRole(UserRoleName.ADMIN.name())
         .requestMatchers(HttpMethod.DELETE, "/api/v1/tour-companies/{id:\\d+}")
-        .hasRole(UserRoleName.ADMIN.name())
+          .hasRole(UserRoleName.ADMIN.name())
+
         // Tours
         .requestMatchers(HttpMethod.GET, "/api/v1/tours").permitAll()
         .requestMatchers(HttpMethod.GET, "/api/v1/tours/{id:\\d+}").permitAll()
         .requestMatchers(HttpMethod.DELETE, "/api/v1/tours/{id:\\d+}")
-        .hasRole(UserRoleName.ADMIN.name())
+            .hasRole(UserRoleName.ADMIN.name())
         .requestMatchers("/api/v1/tours").hasRole(UserRoleName.COMPANY.name())
+
         // Users
         .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
         .requestMatchers("/api/v1/users/**").hasRole(UserRoleName.ADMIN.name())
+
         // Administration purposes
         .requestMatchers("/api/v1/admins/**").hasRole(UserRoleName.ADMIN.name())
+
         // The rest endpoints
         .anyRequest().authenticated();
   }
