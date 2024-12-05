@@ -41,4 +41,15 @@ public class RoleService {
 
     return boundUserRole;
   }
+
+  public boolean deleteUserRoleByUserId(int userId) {
+    logger.debug(
+        "[deleteRoleByUserId] {} userId [{}] is deleting", Role.class.getSimpleName(), userId);
+
+    userRoleRepository.deleteByUserId(userId);
+    logger.info(
+        "[deleteRoleByUserId] {} userId [{}] is deleted", Role.class.getSimpleName(), userId);
+
+    return true;
+  }
 }

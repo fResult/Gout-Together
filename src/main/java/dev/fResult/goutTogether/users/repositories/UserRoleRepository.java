@@ -8,4 +8,6 @@ import org.springframework.data.repository.ListCrudRepository;
 
 public interface UserRoleRepository extends ListCrudRepository<UserRole, Integer> {
   Optional<UserRole> findOneByUserId(AggregateReference<User, Integer> userId);
+
+  void deleteByUserId(int userId);
 }
