@@ -14,10 +14,12 @@ import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.repositories.RefreshTokenRepository;
 import dev.fResult.goutTogether.auths.repositories.UserLoginRepository;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.exceptions.RefreshTokenExpiredException;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
+import dev.fResult.goutTogether.users.entities.User;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +46,7 @@ public class AuthServiceImpl implements AuthService {
   private final TokenService tokenService;
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
+  private final UserDetailsService userDetailsService;
 
   public AuthServiceImpl(
       UserLoginRepository userLoginRepository,
@@ -50,7 +54,8 @@ public class AuthServiceImpl implements AuthService {
       TokenService tokenService,
       PasswordEncoder passwordEncoder,
       AuthenticationManager authenticationManager,
-      RefreshTokenRepository refreshTokenRepository) {
+      RefreshTokenRepository refreshTokenRepository,
+      UserDetailsService userDetailsService) {
 
     this.userLoginRepository = userLoginRepository;
     this.tourCompanyLoginRepository = tourCompanyLoginRepository;
@@ -58,6 +63,7 @@ public class AuthServiceImpl implements AuthService {
     this.passwordEncoder = passwordEncoder;
     this.authenticationManager = authenticationManager;
     this.refreshTokenRepository = refreshTokenRepository;
+    this.userDetailsService = userDetailsService;
   }
 
   @Override
@@ -94,6 +100,17 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
+  public Optional<UserLogin> findUserCredentialByEmailAndPassword(
+      String userEmail, String password) {
+
+    var credentialToCheck = userLoginRepository.findOneByEmail(userEmail);
+    Predicate<UserLogin> checkUserPassword =
+        credential -> passwordEncoder.matches(password, credential.password());
+
+    return credentialToCheck.filter(checkUserPassword);
+  }
+
+  @Override
   public UserLogin createUserCredential(int userId, String email, String password) {
     logger.debug(
         "[createUserLogin] Creating new {} for userId: {}",
@@ -110,6 +127,21 @@ public class AuthServiceImpl implements AuthService {
         createdUserLogin);
 
     return createdUserLogin;
+  }
+
+  @Override
+  public UserLogin updateUserPassword(String email, String oldPassword, String newPassword) {
+    var userCredential =
+        findUserCredentialByEmailAndPassword(email, oldPassword)
+            .orElseThrow(
+                () ->
+                    new EntityNotFoundException(
+                        String.format("%s password is in correct", User.class.getSimpleName())));
+    var passwordToUpdate = passwordEncoder.encode(newPassword);
+    var credentialToUpdate =
+        UserLogin.of(userCredential.id(), userCredential.userId(), email, passwordToUpdate);
+
+    return userLoginRepository.save(credentialToUpdate);
   }
 
   @Override

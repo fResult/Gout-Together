@@ -2,7 +2,7 @@ package dev.fResult.goutTogether.users;
 
 import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
 
-import dev.fResult.goutTogether.auths.dtos.UserForgotPasswordRequest;
+import dev.fResult.goutTogether.auths.dtos.UserChangePasswordRequest;
 import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
@@ -75,10 +75,15 @@ public class UserController {
   }
 
   // TODO: Re-think the forgot password flow
-  @PatchMapping("/forgot-password")
+  @PatchMapping("/change-password")
   public ResponseEntity<UpdatePasswordResult> changePassword(
-      @RequestBody UserForgotPasswordRequest body) {
-    return ResponseEntity.ok(userService.changePassword(body));
+      Authentication authentication, @Validated @RequestBody UserChangePasswordRequest body) {
+
+    var jwt = (Jwt) authentication.getPrincipal();
+    var claims = jwt.getClaims();
+    var email = (String) claims.get("sub");
+
+    return ResponseEntity.ok(userService.changePassword(email, body));
   }
 
   @DeleteMapping("/{id}")

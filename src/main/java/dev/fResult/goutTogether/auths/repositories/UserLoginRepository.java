@@ -14,4 +14,6 @@ public interface UserLoginRepository extends ListCrudRepository<UserLogin, Integ
     Optional<UserLogin> findOneByEmail(String email);
 
     Optional<UserLogin> findOneByUserId(AggregateReference<User, Integer> userId);
+
+    Optional<UserLogin> findOneByEmailAndPassword(String userEmail, String password);
 }
