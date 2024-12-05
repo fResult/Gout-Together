@@ -1,6 +1,6 @@
 package dev.fResult.goutTogether.users.services;
 
-import dev.fResult.goutTogether.auths.dtos.UserForgotPasswordRequest;
+import dev.fResult.goutTogether.auths.dtos.UserChangePasswordRequest;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.services.AuthService;
 import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
@@ -82,6 +82,8 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserInfoResponse updateUserById(int id, UserUpdateRequest body) {
+    logger.debug("[updateUserById] {} id {} is updating", User.class.getSimpleName(), id);
+
     var toUserUpdate = UserUpdateRequest.dtoToUserUpdate(body);
     var userToUpdate =
         userRepository
@@ -95,8 +97,17 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UpdatePasswordResult changePassword(UserForgotPasswordRequest body) {
-    throw new UnsupportedOperationException("Not implemented yet");
+  public UpdatePasswordResult changePassword(String email, UserChangePasswordRequest body) {
+    logger.debug("[changePassword] {} email {} is updating", User.class.getSimpleName(), email);
+    var updatedUserCredential =
+        authService.updateUserPassword(email, body.oldPassword(), body.newPassword());
+
+    logger.info(
+        "[changePassword] {} id [{}] is updated",
+        UserLogin.class.getSimpleName(),
+        updatedUserCredential.id());
+
+    return UpdatePasswordResult.SUCCESS;
   }
 
   @Override

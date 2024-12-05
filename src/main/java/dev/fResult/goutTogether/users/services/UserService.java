@@ -1,6 +1,6 @@
 package dev.fResult.goutTogether.users.services;
 
-import dev.fResult.goutTogether.auths.dtos.UserForgotPasswordRequest;
+import dev.fResult.goutTogether.auths.dtos.UserChangePasswordRequest;
 import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
@@ -16,7 +16,7 @@ public interface UserService {
 
   UserInfoResponse updateUserById(int id, UserUpdateRequest user);
 
-  UpdatePasswordResult changePassword(UserForgotPasswordRequest body);
+  UpdatePasswordResult changePassword(String email, UserChangePasswordRequest body);
 
   boolean deleteUserById(int id);
 }

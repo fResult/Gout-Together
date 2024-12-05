@@ -16,7 +16,11 @@ public interface AuthService {
 
   Optional<UserLogin> findUserCredentialByEmail(String userEmail);
 
+  Optional<UserLogin> findUserCredentialByEmailAndPassword(String userEmail, String password);
+
   UserLogin createUserCredential(int userId, String email, String password);
+
+  UserLogin updateUserPassword(String email, String oldPassword, String newPassword);
 
   boolean deleteUserCredentialByUserId(int userId);
 
