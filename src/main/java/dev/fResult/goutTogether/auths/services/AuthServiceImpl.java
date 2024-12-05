@@ -130,6 +130,26 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
+  public UserLogin updateUserPasswordByUserId(int userId, String oldPassword, String newPassword) {
+    Predicate<UserLogin> checkUserPassword =
+        credential -> passwordEncoder.matches(oldPassword, credential.password());
+    var userCredential =
+        Optional.of(findUserCredentialByUserId(userId))
+            .filter(checkUserPassword)
+            .orElseThrow(
+                () ->
+                    new EntityNotFoundException(
+                        String.format("%s password is in correct", User.class.getSimpleName())));
+
+    var passwordToUpdate = passwordEncoder.encode(newPassword);
+    var credentialToUpdate =
+        UserLogin.of(
+            userCredential.id(), userCredential.userId(), userCredential.email(), passwordToUpdate);
+
+    return userLoginRepository.save(credentialToUpdate);
+  }
+
+  @Override
   public UserLogin updateUserPassword(String email, String oldPassword, String newPassword) {
     var userCredential =
         findUserCredentialByEmailAndPassword(email, oldPassword)
