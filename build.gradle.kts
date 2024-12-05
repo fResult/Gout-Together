@@ -49,6 +49,7 @@ dependencies {
   implementation("org.flywaydb:flyway-core")
   implementation("org.flywaydb:flyway-database-postgresql")
   implementation("io.github.cdimascio:java-dotenv:5.2.2")
+  implementation("commons-validator:commons-validator:1.9.0")
 
   runtimeOnly("io.micrometer:micrometer-registry-prometheus")
   runtimeOnly("org.postgresql:postgresql")
