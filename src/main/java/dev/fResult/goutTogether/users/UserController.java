@@ -47,15 +47,6 @@ public class UserController {
     return ResponseEntity.ok(userService.getUserById(id));
   }
 
-  @GetMapping("/me")
-  public ResponseEntity<UserInfoResponse> getMyUser(Authentication authentication) {
-    var jwt = (Jwt) authentication.getPrincipal();
-    var claims = jwt.getClaims();
-    var userId = (long) claims.get(RESOURCE_ID_CLAIM);
-
-    return ResponseEntity.ok(userService.getUserById(Math.toIntExact(userId)));
-  }
-
   @PostMapping
   public ResponseEntity<UserInfoResponse> register(
       @Validated @RequestBody UserRegistrationRequest body) {
