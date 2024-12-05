@@ -5,10 +5,11 @@ import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
 import dev.fResult.goutTogether.users.dtos.UserUpdateRequest;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface UserService {
-  List<UserInfoResponse> getUsers();
+  Page<UserInfoResponse> getUsersByFirstName(String keyword, Pageable pageable);
 
   UserInfoResponse getUserById(int id);
 

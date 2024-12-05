@@ -13,13 +13,15 @@ import dev.fResult.goutTogether.users.dtos.UserUpdateRequest;
 import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.repositories.UserRepository;
 import dev.fResult.goutTogether.wallets.services.WalletService;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,14 +46,15 @@ public class UserServiceImpl implements UserService {
     this.roleService = roleService;
   }
 
-  @Override
-  public List<UserInfoResponse> getUsers() {
+  public Page<UserInfoResponse> getUsersByFirstName(String keyword, Pageable pageable) {
     logger.debug("[getUsers] Getting all {}s", User.class.getSimpleName());
-    var users = userRepository.findAll();
-    var userIdToCredentialMap = buildUserIdToCredentialMap(users);
+    logger.info("By First Name: {}", keyword);
+    var userPage = userRepository.findByFirstNameContaining(keyword, pageable);
+    var userIdToCredentialMap = buildUserIdToCredentialMap(userPage);
     var toResponse = UserInfoResponse.fromUserDaoWithUserCredentialMap(userIdToCredentialMap);
+    var userInfos = userPage.stream().map(toResponse).toList();
 
-    return users.stream().map(toResponse).toList();
+    return new PageImpl<>(userInfos);
   }
 
   @Override
@@ -141,12 +144,12 @@ public class UserServiceImpl implements UserService {
     return true;
   }
 
-  private Set<Integer> buildUniqueUserIds(List<User> users) {
-    return users.stream().map(User::id).collect(Collectors.toSet());
+  private Set<Integer> buildUniqueUserIds(Page<User> userPage) {
+    return userPage.stream().map(User::id).collect(Collectors.toSet());
   }
 
-  private Map<Integer, UserLogin> buildUserIdToCredentialMap(List<User> users) {
-    var userIds = buildUniqueUserIds(users);
+  private Map<Integer, UserLogin> buildUserIdToCredentialMap(Page<User> userPage) {
+    var userIds = buildUniqueUserIds(userPage);
 
     return authService.findUserCredentialsByUserIds(userIds).stream()
         .collect(Collectors.toMap(cred -> cred.userId().getId(), Function.identity()));

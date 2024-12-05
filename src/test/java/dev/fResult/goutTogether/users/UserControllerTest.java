@@ -1,7 +1,6 @@
 package dev.fResult.goutTogether.users;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -17,14 +16,18 @@ import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.services.UserService;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(UserController.class)
@@ -49,18 +52,32 @@ public class UserControllerTest {
   @Test
   void whenGetUsersThenSuccess() throws Exception {
     // Arrange
+    var TARGET_FIRST_NAME = "John";
+    var params =
+        new LinkedMultiValueMap<>(
+            Map.of(
+                "page",
+                List.of("0"),
+                "size",
+                List.of("10"),
+                "first-name",
+                List.of(TARGET_FIRST_NAME)));
+
     var mockUserResp =
-        UserInfoResponse.of(USER_ID, "John", "Wick", "john.wick@exampl.com", "0999999999");
-    when(userService.getUsers()).thenReturn(List.of(mockUserResp));
+        UserInfoResponse.of(
+            USER_ID, TARGET_FIRST_NAME, "Wick", "john.wick@exampl.com", "0999999999");
+    var userPage = new PageImpl<UserInfoResponse>(List.of(mockUserResp));
+
+    when(userService.getUsersByFirstName(anyString(), any(Pageable.class))).thenReturn(userPage);
 
     // Actual
-    var resultActions = mockMvc.perform(get(USER_API));
+    var resultActions = mockMvc.perform(get(USER_API).params(params));
 
     // Assert
     resultActions
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value(USER_ID));
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content[0].id").value(USER_ID));
   }
 
   @Test
