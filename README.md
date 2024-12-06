@@ -22,6 +22,12 @@ openssl rsa -pubout -in private_key.pem -out public_key.pem
 openssl pkcs8 -topk8 -in private_key.pem -inform pem -out private_key_pkcs8.pem -outform pem -nocrypt
 ```
 
+### To Assign Public/Private Key for Spring Security Config
+```shell
+base64 -i src/main/resources/private_key_pkcs8.pem # Then put the Base64 text to the `OAUTH_PRIVATE_KEY_BASE64` env var
+base64 -i src/main/resources/public_key.pem # Then put the Base64 text to the `OAUTH_PUBLIC_KEY_BASE64` env var
+```
+
 ### Start the application
 
 #### In development mode with OpenTelemetry Java Agent
