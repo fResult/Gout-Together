@@ -6,15 +6,22 @@ import static org.mockito.Mockito.*;
 
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.services.AuthService;
+import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
 import dev.fResult.goutTogether.users.dtos.UserUpdateRequest;
+import dev.fResult.goutTogether.users.entities.Role;
 import dev.fResult.goutTogether.users.entities.User;
+import dev.fResult.goutTogether.users.entities.UserRole;
 import dev.fResult.goutTogether.users.repositories.UserRepository;
+import dev.fResult.goutTogether.users.services.RoleService;
 import dev.fResult.goutTogether.users.services.UserServiceImpl;
+import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import dev.fResult.goutTogether.wallets.services.WalletService;
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Disabled;
@@ -40,6 +47,7 @@ class UserServiceTest {
   @Mock UserRepository userRepository;
   @Mock AuthService authService;
   @Mock WalletService walletService;
+  @Mock RoleService roleService;
 
   @Test
   void whenGetUsersThenSuccess() {
@@ -131,12 +139,14 @@ class UserServiceTest {
   @Disabled
   void whenRegisterUserThenSuccess() {
     // Arrange
+    AggregateReference<User, Integer> mockUserRef = AggregateReference.to(USER_ID);
+    AggregateReference<Role, Integer> mockRoleRef =
+        AggregateReference.to(UserRoleName.CONSUMER.getId());
     var body =
         UserRegistrationRequest.of("John", "Wick", "john.w@example.com", "password", "0999999999");
     var mockUserToRegister =
         User.of(USER_ID, body.firstName(), body.lastName(), body.phoneNumber());
-    var mockUserCredential =
-        UserLogin.of(10, AggregateReference.to(USER_ID), body.email(), "encryptedPassword");
+    var mockUserCredential = UserLogin.of(10, mockUserRef, body.email(), "encryptedPassword");
     var expectedRegisteredUser =
         UserInfoResponse.of(
             mockUserToRegister.id(),
@@ -144,10 +154,16 @@ class UserServiceTest {
             body.lastName(),
             body.email(),
             body.phoneNumber());
+    var mockBoundUserRole = UserRole.of(1, mockUserRef, mockRoleRef);
+    var mockCreatedWallet = UserWallet.of(1, mockUserRef, Instant.now(), BigDecimal.ZERO);
+
     when(authService.findUserCredentialByEmail(anyString())).thenReturn(Optional.empty());
     when(userRepository.save(any(User.class))).thenReturn(mockUserToRegister);
+    when(roleService.bindNewUser(anyInt(), any(UserRoleName.class))).thenReturn(mockBoundUserRole);
     when(authService.createUserCredential(anyInt(), anyString(), anyString()))
         .thenReturn(mockUserCredential);
+    when(walletService.createConsumerWallet(expectedRegisteredUser.id()))
+        .thenReturn(mockCreatedWallet);
 
     // Actual
     var actualRegisteredUser = userService.registerUser(body);
