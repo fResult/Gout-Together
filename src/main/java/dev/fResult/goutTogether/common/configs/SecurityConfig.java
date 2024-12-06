@@ -17,9 +17,9 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -46,10 +46,14 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-  private final ResourceLoader resourceLoader;
+  private final String privateKeyBase64;
+  private final String publicKeyBase64;
 
-  public SecurityConfig(ResourceLoader resourceLoader) {
-    this.resourceLoader = resourceLoader;
+  public SecurityConfig(
+      @Value("${oauth.private-key}") String privateKeyBase64,
+      @Value("${oauth.public-key}") String publicKeyBase64) {
+    this.privateKeyBase64 = privateKeyBase64;
+    this.publicKeyBase64 = publicKeyBase64;
   }
 
   @Bean
@@ -109,11 +113,11 @@ public class SecurityConfig {
   public RSAKeyProperties rsaInstance()
       throws InvalidKeySpecException, IOException, NoSuchAlgorithmException {
 
-    var privateKeyPkcs8Resource = resourceLoader.getResource("classPath:private_key_pkcs8.pem");
-    var publicKeyResource = resourceLoader.getResource("classPath:public_key.pem");
+    var privateKeyPkcs8Bytes = Base64.getDecoder().decode(privateKeyBase64);
+    var publicKeyBytes = Base64.getDecoder().decode(publicKeyBase64);
 
-    var privateKeyContent = new String(privateKeyPkcs8Resource.getContentAsByteArray());
-    var publicKeyContent = new String(publicKeyResource.getContentAsByteArray());
+    var privateKeyContent = new String(privateKeyPkcs8Bytes);
+    var publicKeyContent = new String(publicKeyBytes);
 
     privateKeyContent =
         privateKeyContent
@@ -138,9 +142,9 @@ public class SecurityConfig {
   }
 
   /**
-   * NOTE:
-   * Alternative solution, we can set by `@PreAuthorize("hasRole('ROLE_XXX')")` on the @GetMapping, @XMapping
-   * or `@PreAuthorize("hasRole('ROLE_XXX') and hasRole('ROLE_YYY')")` if many roles to set
+   * NOTE: Alternative solution, we can set by `@PreAuthorize("hasRole('ROLE_XXX')")` on
+   * the @GetMapping, @XMapping or `@PreAuthorize("hasRole('ROLE_XXX') and hasRole('ROLE_YYY')")` if
+   * many roles to set
    */
   private void configureRequestAuthorization(
       AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry
@@ -148,51 +152,60 @@ public class SecurityConfig {
 
     authorize
         // Actuator
-        .requestMatchers("/actuator/health").permitAll()
-        .requestMatchers("/actuator/metrics").permitAll()
+        .requestMatchers("/actuator/health")
+        .permitAll()
+        .requestMatchers("/actuator/metrics")
+        .permitAll()
 
         // Auth
-        .requestMatchers("/api/v1/auths/login").permitAll()
-        .requestMatchers("/api/v1/auths/refresh").permitAll()
+        .requestMatchers("/api/v1/auths/login")
+        .permitAll()
+        .requestMatchers("/api/v1/auths/refresh")
+        .permitAll()
 
         // Tour Companies
         .requestMatchers(
-            HttpMethod.GET,
-            "/api/v1/tour-companies",
-            "/api/v1/tour-companies/{id:\\d+}")
-          .hasRole(UserRoleName.ADMIN.name())
-        .requestMatchers(HttpMethod.POST, "/api/v1/tour-companies").permitAll()
+            HttpMethod.GET, "/api/v1/tour-companies", "/api/v1/tour-companies/{id:\\d+}")
+        .hasRole(UserRoleName.ADMIN.name())
+        .requestMatchers(HttpMethod.POST, "/api/v1/tour-companies")
+        .permitAll()
         .requestMatchers(
             HttpMethod.PATCH,
             "/api/v1/tour-companies/{id:\\d+}",
             "/api/v1/tour-companies/{id:\\d+}/approve")
         .hasRole(UserRoleName.ADMIN.name())
         .requestMatchers(HttpMethod.GET, "/api/v1/tour-companies/me")
-          .hasRole(UserRoleName.COMPANY.name())
+        .hasRole(UserRoleName.COMPANY.name())
         .requestMatchers(HttpMethod.DELETE, "/api/v1/tour-companies/{id:\\d+}")
-          .hasRole(UserRoleName.ADMIN.name())
+        .hasRole(UserRoleName.ADMIN.name())
 
         // Tours
-        .requestMatchers(HttpMethod.GET, "/api/v1/tours").permitAll()
-        .requestMatchers(HttpMethod.GET, "/api/v1/tours/{id:\\d+}").permitAll()
+        .requestMatchers(HttpMethod.GET, "/api/v1/tours", "/api/v1/tours/{id:\\d+}")
+        .permitAll()
         .requestMatchers(HttpMethod.DELETE, "/api/v1/tours/{id:\\d+}")
-            .hasRole(UserRoleName.ADMIN.name())
-        .requestMatchers("/api/v1/tours").hasRole(UserRoleName.COMPANY.name())
+        .hasRole(UserRoleName.ADMIN.name())
+        .requestMatchers("/api/v1/tours")
+        .hasRole(UserRoleName.COMPANY.name())
 
         // Users
-        .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+        .requestMatchers(HttpMethod.POST, "/api/v1/users")
+        .permitAll()
         .requestMatchers(HttpMethod.GET, "/api/v1/users/me")
-          .hasAnyRole(UserRoleName.ADMIN.name(), UserRoleName.CONSUMER.name())
-        .requestMatchers("/api/v1/users/**").hasRole(UserRoleName.ADMIN.name())
+        .hasAnyRole(UserRoleName.ADMIN.name(), UserRoleName.CONSUMER.name())
+        .requestMatchers("/api/v1/users/**")
+        .hasRole(UserRoleName.ADMIN.name())
 
         // Self Managed Users
-        .requestMatchers("api/v1/me/**").hasRole(UserRoleName.CONSUMER.name())
+        .requestMatchers("api/v1/me/**")
+        .hasRole(UserRoleName.CONSUMER.name())
 
         // Administration purposes
-        .requestMatchers("/api/v1/admins/**").hasRole(UserRoleName.ADMIN.name())
+        .requestMatchers("/api/v1/admins/**")
+        .hasRole(UserRoleName.ADMIN.name())
 
         // The rest endpoints
-        .anyRequest().authenticated();
+        .anyRequest()
+        .authenticated();
   }
 
   private OAuth2ResourceServerConfigurer<HttpSecurity> configureJwtResourceServer(
