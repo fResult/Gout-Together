@@ -44,10 +44,10 @@ class UserServiceTest {
 
   @InjectMocks private UserServiceImpl userService;
 
-  @Mock UserRepository userRepository;
-  @Mock AuthService authService;
-  @Mock WalletService walletService;
-  @Mock RoleService roleService;
+  @Mock private UserRepository userRepository;
+  @Mock private AuthService authService;
+  @Mock private WalletService walletService;
+  @Mock private RoleService roleService;
 
   @Test
   void whenGetUsersThenSuccess() {
@@ -159,7 +159,8 @@ class UserServiceTest {
 
     when(authService.findUserCredentialByEmail(anyString())).thenReturn(Optional.empty());
     when(userRepository.save(any(User.class))).thenReturn(mockUserToRegister);
-    when(roleService.bindNewUser(anyInt(), any(UserRoleName.class))).thenReturn(mockBoundUserRole);
+    when(roleService.bindNewUser(anyInt(), eq(UserRoleName.CONSUMER)))
+        .thenReturn(mockBoundUserRole);
     when(authService.createUserCredential(anyInt(), anyString(), anyString()))
         .thenReturn(mockUserCredential);
     when(walletService.createConsumerWallet(expectedRegisteredUser.id()))
