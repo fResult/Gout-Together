@@ -16,6 +16,6 @@ public interface RefreshTokenRepository extends ListCrudRepository<RefreshToken,
       UPDATE refresh_tokens
       SET is_expired = :isExpired
       WHERE usage = :usage AND resource_id = :resourceId;
-  """)
+      """)
   void updateRefreshTokenByResource(UserRoleName usage, int resourceId, boolean isExpired);
 }
