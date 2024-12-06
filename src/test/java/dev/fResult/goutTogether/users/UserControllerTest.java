@@ -85,7 +85,7 @@ public class UserControllerTest {
     // Arrange
     var mockUserResp =
         UserInfoResponse.of(USER_ID, "John", "Wick", "john.wick@example.com", "0999999999");
-    when(userService.getUserById(USER_ID)).thenReturn(mockUserResp);
+    when(userService.getUserById(anyInt())).thenReturn(mockUserResp);
 
     // Actual
     var resultActions = mockMvc.perform(get(USER_API + "/{id}", USER_ID));
@@ -216,7 +216,7 @@ public class UserControllerTest {
     // Arrange
     var responseMessage =
         String.format("Delete %s by id [%d] successfully", User.class.getSimpleName(), USER_ID);
-    when(userService.deleteUserById(USER_ID)).thenReturn(true);
+    when(userService.deleteUserById(anyInt())).thenReturn(true);
 
     // Actual
     var resultActions = mockMvc.perform(delete(USER_API + "/{id}", USER_ID));
