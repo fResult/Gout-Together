@@ -19,6 +19,16 @@
       "name": "token.refresh-token-expired-in-seconds",
       "type": "java.lang.Integer",
       "description": "Duration of expiration of refresh token in 'seconds'."
+    },
+    {
+      "name": "oauth.private-key",
+      "type": "java.lang.String",
+      "description": "oauth.private-key's description"
+    },
+    {
+      "name": "oauth.public-key",
+      "type": "java.lang.String",
+      "description": "oauth.public-key's description"
     }
   ]
 }
