@@ -70,8 +70,9 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
 
 - OpenTelemetry Java Agent
 - Spring Security
-- Unit Test with JUnit 5 and Mockito
+- Unit Testing with JUnit 5 and Mockito
 - Config Authorization with OAuth2ResourceServer
+- Integration Testing
 
 ### Things I did different
 
