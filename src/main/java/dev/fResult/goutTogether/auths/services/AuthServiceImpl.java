@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +45,6 @@ public class AuthServiceImpl implements AuthService {
   private final TokenService tokenService;
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
-  private final UserDetailsService userDetailsService;
 
   public AuthServiceImpl(
       UserLoginRepository userLoginRepository,
@@ -54,8 +52,7 @@ public class AuthServiceImpl implements AuthService {
       TokenService tokenService,
       PasswordEncoder passwordEncoder,
       AuthenticationManager authenticationManager,
-      RefreshTokenRepository refreshTokenRepository,
-      UserDetailsService userDetailsService) {
+      RefreshTokenRepository refreshTokenRepository) {
 
     this.userLoginRepository = userLoginRepository;
     this.tourCompanyLoginRepository = tourCompanyLoginRepository;
@@ -63,7 +60,6 @@ public class AuthServiceImpl implements AuthService {
     this.passwordEncoder = passwordEncoder;
     this.authenticationManager = authenticationManager;
     this.refreshTokenRepository = refreshTokenRepository;
-    this.userDetailsService = userDetailsService;
   }
 
   @Override
