@@ -2,4 +2,8 @@ package dev.fResult.goutTogether.auths.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record LoginRequest(@NotBlank String username, @NotBlank String password) {}
+public record LoginRequest(@NotBlank String username, @NotBlank String password) {
+  public static LoginRequest of(String username, String password) {
+    return new LoginRequest(username, password);
+  }
+}

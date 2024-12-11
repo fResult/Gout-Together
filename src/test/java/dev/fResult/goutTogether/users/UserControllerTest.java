@@ -66,9 +66,9 @@ public class UserControllerTest {
     var mockUserResp =
         UserInfoResponse.of(
             USER_ID, TARGET_FIRST_NAME, "Wick", "john.wick@exampl.com", "0999999999");
-    var userPage = new PageImpl<UserInfoResponse>(List.of(mockUserResp));
+    var usersPage = new PageImpl<UserInfoResponse>(List.of(mockUserResp));
 
-    when(userService.getUsersByFirstName(anyString(), any(Pageable.class))).thenReturn(userPage);
+    when(userService.getUsersByFirstName(anyString(), any(Pageable.class))).thenReturn(usersPage);
 
     // Actual
     var resultActions = mockMvc.perform(get(USER_API).params(params));
