@@ -136,7 +136,6 @@ class UserServiceTest {
   }
 
   @Test
-  @Disabled
   void whenRegisterUserThenSuccess() {
     // Arrange
     AggregateReference<User, Integer> mockUserRef = AggregateReference.to(USER_ID);
@@ -238,6 +237,7 @@ class UserServiceTest {
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
+  // TODO: Handle this test
   @Disabled("Test not implemented yet.")
   @Test()
   void whenChangePasswordThenSuccess() {
