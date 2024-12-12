@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.users.entities.User;
+import dev.fResult.goutTogether.wallets.dtos.UserWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
 import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import dev.fResult.goutTogether.wallets.repositories.TourCompanyWalletRepository;
@@ -51,15 +52,16 @@ class WalletServiceTest {
     // Arrange
     var USER_ID = 1;
     AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID);
-    var mockFoundUserWallet = UserWallet.of(WALLET_ID, userRef, Instant.now(), BigDecimal.ZERO);
-    when(userWalletRepository.findOneByUserId(userRef))
-        .thenReturn(Optional.of(mockFoundUserWallet));
+    var mockUserWallet = UserWallet.of(WALLET_ID, userRef, Instant.now(), BigDecimal.ZERO);
+    var expectedFoundUserWallet = UserWalletInfoResponse.of(WALLET_ID, USER_ID, BigDecimal.ZERO);
+
+    when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserWallet));
 
     // Actual
     var actualFoundWallet = walletService.getConsumerWalletByUserId(USER_ID);
 
     // Assert
-    assertEquals(mockFoundUserWallet, actualFoundWallet);
+    assertEquals(expectedFoundUserWallet, actualFoundWallet);
   }
 
   @Test
