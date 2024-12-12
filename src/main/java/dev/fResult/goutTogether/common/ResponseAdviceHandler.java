@@ -4,13 +4,16 @@ import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.exceptions.RefreshTokenExpiredException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
+import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -35,6 +38,21 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
               propertyToError.put(error.getField(), error.getDefaultMessage());
             });
     detail.setProperty("arguments", propertyToError);
+
+    return ResponseEntity.of(detail).build();
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponseEntity<String> handleConstraintViolationException(
+      ConstraintViolationException ex, WebRequest request) {
+    var errorMessage =
+        ex.getConstraintViolations().stream()
+            .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+            .collect(Collectors.joining(", "));
+    var detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errorMessage);
+
+    logger.warn("Constraint violation: {}", errorMessage);
 
     return ResponseEntity.of(detail).build();
   }
