@@ -9,11 +9,11 @@ import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.data.repository.ListCrudRepository;
 
 public interface UserLoginRepository extends ListCrudRepository<UserLogin, Integer> {
-    List<UserLogin> findByUserIdIn(Collection<Integer> userIds);
+  List<UserLogin> findByUserIdIn(Collection<Integer> userIds);
 
-    Optional<UserLogin> findOneByEmail(String email);
+  Optional<UserLogin> findOneByEmail(String email);
 
-    Optional<UserLogin> findOneByUserId(AggregateReference<User, Integer> userId);
+  Optional<UserLogin> findOneByUserId(AggregateReference<User, Integer> userId);
 
-    Optional<UserLogin> findOneByEmailAndPassword(String userEmail, String password);
+  Optional<UserLogin> findOneByEmailAndPassword(String userEmail, String password);
 }
