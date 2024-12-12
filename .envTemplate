@@ -15,3 +15,7 @@ REFRESH_TOKEN_EXP_SEC=600
 # OAuth Key
 OAUTH_PRIVATE_KEY_BASE64="«echo $(base64 -i src/main/resources/private_key_pkcs8.pem)»" # Assign Base64 from `src/main/resources/private_key_pkcs8.pem`
 OAUTH_PUBLIC_KEY_BASE64="«echo $(base64 -i src/main/resources/public_key.pem)»"
+
+# Jobrunr
+JOBRUNR_BACKGROUND_JOB_ENABLED=true
+JOBRUNR_DASHBOARD_ENABLED=true
