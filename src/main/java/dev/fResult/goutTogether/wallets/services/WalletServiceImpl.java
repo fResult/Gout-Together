@@ -57,21 +57,6 @@ public class WalletServiceImpl implements WalletService {
   }
 
   @Override
-  public TourCompanyWallet createTourCompanyWallet(int tourCompanyId) {
-    logger.debug(
-        "[createTourCompanyWallet] New {} is creating", TourCompanyWallet.class.getSimpleName());
-
-    var walletToCreate =
-        TourCompanyWallet.of(
-            null, AggregateReference.to(tourCompanyId), Instant.now(), BigDecimal.ZERO);
-
-    var createdWallet = tourCompanyWalletRepository.save(walletToCreate);
-    logger.info(
-        "[createTourCompanyWallet] New {} is created: {}",
-        TourCompanyWallet.class.getSimpleName(),
-        createdWallet);
-
-    return createdWallet;
   }
 
   public boolean deleteConsumerWalletByUserId(int userId) {
@@ -84,5 +69,23 @@ public class WalletServiceImpl implements WalletService {
         "[deleteUserWalletById] {} id [{}] is deleted", UserWallet.class.getSimpleName(), userId);
 
     return true;
+  }
+
+  @Override
+  public TourCompanyWallet createTourCompanyWallet(int tourCompanyId) {
+    logger.debug(
+            "[createTourCompanyWallet] New {} is creating", TourCompanyWallet.class.getSimpleName());
+
+    var walletToCreate =
+            TourCompanyWallet.of(
+                    null, AggregateReference.to(tourCompanyId), Instant.now(), BigDecimal.ZERO);
+
+    var createdWallet = tourCompanyWalletRepository.save(walletToCreate);
+    logger.info(
+            "[createTourCompanyWallet] New {} is created: {}",
+            TourCompanyWallet.class.getSimpleName(),
+            createdWallet);
+
+    return createdWallet;
   }
 }
