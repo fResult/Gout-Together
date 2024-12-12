@@ -1,5 +1,5 @@
 ALTER TABLE bookings
-ADD COLUMN idempotent_key TYPE VARCHAR(40);
+ADD COLUMN idempotent_key VARCHAR(40) NOT NULL;
 
 ALTER TABLE transactions
-ADD COLUMN idempotent_key TYPE VARCHAR(40);
+ADD COLUMN idempotent_key VARCHAR(40) NOT NULL;

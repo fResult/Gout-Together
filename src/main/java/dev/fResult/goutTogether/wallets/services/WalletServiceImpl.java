@@ -1,16 +1,18 @@
 package dev.fResult.goutTogether.wallets.services;
 
+import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
+import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.wallets.dtos.UserWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.WalletTopUpRequest;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
+import dev.fResult.goutTogether.wallets.entities.Transaction;
 import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import dev.fResult.goutTogether.wallets.repositories.TourCompanyWalletRepository;
 import dev.fResult.goutTogether.wallets.repositories.TransactionRepository;
 import dev.fResult.goutTogether.wallets.repositories.UserWalletRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
@@ -53,22 +55,19 @@ public class WalletServiceImpl implements WalletService {
   }
 
   @Override
-  public UserWallet findConsumerWalletByUserId(int userId) {
+  public UserWalletInfoResponse getConsumerWalletByUserId(int userId) {
     logger.debug(
-        "[findUserWalletByUserId] Finding {} by userId: {}",
+        "[getConsumerWalletByUserId] Getting {} by userId: {}",
         UserWallet.class.getSimpleName(),
         userId);
 
-    return userWalletRepository
-        .findOneByUserId(AggregateReference.to(userId))
-        .orElseThrow(
-            errorHelper.entityNotFound("findUserWalletByUserId", UserWallet.class, userId));
+    return UserWalletInfoResponse.fromDao(findUserWalletByUserId(userId));
   }
 
   @Override
   @Transactional
   public UserWalletInfoResponse topUpConsumerWallet(
-      int userId, UUID idempotentKey, WalletTopUpRequest body) {
+      int userId, String idempotentKey, WalletTopUpRequest body) {
     var existsTransactionOpt = transactionRepository.findOneByIdempotentKey(idempotentKey);
 
     var userWallet =
@@ -81,13 +80,18 @@ public class WalletServiceImpl implements WalletService {
 
     if (existsTransactionOpt.isPresent()) return userWallet;
 
+    AggregateReference<User, Integer> userRef = AggregateReference.to(userWallet.userId());
+    var transactionToAdd = createTopUpTransaction(userRef, body.amount(), idempotentKey);
+
+    transactionRepository.save(transactionToAdd);
+    logger.info(
+        "[topUpConsumerWallet] {} with userId [{}] is added",
+        Transaction.class.getSimpleName(),
+        userId);
+
     var balanceToUpdate = userWallet.balance().add(body.amount());
     var userWalletToUpdate =
-        UserWallet.of(
-            userWallet.id(),
-            AggregateReference.to(userWallet.userId()),
-            Instant.now(),
-            balanceToUpdate);
+        UserWallet.of(userWallet.id(), userRef, Instant.now(), balanceToUpdate);
 
     var updatedUserWallet = userWalletRepository.save(userWalletToUpdate);
     logger.info(
@@ -103,7 +107,7 @@ public class WalletServiceImpl implements WalletService {
   public boolean deleteConsumerWalletByUserId(int userId) {
     logger.debug(
         "[deleteUserWalletById] Deleting {} by id: {}", UserWallet.class.getSimpleName(), userId);
-    var walletToDelete = findConsumerWalletByUserId(userId);
+    var walletToDelete = findUserWalletByUserId(userId);
 
     userWalletRepository.delete(walletToDelete);
     logger.info(
@@ -128,5 +132,24 @@ public class WalletServiceImpl implements WalletService {
         createdWallet);
 
     return createdWallet;
+  }
+
+  private UserWallet findUserWalletByUserId(int userId) {
+    logger.debug(
+        "[findUserWalletByUserId] Finding {} by userId: {}",
+        UserWallet.class.getSimpleName(),
+        userId);
+
+    return userWalletRepository
+        .findOneByUserId(AggregateReference.to(userId))
+        .orElseThrow(
+            errorHelper.entityNotFound("findUserWalletByUserId", UserWallet.class, userId));
+  }
+
+  private Transaction createTopUpTransaction(
+      AggregateReference<User, Integer> userRef, BigDecimal amount, String idempotentKey) {
+
+    return Transaction.of(
+        null, userRef, null, Instant.now(), amount, TransactionType.TOP_UP, idempotentKey);
   }
 }

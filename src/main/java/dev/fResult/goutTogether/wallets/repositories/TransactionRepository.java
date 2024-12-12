@@ -6,5 +6,5 @@ import java.util.UUID;
 import org.springframework.data.repository.ListCrudRepository;
 
 public interface TransactionRepository extends ListCrudRepository<Transaction, Integer> {
-  Optional<Transaction> findOneByIdempotentKey(UUID idempotentKey);
+  Optional<Transaction> findOneByIdempotentKey(String idempotentKey);
 }
