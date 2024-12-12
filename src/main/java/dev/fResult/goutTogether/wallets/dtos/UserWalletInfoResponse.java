@@ -1,5 +1,5 @@
-package dev.fResult.goutTogether.wallets;
+package dev.fResult.goutTogether.wallets.dtos;
 
 import java.math.BigDecimal;
 
-public record UserWalletInfo(Integer userId, BigDecimal balance) {}
+public record UserWalletInfoResponse(Integer userId, BigDecimal balance) {}
