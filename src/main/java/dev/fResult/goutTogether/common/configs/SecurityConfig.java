@@ -101,6 +101,7 @@ public class SecurityConfig {
     var jwk =
         new RSAKey.Builder(rsaInstance.publicKey()).privateKey(rsaInstance.privateKey()).build();
     var jwkSource = new ImmutableJWKSet<SecurityContext>(new JWKSet(jwk));
+
     return new NimbusJwtEncoder(jwkSource);
   }
 
@@ -194,6 +195,12 @@ public class SecurityConfig {
         .hasAnyRole(UserRoleName.ADMIN.name(), UserRoleName.CONSUMER.name())
         .requestMatchers("/api/v1/users/**")
         .hasRole(UserRoleName.ADMIN.name())
+
+        // Wallets
+        .requestMatchers(HttpMethod.GET, "/api/v1/wallets/me")
+        .hasRole(UserRoleName.CONSUMER.name())
+        .requestMatchers(HttpMethod.POST, "/api/v1/wallets/top-up")
+        .hasRole(UserRoleName.CONSUMER.name())
 
         // Self Managed Users
         .requestMatchers("api/v1/me/**")
