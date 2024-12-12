@@ -56,7 +56,7 @@ class WalletServiceTest {
         .thenReturn(Optional.of(mockFoundUserWallet));
 
     // Actual
-    var actualFoundWallet = walletService.findConsumerWalletByUserId(USER_ID);
+    var actualFoundWallet = walletService.getConsumerWalletByUserId(USER_ID);
 
     // Assert
     assertEquals(mockFoundUserWallet, actualFoundWallet);
@@ -72,7 +72,7 @@ class WalletServiceTest {
     when(userWalletRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> walletService.findConsumerWalletByUserId(NOT_FOUND_USER_ID);
+    Executable actualExecutable = () -> walletService.getConsumerWalletByUserId(NOT_FOUND_USER_ID);
 
     // Assert
     var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);

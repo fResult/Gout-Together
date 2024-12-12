@@ -7,7 +7,7 @@ import dev.fResult.goutTogether.wallets.dtos.UserWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.WalletTopUpRequest;
 import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import dev.fResult.goutTogether.wallets.services.WalletService;
-import java.util.UUID;
+import org.hibernate.validator.constraints.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/wallets")
+@Validated
 public class WalletController {
   private final Logger logger = LoggerFactory.getLogger(WalletController.class);
 
@@ -30,14 +31,18 @@ public class WalletController {
   // User -> See own wallet
   @GetMapping("/me")
   public ResponseEntity<UserWalletInfoResponse> getMyUserWallet(Authentication authentication) {
-    throw new UnsupportedOperationException("Not Implement Yet");
+    var jwt = (Jwt) authentication.getPrincipal();
+    var userId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
+
+    return ResponseEntity.ok(walletService.getConsumerWalletByUserId(Integer.parseInt(userId)));
   }
 
   // User -> Top-up (Assume doing via application, bank deduct on the background)
-  @PostMapping
+  @PostMapping("/top-up")
   public ResponseEntity<UserWalletInfoResponse> topUpUserWallet(
       @Validated @RequestBody WalletTopUpRequest body,
-      @RequestHeader("idempotent-key") UUID idempotentKey,
+      @RequestHeader("idempotent-key") @UUID(message = "wrong format for headers `idempotent-key`")
+          String idempotentKey,
       Authentication authentication) {
 
     var jwt = (Jwt) authentication.getPrincipal();
@@ -54,7 +59,7 @@ public class WalletController {
   }
 
   // Company → See own wallet
-  @GetMapping
+  @GetMapping("/my-company")
   public ResponseEntity<TourCompanyWalletInfoResponse> getMyCompanyWallet() {
     throw new UnsupportedOperationException("Not Implement Yet");
   }

@@ -1,5 +1,6 @@
 package dev.fResult.goutTogether.wallets.entities;
 
+import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.users.entities.User;
 import java.math.BigDecimal;
@@ -15,16 +16,16 @@ public record Transaction(
     AggregateReference<TourCompany, Integer> tourCompanyId,
     Instant transactionDate,
     BigDecimal amount,
-    String type,
+    TransactionType type,
     String idempotentKey) {
 
-  Transaction of(
+  public static Transaction of(
       Integer id,
       AggregateReference<User, Integer> userId,
       AggregateReference<TourCompany, Integer> tourCompanyId,
       Instant transactionDate,
       BigDecimal amount,
-      String type,
+      TransactionType type,
       String idempotentKey) {
 
     return new Transaction(id, userId, tourCompanyId, transactionDate, amount, type, idempotentKey);
