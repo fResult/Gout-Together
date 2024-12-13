@@ -11,7 +11,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RecurringJobConfig {
   private static final Logger logger = LoggerFactory.getLogger(RecurringJobConfig.class);
-  private static final String CRON_EXPRESSION = "*/2 * * * *";
+  // Every day
+  private static final String CRON_EXPRESSION = "0 0 * * *";
 
   private final TokenService tokenService;
 
