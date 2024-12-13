@@ -138,9 +138,8 @@ class UserServiceTest {
   @Test
   void whenRegisterUserThenSuccess() {
     // Arrange
-    AggregateReference<User, Integer> mockUserRef = AggregateReference.to(USER_ID);
-    AggregateReference<Role, Integer> mockRoleRef =
-        AggregateReference.to(UserRoleName.CONSUMER.getId());
+    var mockUserRef = AggregateReference.<User, Integer>to(USER_ID);
+    var mockRoleRef = AggregateReference.<Role, Integer>to(UserRoleName.CONSUMER.getId());
     var body =
         UserRegistrationRequest.of("John", "Wick", "john.w@example.com", "password", "0999999999");
     var mockUserToRegister =

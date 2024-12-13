@@ -80,7 +80,7 @@ public class WalletServiceImpl implements WalletService {
 
     if (existsTransactionOpt.isPresent()) return userWallet;
 
-    AggregateReference<User, Integer> userRef = AggregateReference.to(userWallet.userId());
+    var userRef = AggregateReference.<User, Integer>to(userWallet.userId());
     var transactionToAdd = createTopUpTransaction(userRef, body.amount(), idempotentKey);
 
     transactionRepository.save(transactionToAdd);

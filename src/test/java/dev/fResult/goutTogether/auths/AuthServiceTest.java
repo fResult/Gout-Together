@@ -116,7 +116,7 @@ class AuthServiceTest {
       var mockUserLogin =
           UserLogin.of(
               1, AggregateReference.to(USER_ID_1), "email@example.com", ENCRYPTED_PASSWORD);
-      AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID_1);
+      var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
       when(userLoginRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserLogin));
 
       // Actual
@@ -180,7 +180,7 @@ class AuthServiceTest {
     @Test
     void whenCreateUserCredentialThenSuccess() {
       // Arrange
-      AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID_1);
+      var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
       var mockUserLoginToCreate = UserLogin.of(1, userRef, TARGET_EMAIL, ENCRYPTED_PASSWORD);
       when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
       when(userLoginRepository.save(any(UserLogin.class))).thenReturn(mockUserLoginToCreate);
@@ -200,7 +200,7 @@ class AuthServiceTest {
     @Test
     void whenDeleteUserCredentialByIdThenSuccess() {
       // Arrange
-      AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID_1);
+      var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
       var mockCredentialToDelete = UserLogin.of(1, userRef, "email@example.com", "password");
       doReturn(mockCredentialToDelete).when(authService).findUserCredentialByUserId(anyInt());
       doNothing().when(userLoginRepository).delete(any(UserLogin.class));
@@ -321,7 +321,7 @@ class AuthServiceTest {
     @Test
     void whenCreateCompanyLoginThenSuccess() {
       // Arrange
-      AggregateReference<TourCompany, Integer> companyRef = AggregateReference.to(TOUR_COMPANY_ID);
+      var companyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
       var mockCompanyLoginToCreate =
           TourCompanyLogin.of(1, companyRef, "MyTour", ENCRYPTED_PASSWORD);
       when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
@@ -343,7 +343,7 @@ class AuthServiceTest {
     @Test
     void whenDeleteCompanyLoginByIdThenSuccess() {
       // Arrange
-      AggregateReference<TourCompany, Integer> companyRef = AggregateReference.to(USER_ID_1);
+      var companyRef = AggregateReference.<TourCompany, Integer>to(USER_ID_1);
       var mockCompanyLoginToDelete =
           TourCompanyLogin.of(1, companyRef, "MyTour", ENCRYPTED_PASSWORD);
       doReturn(mockCompanyLoginToDelete)
