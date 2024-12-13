@@ -51,7 +51,7 @@ class WalletServiceTest {
   void whenFindConsumerWalletThenSuccess() {
     // Arrange
     var USER_ID = 1;
-    AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID);
+    var userRef = AggregateReference.<User, Integer>to(USER_ID);
     var mockUserWallet = UserWallet.of(WALLET_ID, userRef, Instant.now(), BigDecimal.ZERO);
     var expectedFoundUserWallet = UserWalletInfoResponse.of(WALLET_ID, USER_ID, BigDecimal.ZERO);
 
@@ -70,7 +70,7 @@ class WalletServiceTest {
     var NOT_FOUND_USER_ID = 99999;
     var expectedErrorMessage =
         String.format("%s id [%s] not found", UserWallet.class.getSimpleName(), NOT_FOUND_USER_ID);
-    AggregateReference<User, Integer> notFoundUserRef = AggregateReference.to(NOT_FOUND_USER_ID);
+    var notFoundUserRef = AggregateReference.<User, Integer>to(NOT_FOUND_USER_ID);
     when(userWalletRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
 
     // Actual
@@ -85,7 +85,7 @@ class WalletServiceTest {
   void whenDeleteConsumerWalletThenSuccess() {
     // Arrange
     var USER_ID = 1;
-    AggregateReference<User, Integer> userRef = AggregateReference.to(USER_ID);
+    var userRef = AggregateReference.<User, Integer>to(USER_ID);
     var walletToDelete = UserWallet.of(WALLET_ID, userRef, Instant.now(), BigDecimal.ZERO);
     when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(walletToDelete));
     doNothing().when(userWalletRepository).delete(any(UserWallet.class));
