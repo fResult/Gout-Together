@@ -7,6 +7,7 @@ import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
 import dev.fResult.goutTogether.auths.entities.RefreshToken;
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
+import dev.fResult.goutTogether.auths.repositories.RefreshTokenRepository;
 import dev.fResult.goutTogether.common.utils.UUIDV7;
 import java.time.Instant;
 import java.util.stream.Collectors;
@@ -22,16 +23,19 @@ public class TokenService {
   private static final String ISSUER = "gout-together";
   private static final int TIME_FOR_ROTATE_IN_SECONDS = 120;
 
+  private final RefreshTokenRepository refreshTokenRepository;
   private final CustomUserDetailsService userDetailsService;
   private final long accessTokenExpiredInSeconds;
   private final long refreshTokenExpiredInSeconds;
   private final JwtEncoder jwtEncoder;
 
   public TokenService(
+      RefreshTokenRepository refreshTokenRepository,
       CustomUserDetailsService userDetailsService,
       @Value("${token.access-token-expired-in-seconds}") long accessTokenExpiredInSeconds,
       @Value("${token.refresh-token-expired-in-seconds}") long refreshTokenExpiredInSeconds,
       JwtEncoder jwtEncoder) {
+    this.refreshTokenRepository = refreshTokenRepository;
     this.userDetailsService = userDetailsService;
     this.accessTokenExpiredInSeconds = accessTokenExpiredInSeconds;
     this.refreshTokenExpiredInSeconds = refreshTokenExpiredInSeconds;
@@ -98,5 +102,18 @@ public class TokenService {
 
     if (Instant.now().isAfter(threadHoldToRotate)) return issueRefreshToken();
     return refreshToken.token();
+  }
+
+  public void cleanupExpiredRefreshToken() {
+    /* Assume Life of Refresh Token is 1 day
+     * - Token issued at 20241213 - 16:13
+     * - Token expires at 20241214 - 16.13
+     * - Cron started at 20241213 - 16:13
+     * - When we want to check expired token from issued date -> use minusDay(1)
+     */
+    var currentDateTime = Instant.now();
+    var thresholdDateTime = currentDateTime.minusSeconds(refreshTokenExpiredInSeconds);
+
+    refreshTokenRepository.updateRefreshTokenThatExpired(true, thresholdDateTime);
   }
 }
