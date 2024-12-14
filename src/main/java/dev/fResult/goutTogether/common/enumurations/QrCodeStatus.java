@@ -1,5 +1,5 @@
 package dev.fResult.goutTogether.common.enumurations;
 
-public enum QrStatus {
+public enum QrCodeStatus {
     ACTIVATED, EXPIRED
 }
