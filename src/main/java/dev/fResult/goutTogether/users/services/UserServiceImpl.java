@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public UserInfoResponse registerUser(UserRegistrationRequest body) {
-    logger.debug("[register] new {} is registering", User.class.getSimpleName());
+    logger.debug("[register] New {} is registering", User.class.getSimpleName());
     throwExceptionIfUserEmailAlreadyExists(body.email());
 
     var userToRegister = User.of(null, body.firstName(), body.lastName(), body.phoneNumber());
