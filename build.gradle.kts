@@ -51,6 +51,8 @@ dependencies {
   implementation("io.github.cdimascio:java-dotenv:5.2.2")
   implementation("commons-validator:commons-validator:1.9.0")
   implementation("org.jobrunr:jobrunr-spring-boot-3-starter:7.3.2")
+  implementation("com.google.zxing:core:3.5.3")
+  implementation("com.google.zxing:javase:3.5.3")
 
   runtimeOnly("io.micrometer:micrometer-registry-prometheus")
   runtimeOnly("org.postgresql:postgresql")
