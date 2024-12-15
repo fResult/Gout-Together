@@ -1,7 +1,10 @@
 package dev.fResult.goutTogether.wallets.services;
 
+import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
+import dev.fResult.goutTogether.tours.entities.Tour;
+import dev.fResult.goutTogether.tours.services.TourService;
 import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.wallets.dtos.UserWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.WalletTopUpRequest;
@@ -13,6 +16,11 @@ import dev.fResult.goutTogether.wallets.repositories.TransactionRepository;
 import dev.fResult.goutTogether.wallets.repositories.UserWalletRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import kotlin.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
@@ -27,15 +35,18 @@ public class WalletServiceImpl implements WalletService {
   private final UserWalletRepository userWalletRepository;
   private final TourCompanyWalletRepository tourCompanyWalletRepository;
   private final TransactionRepository transactionRepository;
+  private final TourService tourService;
 
   public WalletServiceImpl(
       UserWalletRepository userWalletRepository,
       TourCompanyWalletRepository tourCompanyWalletRepository,
-      TransactionRepository transactionRepository) {
+      TransactionRepository transactionRepository,
+      TourService tourService) {
 
     this.userWalletRepository = userWalletRepository;
     this.tourCompanyWalletRepository = tourCompanyWalletRepository;
     this.transactionRepository = transactionRepository;
+    this.tourService = tourService;
   }
 
   @Override
@@ -61,7 +72,7 @@ public class WalletServiceImpl implements WalletService {
         UserWallet.class.getSimpleName(),
         userId);
 
-    return UserWalletInfoResponse.fromDao(findUserWalletByUserId(userId));
+    return UserWalletInfoResponse.fromDao(getUserWalletByUserId(userId));
   }
 
   @Override
@@ -107,7 +118,7 @@ public class WalletServiceImpl implements WalletService {
   public boolean deleteConsumerWalletByUserId(int userId) {
     logger.debug(
         "[deleteUserWalletById] Deleting {} by id: {}", UserWallet.class.getSimpleName(), userId);
-    var walletToDelete = findUserWalletByUserId(userId);
+    var walletToDelete = getUserWalletByUserId(userId);
 
     userWalletRepository.delete(walletToDelete);
     logger.info(
@@ -134,7 +145,43 @@ public class WalletServiceImpl implements WalletService {
     return createdWallet;
   }
 
-  private UserWallet findUserWalletByUserId(int userId) {
+  @Override
+  public Pair<UserWallet, TourCompanyWallet> getConsumerAndTourCompanyWallets(Booking booking) {
+    var userRef = booking.userId();
+    var tourRef = booking.tourId();
+    if (userRef == null || tourRef == null) {
+      throw errorHelper
+          .entityNotFound("getConsumerAndTourCompanyWallets", Booking.class, booking.id())
+          .get();
+    }
+
+    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+      Future<UserWallet> userWalletFuture =
+          executor.submit(() -> getUserWalletByUserId(Objects.requireNonNull(userRef.getId())));
+      Future<Tour> tourFuture =
+          executor.submit(() -> tourService.getTourById(Objects.requireNonNull(tourRef.getId())));
+
+      var userWallet = userWalletFuture.get();
+      var tour = tourFuture.get();
+      var tourCompanyWallet =
+          tourCompanyWalletRepository
+              .findOneByTourCompanyId(tour.tourCompanyId())
+              .orElseThrow(
+                  errorHelper.entityWithSubResourceNotFound(
+                      "getConsumerAndTourCompanyWallets",
+                      TourCompanyWallet.class,
+                      "tourCompanyId",
+                      String.valueOf(tour.tourCompanyId())));
+
+      return new Pair<>(userWallet, tourCompanyWallet);
+    } catch (ExecutionException ex) {
+      throw new RuntimeException("Failed to get user wallets", ex);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private UserWallet getUserWalletByUserId(int userId) {
     logger.debug(
         "[findUserWalletByUserId] Finding {} by userId: {}",
         UserWallet.class.getSimpleName(),
