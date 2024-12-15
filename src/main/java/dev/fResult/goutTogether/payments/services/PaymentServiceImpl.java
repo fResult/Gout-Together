@@ -11,7 +11,12 @@ public class PaymentServiceImpl implements PaymentService {
   }
 
   @Override
-  public BookingInfoResponse payByBookingId(Integer bookingId, String idempotentKey) {
+  public BookingInfoResponse payByBookingId(int bookingId, String idempotentKey) {
+    throw new UnsupportedOperationException("Not Implement Yet");
+  }
+
+  @Override
+  public boolean refundBooking(int bookingId, String idempotentKey) {
     throw new UnsupportedOperationException("Not Implement Yet");
   }
 }
