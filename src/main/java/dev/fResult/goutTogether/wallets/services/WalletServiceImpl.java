@@ -263,19 +263,30 @@ public class WalletServiceImpl implements WalletService {
             Instant.now(),
             tourCompanyWalletBalanceToUpdate);
 
-    userWalletRepository.save(userWalletToUpdate);
-    tourCompanyWalletRepository.save(tourCompanyWalletToUpdate);
+    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+      var futureUserWallet = executor.submit(() -> userWalletRepository.save(userWalletToUpdate));
+      var futureCompanyWallet =
+          executor.submit(() -> tourCompanyWalletRepository.save(tourCompanyWalletToUpdate));
 
-    logger.info(
-        "[transferMoney] {} {} from {} id [{}] to {} id [{}] is transferred",
-        TransactionType.BOOKING,
-        amount,
-        UserWallet.class.getSimpleName(),
-        userWallet.id(),
-        TourCompanyWallet.class.getSimpleName(),
-        companyWallet.id());
+      futureCompanyWallet.get();
 
-    return new Pair<>(userWalletToUpdate, tourCompanyWalletToUpdate);
+      logger.info(
+          "[transferMoney] {} {} from {} id [{}] to {} id [{}] is transferred",
+          TransactionType.BOOKING,
+          amount,
+          UserWallet.class.getSimpleName(),
+          userWallet.id(),
+          TourCompanyWallet.class.getSimpleName(),
+          companyWallet.id());
+
+      return new Pair<>(userWalletToUpdate, tourCompanyWalletToUpdate);
+    } catch (ExecutionException | InterruptedException ex) {
+      var errorMessage =
+          String.format(
+              "Failed to transfer money between %s and %s",
+              User.class.getSimpleName(), TourCompanyWallet.class.getSimpleName());
+      throw new RuntimeException(errorMessage, ex);
+    }
   }
 
   private UserWallet getUserWalletByUserId(int userId) {
