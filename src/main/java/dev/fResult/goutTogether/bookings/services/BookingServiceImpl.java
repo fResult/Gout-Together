@@ -1,27 +1,25 @@
 package dev.fResult.goutTogether.bookings.services;
 
+import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
+
 import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
 import dev.fResult.goutTogether.bookings.dtos.BookingRequest;
 import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.bookings.repositories.BookingRepository;
-
+import dev.fResult.goutTogether.common.enumurations.BookingStatus;
+import dev.fResult.goutTogether.common.enumurations.QrCodeStatus;
+import dev.fResult.goutTogether.common.exceptions.BookingExistsException;
+import dev.fResult.goutTogether.qrcodes.QrCodeService;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
-import dev.fResult.goutTogether.common.enumurations.BookingStatus;
-import dev.fResult.goutTogether.common.enumurations.QrCodeStatus;
-import dev.fResult.goutTogether.common.exceptions.BookingExistsException;
-import dev.fResult.goutTogether.qrcodes.QrCodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
-
-import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
 
 public class BookingServiceImpl implements BookingService {
   private final Logger logger = LoggerFactory.getLogger(BookingServiceImpl.class);
@@ -57,9 +55,8 @@ public class BookingServiceImpl implements BookingService {
         booking -> Objects.equals(booking.status(), BookingStatus.COMPLETED.name());
     existingBookingOpt.filter(isCompletedBooking).ifPresent(throwExceptionIfBookingExists);
 
-    if (existingBookingOpt.isPresent()) {
+    if (existingBookingOpt.isPresent())
       return existingBookingOpt.map(BookingInfoResponse::fromDao).get();
-    }
 
     var bookingToCreate =
         Booking.of(
