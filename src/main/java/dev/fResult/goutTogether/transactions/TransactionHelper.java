@@ -20,7 +20,6 @@ public class TransactionHelper {
 
   public static Transaction buildBookingTransaction(
       String idempotentKey,
-      Integer bookingId,
       Integer userId,
       Integer tourCompanyId,
       BigDecimal amount) {

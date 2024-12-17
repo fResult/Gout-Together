@@ -37,12 +37,21 @@ public class QrCodeService {
     return QrCodeHelper.generateQrCodeImage(qrCodeRef.content());
   }
 
-  public QrCodeReference generateQrRefForBooking(int bookingId) {
+  public QrCodeReference getQrCodeRefByBookingId(Integer bookingId) {
+    return findQrCodeRefByBookingId(bookingId)
+        .orElseThrow(
+            errorHelper.entityWithSubResourceNotFound(
+                "getQrCodeRefByBookingId",
+                QrCodeReference.class,
+                "bookingId",
+                String.valueOf(bookingId)));
+  }
 
+  public QrCodeReference createQrCodeRefForBooking(int bookingId) {
     var qrCodeRefOpt = findQrCodeRefByBookingId(bookingId);
     if (qrCodeRefOpt.isPresent()) {
       logger.info(
-          "[generateQrForBooking] {} for bookingId [{}] exists, return the existing one",
+          "[createQrCodeRefForBooking] {} for bookingId [{}] exists, return the existing one",
           QrCodeReference.class.getSimpleName(),
           bookingId);
 
@@ -50,21 +59,21 @@ public class QrCodeService {
     }
 
     logger.debug(
-        "[generateQrForBooking] New {} is generating by bookingId [{}]",
+        "[createQrCodeRefForBooking] New {} is creating by bookingId [{}]",
         QrCodeReference.class.getSimpleName(),
         bookingId);
 
-    var paymentApiPath = String.format("%s/%s", API_PAYMENT_PATH, bookingId);
-    var qrCodeToGenerate =
+    var paymentApiPath = String.format("%s/%d", API_PAYMENT_PATH, bookingId);
+    var qrCodeToCreate =
         QrCodeReference.of(null, bookingId, paymentApiPath, QrCodeStatus.ACTIVATED);
 
-    var generatedQrCode = qrCodeReferenceRepository.save(qrCodeToGenerate);
+    var createdQrCode = qrCodeReferenceRepository.save(qrCodeToCreate);
     logger.info(
-        "[generateQrForBooking] New {} is generated: {}",
+        "[createQrCodeRefForBooking] New {} is created: {}",
         QrCodeReference.class.getSimpleName(),
-        generatedQrCode);
+        createdQrCode);
 
-    return generatedQrCode;
+    return createdQrCode;
   }
 
   public QrCodeReference updateQrCodeRefStatusByBookingId(
@@ -75,15 +84,7 @@ public class QrCodeService {
         QrCodeReference.class.getSimpleName(),
         bookingId);
 
-    var qrCodeRef =
-        findQrCodeRefByBookingId(bookingId)
-            .orElseThrow(
-                errorHelper.entityWithSubResourceNotFound(
-                    "updateQrCodeRefStatusByBookingId",
-                    QrCodeReference.class,
-                    "bookingId",
-                    String.valueOf(bookingId)));
-
+    var qrCodeRef = getQrCodeRefByBookingId(bookingId);
     var qrCodeToUpdate =
         QrCodeReference.of(
             qrCodeRef.id(), qrCodeRef.bookingId(), qrCodeRef.content(), statusToUpdate);

@@ -77,7 +77,6 @@ public class PaymentServiceImpl implements PaymentService {
     var newTransaction =
         TransactionHelper.buildBookingTransaction(
             idempotentKey,
-            bookingId,
             userWallet.userId().getId(),
             tourCompanyWallet.tourCompanyId().getId(),
             BigDecimal.valueOf(tourPrice));
