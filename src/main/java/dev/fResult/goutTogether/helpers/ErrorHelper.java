@@ -1,7 +1,11 @@
 package dev.fResult.goutTogether.helpers;
 
+import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
+import dev.fResult.goutTogether.common.exceptions.InsufficientBalanceException;
+import dev.fResult.goutTogether.common.exceptions.UnsupportedTransactionTypeException;
 import dev.fResult.goutTogether.common.utils.StringUtil;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Supplier;
@@ -54,6 +58,37 @@ public class ErrorHelper {
           idsToDisplay);
       return new EntityNotFoundException(
           String.format("%s ids [%s] not found", entityClass.getSimpleName(), idsToDisplay));
+    };
+  }
+
+  public Supplier<InsufficientBalanceException> insufficientBalance(
+      String transferMoney, BigDecimal userWalletBalance, BigDecimal amount) {
+
+    return () -> {
+      logger.warn(
+          "[{}] User wallet balance: {} is insufficient for amount: {}",
+          transferMoney,
+          userWalletBalance,
+          amount);
+
+      return new InsufficientBalanceException(
+          "User wallet balance is insufficient for this operation");
+    };
+  }
+
+  public Supplier<UnsupportedTransactionTypeException> unsupportedTransactionType(
+      String methodName, TransactionType transactionType) {
+
+    return () -> {
+      logger.warn(
+          "[{}] Transaction type: {} is not supported for this transferring method",
+          methodName,
+          transactionType);
+
+      return new UnsupportedTransactionTypeException(
+          String.format(
+              "Transaction type [%s] is not supported for this transferring method",
+              transactionType));
     };
   }
 }
