@@ -33,7 +33,8 @@ base64 -i src/main/resources/public_key.pem # Then put the Base64 text to the `O
 
 #### In development mode with OpenTelemetry Java Agent
 
-As we already declared the required environment variables in the `.env` file, we can start application with the following
+As we already declared the required environment variables in the `.env` file, we can start application with the
+following
 command.
 
 ```bash
@@ -80,4 +81,4 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
 - Using the Gradle Kotlin instead of the Gradle Groovy
 - PasswordEncoder, using Argon2PasswordEncoder instead of BCryptPasswordEncoder
 - Add more assertion, assert the error message
-- Use Virtual Thread for concurrency fetching independently data from database
+- Use [Virtual Thread](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html) for concurrency fetching independently data from database
