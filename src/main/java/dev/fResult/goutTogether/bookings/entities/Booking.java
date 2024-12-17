@@ -1,6 +1,5 @@
 package dev.fResult.goutTogether.bookings.entities;
 
-import dev.fResult.goutTogether.common.enumurations.BookingStatus;
 import dev.fResult.goutTogether.tours.entities.Tour;
 import dev.fResult.goutTogether.users.entities.User;
 import java.time.Instant;
@@ -13,7 +12,7 @@ public record Booking(
     @Id Integer id,
     AggregateReference<User, Integer> userId,
     AggregateReference<Tour, Integer> tourId,
-    BookingStatus status,
+    String status,
     Instant bookingDate,
     Instant lastUpdated,
     String idempotentKey) {
@@ -22,7 +21,7 @@ public record Booking(
       Integer id,
       AggregateReference<User, Integer> userId,
       AggregateReference<Tour, Integer> tourId,
-      BookingStatus status,
+      String status,
       Instant bookingDate,
       Instant lastUpdated,
       String idempotentKey) {
