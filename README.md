@@ -23,6 +23,7 @@ openssl pkcs8 -topk8 -in private_key.pem -inform pem -out private_key_pkcs8.pem 
 ```
 
 ### To Assign Public/Private Key for Spring Security Config
+
 ```shell
 base64 -i src/main/resources/private_key_pkcs8.pem # Then put the Base64 text to the `OAUTH_PRIVATE_KEY_BASE64` env var
 base64 -i src/main/resources/public_key.pem # Then put the Base64 text to the `OAUTH_PUBLIC_KEY_BASE64` env var
@@ -79,3 +80,4 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
 - Using the Gradle Kotlin instead of the Gradle Groovy
 - PasswordEncoder, using Argon2PasswordEncoder instead of BCryptPasswordEncoder
 - Add more assertion, assert the error message
+- Use Virtual Thread for concurrency fetching independently data from database
