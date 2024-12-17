@@ -17,11 +17,14 @@ import dev.fResult.goutTogether.wallets.services.WalletService;
 import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -60,7 +63,9 @@ public class PaymentServiceImpl implements PaymentService {
     return qrCodeService.generateQrCodeImageById(id);
   }
 
+  // TODO: Handle Idempotent Key
   @Override
+  @Transactional
   public BookingInfoResponse payByBookingId(int bookingId, String idempotentKey) {
     var booking =
         bookingService
@@ -71,34 +76,62 @@ public class PaymentServiceImpl implements PaymentService {
     var userWallet = wallets.getFirst();
     var tourCompanyWallet = wallets.getSecond();
 
-    walletService.transferMoney(
-        userWallet, tourCompanyWallet, BigDecimal.valueOf(tourPrice), TransactionType.BOOKING);
+    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+      var futureTransferredMoney =
+          executor.submit(
+              () ->
+                  walletService.transferMoney(
+                      userWallet,
+                      tourCompanyWallet,
+                      BigDecimal.valueOf(tourPrice),
+                      TransactionType.BOOKING));
 
-    var newTransaction =
-        TransactionHelper.buildBookingTransaction(
-            idempotentKey,
-            userWallet.userId().getId(),
-            tourCompanyWallet.tourCompanyId().getId(),
-            BigDecimal.valueOf(tourPrice));
-    transactionService.createTransaction(newTransaction);
-    tourCountService.incrementTourCount();
+      var futureCreatedTransaction =
+          executor.submit(
+              () -> {
+                var newTransaction =
+                    TransactionHelper.buildBookingTransaction(
+                        idempotentKey,
+                        userWallet.userId().getId(),
+                        tourCompanyWallet.tourCompanyId().getId(),
+                        BigDecimal.valueOf(tourPrice));
 
-    var expiredQrCodeReference =
-        qrCodeService.updateQrCodeRefStatusByBookingId(bookingId, QrCodeStatus.EXPIRED);
+                return transactionService.createTransaction(newTransaction);
+              });
 
-    var bookingToBeComplete =
-        Booking.of(
-            bookingId,
-            booking.userId(),
-            booking.tourId(),
-            BookingStatus.COMPLETED.name(),
-            booking.bookingDate(),
-            Instant.now(),
-            idempotentKey);
-    var completedBooking = bookingRepository.save(bookingToBeComplete);
+      var futureIncrementedTourCount = executor.submit(tourCountService::incrementTourCount);
+      var futureExpiredQrCodeReference =
+          executor.submit(
+              () ->
+                  qrCodeService.updateQrCodeRefStatusByBookingId(bookingId, QrCodeStatus.EXPIRED));
 
-    return BookingInfoResponse.fromDao(completedBooking)
-        .withQrReference(expiredQrCodeReference.id());
+      var futureCompletedBooking =
+          executor.submit(
+              () -> {
+                var bookingToBeComplete =
+                    Booking.of(
+                        bookingId,
+                        booking.userId(),
+                        booking.tourId(),
+                        BookingStatus.COMPLETED.name(),
+                        booking.bookingDate(),
+                        Instant.now(),
+                        idempotentKey);
+
+                return bookingRepository.save(bookingToBeComplete);
+              });
+
+      futureTransferredMoney.get();
+      futureCreatedTransaction.get();
+      futureIncrementedTourCount.get();
+      var expiredQrCodeReference = futureExpiredQrCodeReference.get();
+      var completedBooking = futureCompletedBooking.get();
+
+      return BookingInfoResponse.fromDao(completedBooking)
+          .withQrReference(expiredQrCodeReference.id());
+    } catch (ExecutionException | InterruptedException ex) {
+      throw new RuntimeException(ex);
+    }
   }
 
   @Override
