@@ -48,7 +48,6 @@ public class UserServiceImpl implements UserService {
 
   public Page<UserInfoResponse> getUsersByFirstName(String keyword, Pageable pageable) {
     logger.debug("[getUsers] Getting all {}s", User.class.getSimpleName());
-    logger.info("By First Name: {}", keyword);
     var userPage = userRepository.findByFirstNameContaining(keyword, pageable);
     var userIdToCredentialMap = buildUserIdToCredentialMap(userPage);
     var toResponse = UserInfoResponse.fromUserDaoWithUserCredentialMap(userIdToCredentialMap);

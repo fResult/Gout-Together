@@ -1,6 +1,5 @@
 package dev.fResult.goutTogether.transactions;
 
-import dev.fResult.goutTogether.common.ResponseAdviceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
