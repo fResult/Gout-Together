@@ -20,7 +20,10 @@ import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
+@Service
 public class PaymentServiceImpl implements PaymentService {
   private final Logger logger = LoggerFactory.getLogger(PaymentServiceImpl.class);
   private final ErrorHelper errorHelper = new ErrorHelper(PaymentServiceImpl.class);
@@ -39,7 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
       BookingRepository bookingRepository,
       QrCodeService qrCodeService,
       BookingService bookingService,
-      WalletService walletService,
+      @Lazy WalletService walletService,
       TourCountService tourCountService,
       TransactionService transactionService) {
     this.qrCodeService = qrCodeService;
