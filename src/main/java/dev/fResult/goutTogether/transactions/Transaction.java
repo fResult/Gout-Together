@@ -1,4 +1,4 @@
-package dev.fResult.goutTogether.wallets.entities;
+package dev.fResult.goutTogether.transactions;
 
 import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
