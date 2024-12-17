@@ -5,15 +5,15 @@ import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tours.entities.Tour;
 import dev.fResult.goutTogether.tours.services.TourService;
+import dev.fResult.goutTogether.transactions.Transaction;
 import dev.fResult.goutTogether.transactions.TransactionHelper;
+import dev.fResult.goutTogether.transactions.TransactionRepository;
 import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.wallets.dtos.UserWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.WalletTopUpRequest;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
-import dev.fResult.goutTogether.transactions.Transaction;
 import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import dev.fResult.goutTogether.wallets.repositories.TourCompanyWalletRepository;
-import dev.fResult.goutTogether.transactions.TransactionRepository;
 import dev.fResult.goutTogether.wallets.repositories.UserWalletRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -24,6 +24,7 @@ import java.util.concurrent.Future;
 import kotlin.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +43,7 @@ public class WalletServiceImpl implements WalletService {
       UserWalletRepository userWalletRepository,
       TourCompanyWalletRepository tourCompanyWalletRepository,
       TransactionRepository transactionRepository,
-      TourService tourService) {
+      @Lazy TourService tourService) {
 
     this.userWalletRepository = userWalletRepository;
     this.tourCompanyWalletRepository = tourCompanyWalletRepository;
