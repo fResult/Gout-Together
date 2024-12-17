@@ -130,11 +130,12 @@ public class PaymentServiceImpl implements PaymentService {
       return BookingInfoResponse.fromDao(completedBooking)
           .withQrReference(expiredQrCodeReference.id());
     } catch (ExecutionException | InterruptedException ex) {
-      throw new RuntimeException(ex);
+      throw new RuntimeException("Failed to pay on booking", ex);
     }
   }
 
   @Override
+  @Transactional
   public boolean refundBooking(int bookingId, String idempotentKey) {
     throw new UnsupportedOperationException("Not Implement Yet");
   }
