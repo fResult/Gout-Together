@@ -67,7 +67,9 @@ public class QrCodeService {
     return generatedQrCode;
   }
 
-  public QrCodeReference updateQrCodeRefStatusByBookingId(int bookingId, QrCodeStatus status) {
+  public QrCodeReference updateQrCodeRefStatusByBookingId(
+      int bookingId, QrCodeStatus statusToUpdate) {
+
     logger.debug(
         "[updateQrCodeRefStatusByBookingId] {} by bookingId [{}] is updating",
         QrCodeReference.class.getSimpleName(),
@@ -84,7 +86,7 @@ public class QrCodeService {
 
     var qrCodeToUpdate =
         QrCodeReference.of(
-            qrCodeRef.id(), qrCodeRef.bookingId(), qrCodeRef.content(), qrCodeRef.status());
+            qrCodeRef.id(), qrCodeRef.bookingId(), qrCodeRef.content(), statusToUpdate);
 
     var updatedQrCodeRef = qrCodeReferenceRepository.save(qrCodeToUpdate);
     logger.info(

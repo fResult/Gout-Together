@@ -42,7 +42,7 @@ public class BookingController {
       @Validated @RequestBody BookingRequest body,
       Authentication authentication) {
 
-    var bookedTour = bookingService.bookTour(idempotentKey, body);
+    var bookedTour = bookingService.bookTour(authentication, body, idempotentKey);
 
     return ResponseEntity.ok(bookedTour);
   }
