@@ -5,14 +5,15 @@ import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tours.entities.Tour;
 import dev.fResult.goutTogether.tours.services.TourService;
+import dev.fResult.goutTogether.transactions.TransactionHelper;
 import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.wallets.dtos.UserWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.WalletTopUpRequest;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
-import dev.fResult.goutTogether.wallets.entities.Transaction;
+import dev.fResult.goutTogether.transactions.Transaction;
 import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import dev.fResult.goutTogether.wallets.repositories.TourCompanyWalletRepository;
-import dev.fResult.goutTogether.wallets.repositories.TransactionRepository;
+import dev.fResult.goutTogether.transactions.TransactionRepository;
 import dev.fResult.goutTogether.wallets.repositories.UserWalletRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -179,6 +180,103 @@ public class WalletServiceImpl implements WalletService {
     }
   }
 
+  @Override
+  public Pair<UserWallet, TourCompanyWallet> transferMoney(
+      UserWallet userWallet,
+      TourCompanyWallet tourCompanyWallet,
+      BigDecimal amount,
+      TransactionType transactionType) {
+    logger.debug(
+        "[transferMoney] Transferring {} {} from {} id [{}] to {} id [{}]",
+        transactionType,
+        amount,
+        UserWallet.class.getSimpleName(),
+        userWallet.id(),
+        TourCompanyWallet.class.getSimpleName(),
+        tourCompanyWallet.id());
+
+    return switch (transactionType) {
+      case BOOKING -> transferMoneyForBooking(userWallet, tourCompanyWallet, amount);
+      case REFUND -> transferMoneyForRefund(userWallet, tourCompanyWallet, amount);
+      default ->
+          throw errorHelper.unsupportedTransactionType("transferMoney", transactionType).get();
+    };
+  }
+
+  private Pair<UserWallet, TourCompanyWallet> transferMoneyForRefund(
+      UserWallet userWallet, TourCompanyWallet companyWallet, BigDecimal amount) {
+
+    var companyWalletBalance = companyWallet.balance();
+    var isBalanceInsufficient = companyWalletBalance.compareTo(amount) < 0;
+
+    if (isBalanceInsufficient)
+      throw errorHelper.insufficientBalance("transferMoney", companyWalletBalance, amount).get();
+
+    var companyWalletBalanceToUpdate = companyWalletBalance.subtract(amount);
+    var companyWalletToUpdate =
+        TourCompanyWallet.of(
+            companyWallet.id(),
+            companyWallet.tourCompanyId(),
+            Instant.now(),
+            companyWalletBalanceToUpdate);
+
+    var userWalletBalance = userWallet.balance();
+    var userWalletBalanceToUpdate = userWalletBalance.add(amount);
+    var userWalletToUpdate =
+        UserWallet.of(
+            userWallet.id(), userWallet.userId(), Instant.now(), userWalletBalanceToUpdate);
+
+    userWalletRepository.save(userWalletToUpdate);
+    tourCompanyWalletRepository.save(companyWalletToUpdate);
+
+    logger.info(
+        "[transferMoney] {} {} from {} id [{}] to {} id [{}] is transferred",
+        TransactionType.REFUND,
+        amount,
+        TourCompanyWallet.class.getSimpleName(),
+        companyWallet.id(),
+        UserWallet.class.getSimpleName(),
+        userWallet.id());
+
+    return new Pair<>(userWalletToUpdate, companyWalletToUpdate);
+  }
+
+  private Pair<UserWallet, TourCompanyWallet> transferMoneyForBooking(
+      UserWallet userWallet, TourCompanyWallet companyWallet, BigDecimal amount) {
+    var userWalletBalance = userWallet.balance();
+    if (userWalletBalance.compareTo(amount) < 0) {
+      throw errorHelper.insufficientBalance("transferMoney", userWalletBalance, amount).get();
+    }
+
+    var userWalletBalanceToUpdate = userWalletBalance.subtract(amount);
+    var userWalletToUpdate =
+        UserWallet.of(
+            userWallet.id(), userWallet.userId(), Instant.now(), userWalletBalanceToUpdate);
+
+    var tourCompanyWalletBalance = companyWallet.balance();
+    var tourCompanyWalletBalanceToUpdate = tourCompanyWalletBalance.add(amount);
+    var tourCompanyWalletToUpdate =
+        TourCompanyWallet.of(
+            companyWallet.id(),
+            companyWallet.tourCompanyId(),
+            Instant.now(),
+            tourCompanyWalletBalanceToUpdate);
+
+    userWalletRepository.save(userWalletToUpdate);
+    tourCompanyWalletRepository.save(tourCompanyWalletToUpdate);
+
+    logger.info(
+        "[transferMoney] {} {} from {} id [{}] to {} id [{}] is transferred",
+        TransactionType.BOOKING,
+        amount,
+        UserWallet.class.getSimpleName(),
+        userWallet.id(),
+        TourCompanyWallet.class.getSimpleName(),
+        companyWallet.id());
+
+    return new Pair<>(userWalletToUpdate, tourCompanyWalletToUpdate);
+  }
+
   private UserWallet getUserWalletByUserId(int userId) {
     logger.debug(
         "[findUserWalletByUserId] Finding {} by userId: {}",
@@ -194,7 +292,13 @@ public class WalletServiceImpl implements WalletService {
   private Transaction createTopUpTransaction(
       AggregateReference<User, Integer> userRef, BigDecimal amount, String idempotentKey) {
 
-    return Transaction.of(
-        null, userRef, null, Instant.now(), amount, TransactionType.TOP_UP, idempotentKey);
+    var transactionToCreate =
+        TransactionHelper.buildTopUpTransaction(userRef.getId(), amount, idempotentKey);
+    var createdTransaction = transactionRepository.save(transactionToCreate);
+    logger.info(
+        "[createTopUpTransaction] New {} is created: {}",
+        Transaction.class.getSimpleName(),
+        createdTransaction);
+    return createdTransaction;
   }
 }
