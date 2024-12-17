@@ -7,13 +7,13 @@ import dev.fResult.goutTogether.bookings.dtos.BookingRequest;
 import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.bookings.repositories.BookingRepository;
 import dev.fResult.goutTogether.common.enumurations.BookingStatus;
-import dev.fResult.goutTogether.common.enumurations.QrCodeStatus;
 import dev.fResult.goutTogether.common.exceptions.BookingExistsException;
 import dev.fResult.goutTogether.qrcodes.QrCodeService;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +21,7 @@ import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -42,8 +43,9 @@ public class BookingServiceImpl implements BookingService {
   }
 
   @Override
+  @Transactional
   public BookingInfoResponse bookTour(
-      Authentication authentication, BookingRequest body, String idempotentKey) {
+      Authentication authentication, int tourId, String idempotentKey) {
     logger.debug("[bookTour] New {} is creating", Booking.class.getSimpleName());
 
     var jwt = (Jwt) authentication.getPrincipal();
@@ -51,30 +53,37 @@ public class BookingServiceImpl implements BookingService {
 
     var existingBookingOpt =
         bookingRepository.findOneByUserIdAndTourId(
-            AggregateReference.to(userId), AggregateReference.to(body.tourId()));
+            AggregateReference.to(userId), AggregateReference.to(tourId));
 
     Predicate<Booking> isCompletedBooking =
         booking -> Objects.equals(booking.status(), BookingStatus.COMPLETED.name());
     existingBookingOpt.filter(isCompletedBooking).ifPresent(throwExceptionIfBookingExists);
 
-    if (existingBookingOpt.isPresent())
-      return existingBookingOpt.map(BookingInfoResponse::fromDao).get();
+    if (existingBookingOpt.isPresent()) {
+      var qrCodeRef = qrCodeService.getQrCodeRefByBookingId(existingBookingOpt.get().id());
+      Function<BookingInfoResponse, BookingInfoResponse> toResponseWithQrCodeRefId =
+          bookingInfo -> bookingInfo.withQrReference(qrCodeRef.id());
+
+      return existingBookingOpt
+          .map(BookingInfoResponse::fromDao)
+          .map(toResponseWithQrCodeRefId)
+          .get();
+    }
 
     var bookingToCreate =
         Booking.of(
             null,
             AggregateReference.to(Integer.valueOf(userId)),
-            null,
-            null,
-            null,
+            AggregateReference.to(tourId),
+            BookingStatus.PENDING.name(),
+            Instant.now(),
             Instant.now(),
             idempotentKey);
     var createdBooking = bookingRepository.save(bookingToCreate);
     logger.info("[bookTour] New {} is created: {}", Booking.class.getSimpleName(), createdBooking);
-    var qrCodeReference =
-        qrCodeService.updateQrCodeRefStatusByBookingId(createdBooking.id(), QrCodeStatus.ACTIVATED);
+    var qrCodeReference = qrCodeService.createQrCodeRefForBooking(createdBooking.id());
 
-    return BookingInfoResponse.fromDao(bookingToCreate).withQrReference(qrCodeReference.id());
+    return BookingInfoResponse.fromDao(createdBooking).withQrReference(qrCodeReference.id());
   }
 
   @Override

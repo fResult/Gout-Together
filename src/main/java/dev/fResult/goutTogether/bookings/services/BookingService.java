@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface BookingService {
   Optional<Booking> findBookingById(int id);
 
-  BookingInfoResponse bookTour(Authentication authentication, BookingRequest body, String idempotentKey);
+  BookingInfoResponse bookTour(Authentication authentication, int tourId, String idempotentKey);
 
   BookingInfoResponse cancelTour(String idempotentKey, BookingRequest body);
 }

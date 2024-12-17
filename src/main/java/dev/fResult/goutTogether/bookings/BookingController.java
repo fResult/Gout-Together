@@ -35,14 +35,14 @@ public class BookingController {
     this.tourCountRepository = tourCountRepository;
   }
 
-  @PostMapping
+  @PostMapping("/tours/{tourId}")
   public ResponseEntity<BookingInfoResponse> bookTour(
       @UUID(message = "wrong format for headers `idempotent-key`") @RequestHeader("idempotent-key")
           String idempotentKey,
-      @Validated @RequestBody BookingRequest body,
+      @PathVariable @Min(1) Integer tourId,
       Authentication authentication) {
 
-    var bookedTour = bookingService.bookTour(authentication, body, idempotentKey);
+    var bookedTour = bookingService.bookTour(authentication, tourId, idempotentKey);
 
     return ResponseEntity.ok(bookedTour);
   }
