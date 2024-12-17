@@ -1,8 +1,6 @@
-package dev.fResult.goutTogether.wallets.repositories;
+package dev.fResult.goutTogether.transactions;
 
-import dev.fResult.goutTogether.wallets.entities.Transaction;
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.data.repository.ListCrudRepository;
 
 public interface TransactionRepository extends ListCrudRepository<Transaction, Integer> {
