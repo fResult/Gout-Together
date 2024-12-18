@@ -11,14 +11,21 @@ import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.qrcodes.QrCodeService;
 import dev.fResult.goutTogether.tours.services.TourCountService;
+import dev.fResult.goutTogether.transactions.Transaction;
 import dev.fResult.goutTogether.transactions.TransactionHelper;
 import dev.fResult.goutTogether.transactions.TransactionService;
+import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
+import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import dev.fResult.goutTogether.wallets.services.WalletService;
 import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -76,37 +83,30 @@ public class PaymentServiceImpl implements PaymentService {
     var userWallet = wallets.getFirst();
     var tourCompanyWallet = wallets.getSecond();
 
+    // TODO: Handle existing Transaction By Idempotent Key (to avoid to create new Transaction)
     try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
       var futureTransferredMoney =
-          executor.submit(
-              () ->
-                  walletService.transferMoney(
-                      userWallet,
-                      tourCompanyWallet,
-                      BigDecimal.valueOf(tourPrice),
-                      TransactionType.BOOKING));
+          CompletableFuture.runAsync(
+              buildMoneyTransferRunnable(userWallet, tourCompanyWallet), executor);
 
       var futureCreatedTransaction =
-          executor.submit(
-              () -> {
-                var newTransaction =
-                    TransactionHelper.buildBookingTransaction(
-                        idempotentKey,
-                        userWallet.userId().getId(),
-                        tourCompanyWallet.tourCompanyId().getId(),
-                        BigDecimal.valueOf(tourPrice));
+          CompletableFuture.supplyAsync(
+              buildTransactionCreationSupplier(idempotentKey, userWallet, tourCompanyWallet),
+              executor);
 
-                return transactionService.createTransaction(newTransaction);
-              });
-
-      var futureIncrementedTourCount = executor.submit(tourCountService::incrementTourCount);
-      var futureExpiredQrCodeReference =
-          executor.submit(
+      var futureIncrementedTourCount =
+          CompletableFuture.runAsync(
               () ->
-                  qrCodeService.updateQrCodeRefStatusByBookingId(bookingId, QrCodeStatus.EXPIRED));
+                  tourCountService.incrementTourCount(
+                      Objects.requireNonNull(booking.tourId().getId())),
+              executor);
+      var futureExpiredQrCodeReference =
+          CompletableFuture.supplyAsync(
+              () -> qrCodeService.updateQrCodeRefStatusByBookingId(bookingId, QrCodeStatus.EXPIRED),
+              executor);
 
       var futureCompletedBooking =
-          executor.submit(
+          CompletableFuture.supplyAsync(
               () -> {
                 var bookingToBeComplete =
                     Booking.of(
@@ -119,11 +119,18 @@ public class PaymentServiceImpl implements PaymentService {
                         idempotentKey);
 
                 return bookingRepository.save(bookingToBeComplete);
-              });
+              },
+              executor);
 
-      futureTransferredMoney.get();
-      futureCreatedTransaction.get();
-      futureIncrementedTourCount.get();
+      var allFutures =
+          CompletableFuture.allOf(
+              futureTransferredMoney,
+              futureCreatedTransaction,
+              futureIncrementedTourCount,
+              futureExpiredQrCodeReference,
+              futureCompletedBooking);
+      allFutures.join();
+
       var expiredQrCodeReference = futureExpiredQrCodeReference.get();
       var completedBooking = futureCompletedBooking.get();
 
@@ -138,5 +145,28 @@ public class PaymentServiceImpl implements PaymentService {
   @Transactional
   public boolean refundBookingByBookingId(int bookingId, String idempotentKey) {
     throw new UnsupportedOperationException("Not Implement Yet");
+  }
+
+  @NotNull
+  private Supplier<Transaction> buildTransactionCreationSupplier(
+      String idempotentKey, UserWallet userWallet, TourCompanyWallet tourCompanyWallet) {
+    return () -> {
+      var newTransaction =
+          TransactionHelper.buildBookingTransaction(
+              idempotentKey,
+              userWallet.userId().getId(),
+              tourCompanyWallet.tourCompanyId().getId(),
+              BigDecimal.valueOf(tourPrice));
+
+      return transactionService.createTransaction(newTransaction);
+    };
+  }
+
+  @NotNull
+  private Runnable buildMoneyTransferRunnable(
+      UserWallet userWallet, TourCompanyWallet tourCompanyWallet) {
+    return () ->
+        walletService.transferMoney(
+            userWallet, tourCompanyWallet, BigDecimal.valueOf(tourPrice), TransactionType.BOOKING);
   }
 }
