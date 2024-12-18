@@ -22,6 +22,7 @@ import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -87,28 +88,26 @@ public class PaymentServiceImpl implements PaymentService {
     // TODO: Handle existing Transaction By Idempotent Key (to avoid to create new Transaction)
     try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
       var futureTransferredMoney =
-          CompletableFuture.runAsync(
-              buildMoneyTransferRunnable(userWallet, tourCompanyWallet), executor);
+          executor.submit(buildMoneyTransferRunnable(userWallet, tourCompanyWallet));
 
       var futureCreatedTransaction =
-          CompletableFuture.supplyAsync(
+          executor.submit(
               buildBookingTransactionCreationSupplier(
-                  idempotentKey, bookingId, userWallet, tourCompanyWallet),
-              executor);
+                  idempotentKey, bookingId, userWallet, tourCompanyWallet));
 
       var futureIncrementedTourCount =
-          CompletableFuture.runAsync(
+          executor.submit(
               () ->
                   tourCountService.incrementTourCount(
                       Objects.requireNonNull(booking.tourId().getId())),
               executor);
       var futureExpiredQrCodeReference =
-          CompletableFuture.supplyAsync(
-              () -> qrCodeService.updateQrCodeRefStatusByBookingId(bookingId, QrCodeStatus.EXPIRED),
-              executor);
+          executor.submit(
+              () ->
+                  qrCodeService.updateQrCodeRefStatusByBookingId(bookingId, QrCodeStatus.EXPIRED));
 
       var futureCompletedBooking =
-          CompletableFuture.supplyAsync(
+          executor.submit(
               () -> {
                 var bookingToBeComplete =
                     Booking.of(
@@ -121,18 +120,20 @@ public class PaymentServiceImpl implements PaymentService {
                         idempotentKey);
 
                 return bookingRepository.save(bookingToBeComplete);
-              },
-              executor);
+              });
 
       var allFutures =
           CompletableFuture.allOf(
-              futureTransferredMoney,
-              futureCreatedTransaction,
-              futureIncrementedTourCount,
-              futureExpiredQrCodeReference,
-              futureCompletedBooking);
+              CompletableFuture.supplyAsync(() -> futureTransferredMoney),
+              CompletableFuture.supplyAsync(() -> futureCreatedTransaction),
+              CompletableFuture.supplyAsync(() -> futureIncrementedTourCount),
+              CompletableFuture.supplyAsync(() -> futureExpiredQrCodeReference),
+              CompletableFuture.supplyAsync(() -> futureCompletedBooking));
       allFutures.join();
 
+      futureTransferredMoney.get();
+      futureCreatedTransaction.get();
+      futureIncrementedTourCount.get();
       var expiredQrCodeReference = futureExpiredQrCodeReference.get();
       var completedBooking = futureCompletedBooking.get();
 
@@ -156,11 +157,12 @@ public class PaymentServiceImpl implements PaymentService {
   }
 
   @NotNull
-  private Supplier<Transaction> buildBookingTransactionCreationSupplier(
+  private Callable<Transaction> buildBookingTransactionCreationSupplier(
       String idempotentKey,
       int bookingId,
       UserWallet userWallet,
       TourCompanyWallet tourCompanyWallet) {
+
     return () -> {
       var newTransaction =
           TransactionHelper.buildBookingTransaction(

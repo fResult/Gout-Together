@@ -207,7 +207,7 @@ public class SecurityConfig {
         .hasRole(UserRoleName.CONSUMER.name())
 
         // Self Managed Users
-        .requestMatchers("api/v1/me/**")
+        .requestMatchers("/api/v1/me/**")
         .hasRole(UserRoleName.CONSUMER.name())
 
         // Administration purposes
