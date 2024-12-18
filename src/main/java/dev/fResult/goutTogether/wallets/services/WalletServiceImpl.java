@@ -236,19 +236,34 @@ public class WalletServiceImpl implements WalletService {
         UserWallet.of(
             userWallet.id(), userWallet.userId(), Instant.now(), userWalletBalanceToUpdate);
 
-    userWalletRepository.save(userWalletToUpdate);
-    tourCompanyWalletRepository.save(companyWalletToUpdate);
+    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+      var futureUpdatedUserWallet =
+          CompletableFuture.supplyAsync(
+              () -> userWalletRepository.save(userWalletToUpdate), executor);
+      var futureUpdatedCompanyWallet =
+          CompletableFuture.supplyAsync(
+              () -> tourCompanyWalletRepository.save(companyWalletToUpdate), executor);
 
-    logger.info(
-        "[transferMoney] {} {} from {} id [{}] to {} id [{}] is transferred",
-        TransactionType.REFUND,
-        amount,
-        TourCompanyWallet.class.getSimpleName(),
-        companyWallet.id(),
-        UserWallet.class.getSimpleName(),
-        userWallet.id());
+      var updatedUserWallet = futureUpdatedUserWallet.get();
+      var updatedCompanyWallet = futureUpdatedCompanyWallet.get();
 
-    return new Pair<>(userWalletToUpdate, companyWalletToUpdate);
+      logger.info(
+          "[transferMoney] {} {} from {} id [{}] to {} id [{}] is transferred",
+          TransactionType.REFUND,
+          amount,
+          TourCompanyWallet.class.getSimpleName(),
+          companyWallet.id(),
+          UserWallet.class.getSimpleName(),
+          userWallet.id());
+
+      return new Pair<>(updatedUserWallet, updatedCompanyWallet);
+    } catch (ExecutionException | InterruptedException ex) {
+      var errorMessage =
+          String.format(
+              "Failed to transfer money between %s and %s",
+              User.class.getSimpleName(), TourCompanyWallet.class.getSimpleName());
+      throw new RuntimeException(errorMessage, ex);
+    }
   }
 
   private Pair<UserWallet, TourCompanyWallet> transferMoneyForBooking(
@@ -274,10 +289,11 @@ public class WalletServiceImpl implements WalletService {
 
     try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
       var futureUpdatedUserWallet =
-          CompletableFuture.supplyAsync(() -> userWalletRepository.save(userWalletToUpdate));
+          CompletableFuture.supplyAsync(
+              () -> userWalletRepository.save(userWalletToUpdate), executor);
       var futureUpdatedCompanyWallet =
           CompletableFuture.supplyAsync(
-              () -> tourCompanyWalletRepository.save(tourCompanyWalletToUpdate));
+              () -> tourCompanyWalletRepository.save(tourCompanyWalletToUpdate), executor);
 
       CompletableFuture.allOf(futureUpdatedUserWallet, futureUpdatedCompanyWallet).join();
 
