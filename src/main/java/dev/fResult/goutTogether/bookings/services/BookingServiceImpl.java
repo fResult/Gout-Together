@@ -3,7 +3,7 @@ package dev.fResult.goutTogether.bookings.services;
 import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
 
 import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
-import dev.fResult.goutTogether.bookings.dtos.BookingRequest;
+import dev.fResult.goutTogether.bookings.dtos.BookingCancellationRequest;
 import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.bookings.repositories.BookingRepository;
 import dev.fResult.goutTogether.common.enumurations.BookingStatus;
@@ -87,7 +87,14 @@ public class BookingServiceImpl implements BookingService {
   }
 
   @Override
-  public BookingInfoResponse cancelTour(String idempotentKey, BookingRequest body) {
+  public BookingInfoResponse cancelTour(
+      Authentication authentication, BookingCancellationRequest body, String idempotentKey) {
+
+    logger.debug(
+        "[cancelTour] Canceling {} with idempotentKey [{}]",
+        Booking.class.getSimpleName(),
+        idempotentKey);
+
     throw new UnsupportedOperationException("Not Implement Yet.");
   }
 
