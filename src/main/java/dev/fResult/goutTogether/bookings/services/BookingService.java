@@ -1,7 +1,7 @@
 package dev.fResult.goutTogether.bookings.services;
 
 import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
-import dev.fResult.goutTogether.bookings.dtos.BookingRequest;
+import dev.fResult.goutTogether.bookings.dtos.BookingCancellationRequest;
 import dev.fResult.goutTogether.bookings.entities.Booking;
 import org.springframework.security.core.Authentication;
 
@@ -12,5 +12,5 @@ public interface BookingService {
 
   BookingInfoResponse bookTour(Authentication authentication, int tourId, String idempotentKey);
 
-  BookingInfoResponse cancelTour(String idempotentKey, BookingRequest body);
+  BookingInfoResponse cancelTour(Authentication authentication, BookingCancellationRequest body, String idempotentKey);
 }
