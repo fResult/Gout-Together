@@ -43,10 +43,12 @@ public class BookingController {
       @PathVariable @Min(1) Integer tourId,
       Authentication authentication) {
 
-    var bookedTour = bookingService.bookTour(authentication, tourId, idempotentKey);
-    var createdUri = URI.create("/api/v1/bookings/tours/" + bookedTour.id());
+    logger.debug("[bookTour] Booking tour with tourId [{}]", tourId);
 
-    return ResponseEntity.created(createdUri).body(bookedTour);
+    var createdTourBooking = bookingService.bookTour(authentication, tourId, idempotentKey);
+    var createdUri = URI.create("/api/v1/bookings/" + createdTourBooking.id());
+
+    return ResponseEntity.created(createdUri).body(createdTourBooking);
   }
 
   @DeleteMapping("/{id}")
@@ -62,7 +64,9 @@ public class BookingController {
     return ResponseEntity.ok(cancelledTour);
   }
 
-  // Note: For Pessimistic Lock Testing Purpose
+  /*
+   * Note: For Pessimistic Lock Testing Purpose
+   */
   @PostMapping("/by-booking")
   public ResponseEntity<?> updateTourCountByBookingId(@RequestBody Payload body) {
     BackgroundJob.<SimpleService>schedule(
@@ -73,7 +77,9 @@ public class BookingController {
     return ResponseEntity.noContent().build();
   }
 
-  // Note: For Pessimistic Lock Testing Purpose
+  /*
+   * Note: For Pessimistic Lock Testing Purpose
+   */
   @PostMapping("/by-tour")
   public ResponseEntity<?> updateTourCountByTourId(@RequestBody Payload body) {
     BackgroundJob.<SimpleService>schedule(
