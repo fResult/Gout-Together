@@ -213,59 +213,6 @@ public class WalletServiceImpl implements WalletService {
     };
   }
 
-  private Pair<UserWallet, TourCompanyWallet> transferMoneyForRefund(
-      UserWallet userWallet, TourCompanyWallet companyWallet, BigDecimal amount) {
-
-    var companyWalletBalance = companyWallet.balance();
-    var isBalanceInsufficient = companyWalletBalance.compareTo(amount) < 0;
-
-    if (isBalanceInsufficient)
-      throw errorHelper.insufficientBalance("transferMoney", companyWalletBalance, amount).get();
-
-    var companyWalletBalanceToUpdate = companyWalletBalance.subtract(amount);
-    var companyWalletToUpdate =
-        TourCompanyWallet.of(
-            companyWallet.id(),
-            companyWallet.tourCompanyId(),
-            Instant.now(),
-            companyWalletBalanceToUpdate);
-
-    var userWalletBalance = userWallet.balance();
-    var userWalletBalanceToUpdate = userWalletBalance.add(amount);
-    var userWalletToUpdate =
-        UserWallet.of(
-            userWallet.id(), userWallet.userId(), Instant.now(), userWalletBalanceToUpdate);
-
-    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-      var futureUpdatedUserWallet =
-          CompletableFuture.supplyAsync(
-              () -> userWalletRepository.save(userWalletToUpdate), executor);
-      var futureUpdatedCompanyWallet =
-          CompletableFuture.supplyAsync(
-              () -> tourCompanyWalletRepository.save(companyWalletToUpdate), executor);
-
-      var updatedUserWallet = futureUpdatedUserWallet.get();
-      var updatedCompanyWallet = futureUpdatedCompanyWallet.get();
-
-      logger.info(
-          "[transferMoney] {} {} from {} id [{}] to {} id [{}] is transferred",
-          TransactionType.REFUND,
-          amount,
-          TourCompanyWallet.class.getSimpleName(),
-          companyWallet.id(),
-          UserWallet.class.getSimpleName(),
-          userWallet.id());
-
-      return new Pair<>(updatedUserWallet, updatedCompanyWallet);
-    } catch (ExecutionException | InterruptedException ex) {
-      var errorMessage =
-          String.format(
-              "Failed to transfer money between %s and %s",
-              User.class.getSimpleName(), TourCompanyWallet.class.getSimpleName());
-      throw new RuntimeException(errorMessage, ex);
-    }
-  }
-
   private Pair<UserWallet, TourCompanyWallet> transferMoneyForBooking(
       UserWallet userWallet, TourCompanyWallet companyWallet, BigDecimal amount) {
     var userWalletBalance = userWallet.balance();
@@ -308,6 +255,59 @@ public class WalletServiceImpl implements WalletService {
           userWallet.id(),
           TourCompanyWallet.class.getSimpleName(),
           companyWallet.id());
+
+      return new Pair<>(updatedUserWallet, updatedCompanyWallet);
+    } catch (ExecutionException | InterruptedException ex) {
+      var errorMessage =
+          String.format(
+              "Failed to transfer money between %s and %s",
+              User.class.getSimpleName(), TourCompanyWallet.class.getSimpleName());
+      throw new RuntimeException(errorMessage, ex);
+    }
+  }
+
+  private Pair<UserWallet, TourCompanyWallet> transferMoneyForRefund(
+      UserWallet userWallet, TourCompanyWallet companyWallet, BigDecimal amount) {
+
+    var companyWalletBalance = companyWallet.balance();
+    var isBalanceInsufficient = companyWalletBalance.compareTo(amount) < 0;
+
+    if (isBalanceInsufficient)
+      throw errorHelper.insufficientBalance("transferMoney", companyWalletBalance, amount).get();
+
+    var companyWalletBalanceToUpdate = companyWalletBalance.subtract(amount);
+    var companyWalletToUpdate =
+        TourCompanyWallet.of(
+            companyWallet.id(),
+            companyWallet.tourCompanyId(),
+            Instant.now(),
+            companyWalletBalanceToUpdate);
+
+    var userWalletBalance = userWallet.balance();
+    var userWalletBalanceToUpdate = userWalletBalance.add(amount);
+    var userWalletToUpdate =
+        UserWallet.of(
+            userWallet.id(), userWallet.userId(), Instant.now(), userWalletBalanceToUpdate);
+
+    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+      var futureUpdatedUserWallet =
+          CompletableFuture.supplyAsync(
+              () -> userWalletRepository.save(userWalletToUpdate), executor);
+      var futureUpdatedCompanyWallet =
+          CompletableFuture.supplyAsync(
+              () -> tourCompanyWalletRepository.save(companyWalletToUpdate), executor);
+
+      var updatedUserWallet = futureUpdatedUserWallet.get();
+      var updatedCompanyWallet = futureUpdatedCompanyWallet.get();
+
+      logger.info(
+          "[transferMoney] {} {} from {} id [{}] to {} id [{}] is transferred",
+          TransactionType.REFUND,
+          amount,
+          TourCompanyWallet.class.getSimpleName(),
+          companyWallet.id(),
+          UserWallet.class.getSimpleName(),
+          userWallet.id());
 
       return new Pair<>(updatedUserWallet, updatedCompanyWallet);
     } catch (ExecutionException | InterruptedException ex) {
