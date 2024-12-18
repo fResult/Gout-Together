@@ -13,4 +13,8 @@ public record TourCount(@Id Integer id, AggregateReference<Tour, Integer> tourId
   public TourCount increaseAmount(int amountToAdd) {
     return new TourCount(id, tourId, amount + amountToAdd);
   }
+
+  public TourCount decreaseAmount(int amountToSubtract) {
+    return new TourCount(id, tourId, amount - amountToSubtract);
+  }
 }

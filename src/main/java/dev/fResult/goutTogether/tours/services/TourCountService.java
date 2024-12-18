@@ -60,4 +60,27 @@ public class TourCountService {
         TourCount.class.getSimpleName(),
         tourCount.amount());
   }
+
+  public void decrementTourCount(int tourId) {
+    logger.debug(
+        "[decrementTourCount] Decrementing {} with tourId [{}]",
+        TourCount.class.getSimpleName(),
+        tourId);
+
+    var tourCount =
+        tourCountRepository
+            .findOneByTourId(AggregateReference.to(tourId))
+            .orElseThrow(
+                errorHelper.entityWithSubResourceNotFound(
+                    "decrementTourCount", TourCount.class, "tourId", String.valueOf(tourId)));
+
+    var tourCountAmount = 1;
+    var tourCountToDecrement = tourCount.decreaseAmount(tourCountAmount);
+    tourCountRepository.save(tourCountToDecrement);
+
+    logger.info(
+        "[decrementTourCount] Decremented {} with tourId to [{}]",
+        TourCount.class.getSimpleName(),
+        tourId);
+  }
 }
