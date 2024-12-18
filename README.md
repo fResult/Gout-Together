@@ -81,4 +81,4 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
 - Using the Gradle Kotlin instead of the Gradle Groovy
 - PasswordEncoder, using Argon2PasswordEncoder instead of BCryptPasswordEncoder
 - Add more assertion, assert the error message
-- Use [Virtual Thread](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html) for concurrency fetching independently data from database
+- Use [Virtual Thread](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html) and Future for concurrency fetching independent data from database

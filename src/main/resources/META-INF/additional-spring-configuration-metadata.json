@@ -33,7 +33,7 @@
     {
       "name": "booking.tour-price",
       "type": "java.lang.BigDecimal",
-      "description": "The price of the tour for learning purpose."
+      "description": "The static tour price for learning purpose."
     }
   ]
 }
