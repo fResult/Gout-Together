@@ -4,7 +4,6 @@ import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
-import dev.fResult.goutTogether.tours.entities.Tour;
 import dev.fResult.goutTogether.tours.services.TourService;
 import dev.fResult.goutTogether.transactions.Transaction;
 import dev.fResult.goutTogether.transactions.TransactionHelper;
@@ -19,9 +18,9 @@ import dev.fResult.goutTogether.wallets.repositories.UserWalletRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import kotlin.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,10 +162,14 @@ public class WalletServiceImpl implements WalletService {
     }
 
     try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-      Future<UserWallet> userWalletFuture =
-          executor.submit(() -> getUserWalletByUserId(Objects.requireNonNull(userRef.getId())));
-      Future<Tour> tourFuture =
-          executor.submit(() -> tourService.getTourById(Objects.requireNonNull(tourRef.getId())));
+      var userWalletFuture =
+          CompletableFuture.supplyAsync(
+              () -> getUserWalletByUserId(Objects.requireNonNull(userRef.getId())));
+      var tourFuture =
+          CompletableFuture.supplyAsync(
+              () -> tourService.getTourById(Objects.requireNonNull(tourRef.getId())));
+
+      CompletableFuture.allOf(userWalletFuture, tourFuture).join();
 
       var userWallet = userWalletFuture.get();
       var tour = tourFuture.get();
