@@ -273,11 +273,16 @@ public class WalletServiceImpl implements WalletService {
             tourCompanyWalletBalanceToUpdate);
 
     try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-      var futureUserWallet = executor.submit(() -> userWalletRepository.save(userWalletToUpdate));
-      var futureCompanyWallet =
-          executor.submit(() -> tourCompanyWalletRepository.save(tourCompanyWalletToUpdate));
+      var futureUpdatedUserWallet =
+          CompletableFuture.supplyAsync(() -> userWalletRepository.save(userWalletToUpdate));
+      var futureUpdatedCompanyWallet =
+          CompletableFuture.supplyAsync(
+              () -> tourCompanyWalletRepository.save(tourCompanyWalletToUpdate));
 
-      futureCompanyWallet.get();
+      CompletableFuture.allOf(futureUpdatedUserWallet, futureUpdatedCompanyWallet).join();
+
+      var updatedUserWallet = futureUpdatedUserWallet.get();
+      var updatedCompanyWallet = futureUpdatedCompanyWallet.get();
 
       logger.info(
           "[transferMoney] {} {} from {} id [{}] to {} id [{}] is transferred",
@@ -288,7 +293,7 @@ public class WalletServiceImpl implements WalletService {
           TourCompanyWallet.class.getSimpleName(),
           companyWallet.id());
 
-      return new Pair<>(userWalletToUpdate, tourCompanyWalletToUpdate);
+      return new Pair<>(updatedUserWallet, updatedCompanyWallet);
     } catch (ExecutionException | InterruptedException ex) {
       var errorMessage =
           String.format(
