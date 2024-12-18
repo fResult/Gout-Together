@@ -196,6 +196,10 @@ public class SecurityConfig {
         .requestMatchers("/api/v1/users/**")
         .hasRole(UserRoleName.ADMIN.name())
 
+        // Payments
+        .requestMatchers("/api/v1/payments/**")
+        .hasRole(UserRoleName.CONSUMER.name())
+
         // Wallets
         .requestMatchers(HttpMethod.GET, "/api/v1/wallets/me")
         .hasRole(UserRoleName.CONSUMER.name())
