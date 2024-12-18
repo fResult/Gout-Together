@@ -216,7 +216,8 @@ public class WalletServiceImpl implements WalletService {
   private Pair<UserWallet, TourCompanyWallet> transferMoneyForBooking(
       UserWallet userWallet, TourCompanyWallet companyWallet, BigDecimal amount) {
     var userWalletBalance = userWallet.balance();
-    if (userWalletBalance.compareTo(amount) < 0) {
+    var isInsufficientBalance = userWalletBalance.compareTo(amount) < 0;
+    if (isInsufficientBalance) {
       throw errorHelper.insufficientBalance("transferMoney", userWalletBalance, amount).get();
     }
 
