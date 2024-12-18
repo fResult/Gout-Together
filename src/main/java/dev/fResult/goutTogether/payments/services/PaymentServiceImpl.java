@@ -136,7 +136,7 @@ public class PaymentServiceImpl implements PaymentService {
 
   @Override
   @Transactional
-  public boolean refundBooking(int bookingId, String idempotentKey) {
+  public boolean refundBookingByBookingId(int bookingId, String idempotentKey) {
     throw new UnsupportedOperationException("Not Implement Yet");
   }
 }
