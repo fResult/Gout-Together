@@ -9,5 +9,5 @@ public interface PaymentService {
 
   BookingInfoResponse payByBookingId(int bookingId, String idempotentKey);
 
-  boolean refundBooking(int bookingId, String idempotentKey);
+  boolean refundBookingByBookingId(int bookingId, String idempotentKey);
 }
