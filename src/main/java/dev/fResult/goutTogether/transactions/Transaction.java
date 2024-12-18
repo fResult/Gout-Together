@@ -1,5 +1,6 @@
 package dev.fResult.goutTogether.transactions;
 
+import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.users.entities.User;
@@ -14,6 +15,7 @@ public record Transaction(
     @Id Integer id,
     AggregateReference<User, Integer> userId,
     AggregateReference<TourCompany, Integer> tourCompanyId,
+    AggregateReference<Booking, Integer> bookingId,
     Instant transactionDate,
     BigDecimal amount,
     TransactionType type,
@@ -23,11 +25,13 @@ public record Transaction(
       Integer id,
       AggregateReference<User, Integer> userId,
       AggregateReference<TourCompany, Integer> tourCompanyId,
+      AggregateReference<Booking, Integer> bookingId,
       Instant transactionDate,
       BigDecimal amount,
       TransactionType type,
       String idempotentKey) {
 
-    return new Transaction(id, userId, tourCompanyId, transactionDate, amount, type, idempotentKey);
+    return new Transaction(
+        id, userId, tourCompanyId, bookingId, transactionDate, amount, type, idempotentKey);
   }
 }

@@ -9,6 +9,7 @@ import dev.fResult.goutTogether.tours.entities.TourCount;
 import dev.fResult.goutTogether.tours.repositories.TourRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
@@ -27,7 +28,8 @@ public class TourServiceImpl implements TourService {
   public TourServiceImpl(
       TourRepository tourRepository,
       TourCompanyService tourCompanyService,
-      TourCountService tourCountService) {
+      @Lazy TourCountService tourCountService) {
+
     this.tourRepository = tourRepository;
     this.tourCompanyService = tourCompanyService;
     this.tourCountService = tourCountService;

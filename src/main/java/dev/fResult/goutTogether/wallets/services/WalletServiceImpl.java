@@ -338,7 +338,7 @@ public class WalletServiceImpl implements WalletService {
       AggregateReference<User, Integer> userRef, BigDecimal amount, String idempotentKey) {
 
     var transactionToCreate =
-        TransactionHelper.buildTopUpTransaction(userRef.getId(), amount, idempotentKey);
+        TransactionHelper.buildTopUpTransaction(userRef.getId(), null, amount, idempotentKey);
     var createdTransaction = transactionRepository.save(transactionToCreate);
     logger.info(
         "[createTopUpTransaction] New {} is created: {}",

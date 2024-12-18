@@ -91,7 +91,8 @@ public class PaymentServiceImpl implements PaymentService {
 
       var futureCreatedTransaction =
           CompletableFuture.supplyAsync(
-              buildTransactionCreationSupplier(idempotentKey, userWallet, tourCompanyWallet),
+              buildBookingTransactionCreationSupplier(
+                  idempotentKey, bookingId, userWallet, tourCompanyWallet),
               executor);
 
       var futureIncrementedTourCount =
@@ -148,13 +149,17 @@ public class PaymentServiceImpl implements PaymentService {
   }
 
   @NotNull
-  private Supplier<Transaction> buildTransactionCreationSupplier(
-      String idempotentKey, UserWallet userWallet, TourCompanyWallet tourCompanyWallet) {
+  private Supplier<Transaction> buildBookingTransactionCreationSupplier(
+      String idempotentKey,
+      int bookingId,
+      UserWallet userWallet,
+      TourCompanyWallet tourCompanyWallet) {
     return () -> {
       var newTransaction =
           TransactionHelper.buildBookingTransaction(
               idempotentKey,
               userWallet.userId().getId(),
+              bookingId,
               tourCompanyWallet.tourCompanyId().getId(),
               BigDecimal.valueOf(tourPrice));
 
