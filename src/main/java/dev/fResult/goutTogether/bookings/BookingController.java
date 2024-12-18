@@ -9,6 +9,7 @@ import dev.fResult.goutTogether.tours.entities.TourCount;
 import dev.fResult.goutTogether.tours.repositories.TourCountRepository;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import java.net.URI;
 import java.time.Instant;
 import org.hibernate.validator.constraints.UUID;
 import org.jobrunr.scheduling.BackgroundJob;
@@ -43,8 +44,9 @@ public class BookingController {
       Authentication authentication) {
 
     var bookedTour = bookingService.bookTour(authentication, tourId, idempotentKey);
+    var createdUri = URI.create("/api/v1/bookings/tours/" + bookedTour.id());
 
-    return ResponseEntity.ok(bookedTour);
+    return ResponseEntity.created(createdUri).body(bookedTour);
   }
 
   @DeleteMapping("/{id}")
