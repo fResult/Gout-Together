@@ -3,12 +3,16 @@ package dev.fResult.goutTogether.helpers;
 import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.exceptions.InsufficientBalanceException;
+import dev.fResult.goutTogether.common.exceptions.InsufficientTourCountException;
 import dev.fResult.goutTogether.common.exceptions.UnsupportedTransactionTypeException;
 import dev.fResult.goutTogether.common.utils.StringUtil;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Supplier;
+
+import dev.fResult.goutTogether.tours.entities.TourCount;
+import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,13 +70,29 @@ public class ErrorHelper {
 
     return () -> {
       logger.warn(
-          "[{}] User wallet balance: {} is insufficient for amount: {}",
+          "[{}] {} balance: {} is insufficient for amount: {}",
           transferMoney,
+          UserWallet.class.getSimpleName(),
           userWalletBalance,
           amount);
 
       return new InsufficientBalanceException(
-          "User wallet balance is insufficient for this operation");
+          String.format(
+              "%s balance is insufficient for this operation", UserWallet.class.getSimpleName()));
+    };
+  }
+
+  public Supplier<InsufficientTourCountException> insufficientTourCount(
+      String methodName, int amount) {
+
+    return () -> {
+      logger.warn(
+          "[{}] {} is insufficient for amount: {}",
+          methodName,
+          TourCount.class.getSimpleName(),
+          amount);
+      return new InsufficientTourCountException(
+          String.format("%s amount is insufficient for this operation", TourCount.class.getSimpleName()));
     };
   }
 

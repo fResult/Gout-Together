@@ -14,9 +14,11 @@ public class TourCountService {
   private final ErrorHelper errorHelper = new ErrorHelper(TourCountService.class);
 
   private final TourCountRepository tourCountRepository;
+  private final TourService tourService;
 
-  public TourCountService(TourCountRepository tourCountRepository) {
+  public TourCountService(TourCountRepository tourCountRepository, TourService tourService) {
     this.tourCountRepository = tourCountRepository;
+    this.tourService = tourService;
   }
 
   public TourCount createTourCount(TourCount tourCount) {
@@ -34,6 +36,7 @@ public class TourCountService {
         TourCount.class.getSimpleName(),
         tourId);
 
+    var tour = tourService.getTourById(tourId);
     var tourCount =
         tourCountRepository
             .findOneByTourId(AggregateReference.to(tourId))
@@ -41,7 +44,14 @@ public class TourCountService {
                 errorHelper.entityWithSubResourceNotFound(
                     "incrementTourCount", TourCount.class, "tourId", String.valueOf(tourId)));
 
-    var tourCountToIncrement = tourCount.increaseAmount(1);
+    var tourCountAmount = 1;
+    // TODO: Make pessimistic lock to avoid race condition
+    var isInsufficient = tour.numberOfPeople() < tourCount.amount() + tourCountAmount;
+    if (isInsufficient) {
+      throw errorHelper.insufficientTourCount("incrementTourCount", tour.numberOfPeople()).get();
+    }
+
+    var tourCountToIncrement = tourCount.increaseAmount(tourCountAmount);
     tourCountRepository.save(tourCountToIncrement);
 
     logger.info(
