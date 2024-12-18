@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
+@Validated
 public class BookingController {
   private final Logger logger = LoggerFactory.getLogger(BookingController.class);
   private final ErrorHelper errorHelper = new ErrorHelper(BookingController.class);
@@ -58,11 +59,11 @@ public class BookingController {
   public ResponseEntity<BookingInfoResponse> cancelTourById(
       @UUID(message = "wrong format for headers `idempotent-key`") @RequestHeader("idempotent-key")
           String idempotentKey,
-      @NotNull @Min(1) Integer id,
+      @PathVariable @NotNull @Min(1) Integer id,
       @Validated @RequestBody BookingCancellationRequest body,
       Authentication authentication) {
 
-    logger.debug("[cancelTourById] Canceling tour booking with tourId [{}]", id);
+    logger.debug("[cancelTourById] Canceling tour booking with tourId [{}]", body.tourId());
     var cancelledTour = bookingService.cancelTour(authentication, body, idempotentKey);
 
     return ResponseEntity.ok(cancelledTour);

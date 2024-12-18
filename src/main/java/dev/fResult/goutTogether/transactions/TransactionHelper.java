@@ -36,4 +36,22 @@ public class TransactionHelper {
         TransactionType.BOOKING,
         idempotentKey);
   }
+
+  public static Transaction buildRefundTransaction(
+      String idempotentKey,
+      Integer userId,
+      Integer bookingId,
+      Integer tourCompanyId,
+      BigDecimal amount) {
+
+    return Transaction.of(
+        null,
+        AggregateReference.to(userId),
+        AggregateReference.to(tourCompanyId),
+        AggregateReference.to(bookingId),
+        Instant.now(),
+        amount,
+        TransactionType.REFUND,
+        idempotentKey);
+  }
 }

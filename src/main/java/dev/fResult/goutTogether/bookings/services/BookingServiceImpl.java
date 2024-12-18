@@ -8,6 +8,8 @@ import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.bookings.repositories.BookingRepository;
 import dev.fResult.goutTogether.common.enumurations.BookingStatus;
 import dev.fResult.goutTogether.common.exceptions.BookingExistsException;
+import dev.fResult.goutTogether.helpers.ErrorHelper;
+import dev.fResult.goutTogether.payments.services.PaymentService;
 import dev.fResult.goutTogether.qrcodes.QrCodeService;
 import java.time.Instant;
 import java.util.Objects;
@@ -15,6 +17,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import dev.fResult.goutTogether.tours.services.TourCountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
@@ -26,13 +30,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class BookingServiceImpl implements BookingService {
   private final Logger logger = LoggerFactory.getLogger(BookingServiceImpl.class);
+  private final ErrorHelper errorHelper = new ErrorHelper(BookingServiceImpl.class);
 
   private final BookingRepository bookingRepository;
   private final QrCodeService qrCodeService;
+  private final TourCountService tourCountService;
+  private final PaymentService paymentService;
 
-  public BookingServiceImpl(BookingRepository bookingRepository, QrCodeService qrCodeService) {
+  public BookingServiceImpl(
+      BookingRepository bookingRepository,
+      QrCodeService qrCodeService,
+      TourCountService tourCountService,
+      PaymentService paymentService) {
+
     this.bookingRepository = bookingRepository;
     this.qrCodeService = qrCodeService;
+    this.tourCountService = tourCountService;
+    this.paymentService = paymentService;
   }
 
   @Override
@@ -95,7 +109,27 @@ public class BookingServiceImpl implements BookingService {
         Booking.class.getSimpleName(),
         idempotentKey);
 
-    throw new UnsupportedOperationException("Not Implement Yet.");
+    var jwt = (Jwt) authentication.getPrincipal();
+    var userId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
+    var existingBooking =
+        bookingRepository
+            .findOneByUserIdAndTourId(
+                AggregateReference.to(userId), AggregateReference.to(body.tourId()))
+            .orElseThrow(
+                errorHelper.entityWithSubResourceNotFound(
+                    "cancelTour", Booking.class, "tourId", String.valueOf(body.tourId())));
+
+    tourCountService.decrementTourCount(body.tourId());
+    paymentService.refundBookingByBookingId(existingBooking.id(), idempotentKey);
+
+    bookingRepository.deleteById(existingBooking.id());
+
+    return BookingInfoResponse.of(
+        existingBooking.id(),
+        existingBooking.userId().getId(),
+        existingBooking.tourId().getId(),
+        BookingStatus.CANCELLED,
+        null);
   }
 
   private final Consumer<Booking> throwExceptionIfBookingExists =

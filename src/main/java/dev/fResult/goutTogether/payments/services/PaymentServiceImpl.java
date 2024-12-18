@@ -26,7 +26,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.function.Supplier;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +52,7 @@ public class PaymentServiceImpl implements PaymentService {
       @Value("${booking.tour-price}") double tourPrice,
       BookingRepository bookingRepository,
       QrCodeService qrCodeService,
-      BookingService bookingService,
+      @Lazy BookingService bookingService,
       @Lazy WalletService walletService,
       TourCountService tourCountService,
       TransactionService transactionService) {
@@ -153,7 +152,34 @@ public class PaymentServiceImpl implements PaymentService {
   @Override
   @Transactional
   public boolean refundBookingByBookingId(int bookingId, String idempotentKey) {
-    throw new UnsupportedOperationException("Not Implement Yet");
+    var booking =
+        bookingService
+            .findBookingById(bookingId)
+            .orElseThrow(
+                errorHelper.entityNotFound("refundBookingByBookingId", Booking.class, bookingId));
+
+    var wallets = walletService.getConsumerAndTourCompanyWallets(booking);
+    var userWallet = wallets.getFirst();
+    var tourCompanyWallet = wallets.getSecond();
+
+    walletService.transferMoney(
+        userWallet, tourCompanyWallet, BigDecimal.valueOf(tourPrice), TransactionType.REFUND);
+    var transactionToRefund =
+        TransactionHelper.buildRefundTransaction(
+            idempotentKey,
+            userWallet.userId().getId(),
+            bookingId,
+            tourCompanyWallet.tourCompanyId().getId(),
+            BigDecimal.valueOf(tourPrice));
+
+    var refundedTransaction = transactionService.createTransaction(transactionToRefund);
+
+    logger.info(
+        "[refundBookingByBookingId] Refunded {}: {}",
+        Transaction.class.getSimpleName(),
+        refundedTransaction.id());
+
+    return true;
   }
 
   @NotNull
