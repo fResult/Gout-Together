@@ -2,6 +2,7 @@ package dev.fResult.goutTogether.wallets.services;
 
 import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.common.enumurations.TransactionType;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tours.entities.Tour;
 import dev.fResult.goutTogether.tours.services.TourService;
@@ -152,9 +153,13 @@ public class WalletServiceImpl implements WalletService {
     var userRef = booking.userId();
     var tourRef = booking.tourId();
     if (userRef == null || tourRef == null) {
-      throw errorHelper
-          .entityNotFound("getConsumerAndTourCompanyWallets", Booking.class, booking.id())
-          .get();
+      logger.warn(
+          "[getConsumerAndTourCompanyWallets] {}'s userId or tourId must not be null null",
+          Booking.class.getSimpleName());
+      throw new EntityNotFoundException(
+          String.format(
+              "[getConsumerAndTourCompanyWallets] %s with userId [%s] tourId [%s] not found",
+              Booking.class.getSimpleName(), getIdOrNull(userRef), getIdOrNull(tourRef)));
     }
 
     try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
@@ -187,6 +192,7 @@ public class WalletServiceImpl implements WalletService {
       TourCompanyWallet tourCompanyWallet,
       BigDecimal amount,
       TransactionType transactionType) {
+
     logger.debug(
         "[transferMoney] Transferring {} {} from {} id [{}] to {} id [{}]",
         transactionType,
@@ -312,5 +318,9 @@ public class WalletServiceImpl implements WalletService {
         Transaction.class.getSimpleName(),
         createdTransaction);
     return createdTransaction;
+  }
+
+  private Integer getIdOrNull(AggregateReference<?, Integer> resourceRef) {
+    return resourceRef != null ? resourceRef.getId() : null;
   }
 }
