@@ -5,6 +5,7 @@ import dev.fResult.goutTogether.tours.entities.TourCount;
 import dev.fResult.goutTogether.tours.repositories.TourCountRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,7 @@ public class TourCountService {
   private final TourCountRepository tourCountRepository;
   private final TourService tourService;
 
-  public TourCountService(TourCountRepository tourCountRepository, TourService tourService) {
+  public TourCountService(TourCountRepository tourCountRepository, @Lazy TourService tourService) {
     this.tourCountRepository = tourCountRepository;
     this.tourService = tourService;
   }

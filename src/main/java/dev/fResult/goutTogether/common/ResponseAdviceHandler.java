@@ -57,7 +57,7 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(ValidationException.class)
   protected ResponseEntity<?> handleValidationException(ValidationException ex) {
     var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
-    logger.info("Validation error: {}", ex.getMessage());
+    logger.warn("Validation error: {}", ex.getMessage());
 
     return ResponseEntity.of(detail).build();
   }
@@ -65,7 +65,7 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(EntityNotFoundException.class)
   protected ResponseEntity<?> handleEntityNotFoundException(EntityNotFoundException ex) {
     var detail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-    logger.info("Entity not found: {}", ex.getMessage());
+    logger.warn("Entity not found: {}", ex.getMessage());
 
     return ResponseEntity.of(detail).build();
   }
@@ -73,7 +73,7 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(CredentialExistsException.class)
   protected ResponseEntity<?> handleCredentialExistsException(CredentialExistsException ex) {
     var detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
-    logger.info("Credential exists: {}", ex.getMessage());
+    logger.warn("Credential exists: {}", ex.getMessage());
 
     return ResponseEntity.of(detail).build();
   }
@@ -81,7 +81,7 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(RefreshTokenExpiredException.class)
   protected ResponseEntity<?> handleRefreshTokenExpiredException(RefreshTokenExpiredException ex) {
     var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
-    logger.info("Refresh token expired: {}", ex.getMessage());
+    logger.warn("Refresh token expired: {}", ex.getMessage());
 
     return ResponseEntity.of(detail).build();
   }
