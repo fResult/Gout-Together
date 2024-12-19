@@ -274,7 +274,6 @@ public class WalletServiceImpl implements WalletService {
     var companyWalletBalance = companyWallet.balance();
 
     var companyWalletBalanceToUpdate = companyWalletBalance.subtract(amount);
-    // TODO: Handle not transfer money back to the consumer, if consumer didn't pay yet.
     var companyWalletToUpdate =
         TourCompanyWallet.of(
             companyWallet.id(),

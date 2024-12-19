@@ -7,6 +7,7 @@ import dev.fResult.goutTogether.bookings.dtos.BookingCancellationRequest;
 import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.bookings.repositories.BookingRepository;
 import dev.fResult.goutTogether.common.enumurations.BookingStatus;
+import dev.fResult.goutTogether.common.enumurations.QrCodeStatus;
 import dev.fResult.goutTogether.common.exceptions.BookingExistsException;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.payments.services.PaymentService;
@@ -114,23 +115,26 @@ public class BookingServiceImpl implements BookingService {
         idempotentKey);
 
     var existingBooking =
-        bookingRepository
-            .findById(id)
-            .orElseThrow(
-                errorHelper.entityWithSubResourceNotFound(
-                    "cancelTour", Booking.class, "tourId", String.valueOf(body.tourId())));
+        findBookingById(id)
+            .orElseThrow(errorHelper.entityNotFound("cancelTour", Booking.class, id));
 
-    tourCountService.decrementTourCount(body.tourId());
-    paymentService.refundBookingByBookingId(id, idempotentKey);
-
+    var qrCodeRef = qrCodeService.getQrCodeRefByBookingId(id);
     bookingRepository.deleteById(id);
 
-    return BookingInfoResponse.of(
-        id,
-        existingBooking.userId().getId(),
-        existingBooking.tourId().getId(),
-        BookingStatus.CANCELLED,
-        null);
+    var refundedBookingInfo =
+        BookingInfoResponse.of(
+            id,
+            existingBooking.userId().getId(),
+            existingBooking.tourId().getId(),
+            BookingStatus.CANCELLED,
+            null);
+
+    if (qrCodeRef.status() == QrCodeStatus.ACTIVATED) return refundedBookingInfo;
+
+    tourCountService.decrementTourCount(body.tourId());
+    paymentService.refundBooking(existingBooking, idempotentKey);
+
+    return refundedBookingInfo;
   }
 
   private final Consumer<Booking> throwExceptionIfBookingExists =
