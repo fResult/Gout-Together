@@ -47,3 +47,6 @@ org.jobrunr:
     thread-type: VirtualThreads
   dashboard:
     enabled: ${JOBRUNR_DASHBOARD_ENABLED:true}
+
+booking:
+  tour-price: 100.00

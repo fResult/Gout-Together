@@ -8,7 +8,6 @@ import dev.fResult.goutTogether.bookings.services.BookingService;
 import dev.fResult.goutTogether.common.enumurations.BookingStatus;
 import dev.fResult.goutTogether.common.enumurations.QrCodeStatus;
 import dev.fResult.goutTogether.common.enumurations.TransactionType;
-import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.qrcodes.QrCodeService;
 import dev.fResult.goutTogether.tours.services.TourCountService;
@@ -139,10 +138,7 @@ public class PaymentServiceImpl implements PaymentService {
       return BookingInfoResponse.fromDao(completedBooking)
           .withQrReference(expiredQrCodeReference.id());
     } catch (ExecutionException ex) {
-      var cause = ex.getCause();
-      if (cause instanceof ValidationException) throw (ValidationException) cause;
-
-      throw new RuntimeException("Failed to pay on booking", ex);
+      throw ErrorHelper.throwMatchedException(ex.getCause(), "Failed to pay on booking");
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
       throw new RuntimeException("Task interrupted", ex);
