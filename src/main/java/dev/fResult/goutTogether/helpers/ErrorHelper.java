@@ -1,23 +1,33 @@
 package dev.fResult.goutTogether.helpers;
 
 import dev.fResult.goutTogether.common.enumurations.TransactionType;
-import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
-import dev.fResult.goutTogether.common.exceptions.InsufficientBalanceException;
-import dev.fResult.goutTogether.common.exceptions.InsufficientTourCountException;
-import dev.fResult.goutTogether.common.exceptions.UnsupportedTransactionTypeException;
+import dev.fResult.goutTogether.common.exceptions.*;
 import dev.fResult.goutTogether.common.utils.StringUtil;
+import dev.fResult.goutTogether.tours.entities.TourCount;
+import dev.fResult.goutTogether.wallets.entities.UserWallet;
+import jakarta.validation.ConstraintViolationException;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Supplier;
-
-import dev.fResult.goutTogether.tours.entities.TourCount;
-import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ErrorHelper {
   private final Logger logger;
+
+  public static RuntimeException throwMatchedException(
+      Throwable cause, String defaultErrorMessage) {
+
+    return switch (cause) {
+      case ConstraintViolationException cve -> cve;
+      case ValidationException ve -> ve;
+      case EntityNotFoundException enfe -> enfe;
+      case CredentialExistsException cee -> cee;
+      case RefreshTokenExpiredException rtee -> rtee;
+      default -> new RuntimeException(defaultErrorMessage, cause);
+    };
+  }
 
   public ErrorHelper(Class<?> classToLog) {
     logger = LoggerFactory.getLogger(classToLog);
@@ -92,7 +102,8 @@ public class ErrorHelper {
           TourCount.class.getSimpleName(),
           amount);
       return new InsufficientTourCountException(
-          String.format("%s amount is insufficient for this operation", TourCount.class.getSimpleName()));
+          String.format(
+              "%s amount is insufficient for this operation", TourCount.class.getSimpleName()));
     };
   }
 
