@@ -99,6 +99,23 @@ public class QrCodeService {
     return updatedQrCodeRef;
   }
 
+  public boolean deleteQrCodeRefByBookingId(int bookingId) {
+    logger.debug(
+        "[deleteQrCodeRefByBookingId] {} by bookingId [{}] is deleting",
+        QrCodeReference.class.getSimpleName(),
+        bookingId);
+
+    var qrCodeRef = getQrCodeRefByBookingId(bookingId);
+    qrCodeReferenceRepository.delete(qrCodeRef);
+
+    logger.info(
+        "[deleteQrCodeRefByBookingId] {} by bookingId [{}] is deleted",
+        QrCodeReference.class.getSimpleName(),
+        bookingId);
+
+    return true;
+  }
+
   private Optional<QrCodeReference> findQrCodeRefByBookingId(Integer bookingId) {
     logger.debug(
         "[findQrByBookingId] Finding {} by bookingId [{}]",

@@ -64,7 +64,7 @@ public class BookingController {
       Authentication authentication) {
 
     logger.debug("[cancelTourById] Canceling tour booking with tourId [{}]", body.tourId());
-    var cancelledTour = bookingService.cancelTour(authentication, body, idempotentKey);
+    var cancelledTour = bookingService.cancelTour(authentication, id, body, idempotentKey);
 
     return ResponseEntity.ok(cancelledTour);
   }
