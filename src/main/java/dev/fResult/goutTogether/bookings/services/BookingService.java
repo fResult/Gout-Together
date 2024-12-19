@@ -12,5 +12,6 @@ public interface BookingService {
 
   BookingInfoResponse bookTour(Authentication authentication, int tourId, String idempotentKey);
 
-  BookingInfoResponse cancelTour(Authentication authentication, BookingCancellationRequest body, String idempotentKey);
+  BookingInfoResponse cancelTour(
+      Authentication authentication, int id, BookingCancellationRequest body, String idempotentKey);
 }

@@ -160,6 +160,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     walletService.transferMoney(
         userWallet, tourCompanyWallet, BigDecimal.valueOf(tourPrice), TransactionType.REFUND);
+    qrCodeService.deleteQrCodeRefByBookingId(bookingId);
+
     var transactionToRefund =
         TransactionHelper.buildRefundTransaction(
             idempotentKey,

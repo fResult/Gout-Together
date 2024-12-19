@@ -100,32 +100,33 @@ public class BookingServiceImpl implements BookingService {
     return BookingInfoResponse.fromDao(createdBooking).withQrReference(qrCodeReference.id());
   }
 
+  @Transactional
   @Override
   public BookingInfoResponse cancelTour(
-      Authentication authentication, BookingCancellationRequest body, String idempotentKey) {
+      Authentication authentication,
+      int id,
+      BookingCancellationRequest body,
+      String idempotentKey) {
 
     logger.debug(
         "[cancelTour] Canceling {} with idempotentKey [{}]",
         Booking.class.getSimpleName(),
         idempotentKey);
 
-    var jwt = (Jwt) authentication.getPrincipal();
-    var userId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
     var existingBooking =
         bookingRepository
-            .findOneByUserIdAndTourId(
-                AggregateReference.to(userId), AggregateReference.to(body.tourId()))
+            .findById(id)
             .orElseThrow(
                 errorHelper.entityWithSubResourceNotFound(
                     "cancelTour", Booking.class, "tourId", String.valueOf(body.tourId())));
 
     tourCountService.decrementTourCount(body.tourId());
-    paymentService.refundBookingByBookingId(existingBooking.id(), idempotentKey);
+    paymentService.refundBookingByBookingId(id, idempotentKey);
 
-    bookingRepository.deleteById(existingBooking.id());
+    bookingRepository.deleteById(id);
 
     return BookingInfoResponse.of(
-        existingBooking.id(),
+        id,
         existingBooking.userId().getId(),
         existingBooking.tourId().getId(),
         BookingStatus.CANCELLED,

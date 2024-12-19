@@ -1,5 +1,6 @@
 package dev.fResult.goutTogether.helpers;
 
+import dev.fResult.goutTogether.common.ResponseAdviceHandler;
 import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.common.exceptions.*;
 import dev.fResult.goutTogether.common.utils.StringUtil;
@@ -16,6 +17,9 @@ import org.slf4j.LoggerFactory;
 public class ErrorHelper {
   private final Logger logger;
 
+  /**
+   * Rethrow error for the multi-thread to works with {@link ResponseAdviceHandler}'s methods.
+   */
   public static RuntimeException throwMatchedException(
       Throwable cause, String defaultErrorMessage) {
 

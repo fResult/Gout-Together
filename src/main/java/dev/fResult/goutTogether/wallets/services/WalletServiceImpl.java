@@ -272,12 +272,9 @@ public class WalletServiceImpl implements WalletService {
       UserWallet userWallet, TourCompanyWallet companyWallet, BigDecimal amount) {
 
     var companyWalletBalance = companyWallet.balance();
-    var isBalanceInsufficient = companyWalletBalance.compareTo(amount) < 0;
-
-    if (isBalanceInsufficient)
-      throw errorHelper.insufficientBalance("transferMoney", companyWalletBalance, amount).get();
 
     var companyWalletBalanceToUpdate = companyWalletBalance.subtract(amount);
+    // TODO: Handle not transfer money back to the consumer, if consumer didn't pay yet.
     var companyWalletToUpdate =
         TourCompanyWallet.of(
             companyWallet.id(),
