@@ -147,33 +147,27 @@ public class PaymentServiceImpl implements PaymentService {
 
   @Override
   @Transactional
-  public boolean refundBookingByBookingId(int bookingId, String idempotentKey) {
-    var booking =
-        bookingService
-            .findBookingById(bookingId)
-            .orElseThrow(
-                errorHelper.entityNotFound("refundBookingByBookingId", Booking.class, bookingId));
-
+  public boolean refundBooking(Booking booking, String idempotentKey) {
     var wallets = walletService.getConsumerAndTourCompanyWallets(booking);
     var userWallet = wallets.getFirst();
     var tourCompanyWallet = wallets.getSecond();
 
     walletService.transferMoney(
         userWallet, tourCompanyWallet, BigDecimal.valueOf(tourPrice), TransactionType.REFUND);
-    qrCodeService.deleteQrCodeRefByBookingId(bookingId);
+    qrCodeService.deleteQrCodeRefByBookingId(booking.id());
 
     var transactionToRefund =
         TransactionHelper.buildRefundTransaction(
             idempotentKey,
             userWallet.userId().getId(),
-            bookingId,
+            booking.id(),
             tourCompanyWallet.tourCompanyId().getId(),
             BigDecimal.valueOf(tourPrice));
 
     var refundedTransaction = transactionService.createTransaction(transactionToRefund);
 
     logger.info(
-        "[refundBookingByBookingId] Refunded {}: {}",
+        "[refundBookingByBookingId] Refunded {} id [{}]",
         Transaction.class.getSimpleName(),
         refundedTransaction.id());
 
