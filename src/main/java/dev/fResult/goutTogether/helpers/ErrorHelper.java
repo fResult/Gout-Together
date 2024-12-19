@@ -40,7 +40,7 @@ public class ErrorHelper {
   public Supplier<EntityNotFoundException> entityNotFound(
       String methodName, Class<?> entityClass, Integer id) {
     return () -> {
-      logger.warn("[{}] {} id: {} not found", methodName, entityClass.getSimpleName(), id);
+      logger.warn("[{}] {} id [{}] not found", methodName, entityClass.getSimpleName(), id);
       return new EntityNotFoundException(
           String.format("%s id [%s] not found", entityClass.getSimpleName(), id));
     };
@@ -50,7 +50,7 @@ public class ErrorHelper {
       String methodName, Class<?> entityClass, String subResourceName, String subResourceValue) {
     return () -> {
       logger.warn(
-          "[{}] {} with {} id: {} not found",
+          "[{}] {} with {} id [{}] not found",
           methodName,
           entityClass.getSimpleName(),
           subResourceName,
@@ -70,7 +70,7 @@ public class ErrorHelper {
 
     return () -> {
       logger.warn(
-          "[{}] {} ids: {} not found",
+          "[{}] {} ids [{}] not found",
           methodName,
           StringUtil.pluralize(entityClass.getSimpleName()),
           idsToDisplay);
