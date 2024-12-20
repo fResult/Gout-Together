@@ -1,0 +1,33 @@
+services:
+  gout-api:
+    image: 'korn704/gout-together:0.0.1'
+    container_name: gout-backend-api
+    env_file:
+      - gout.env
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./opentelemetry-javaagent.jar:/agent/opentelemetry-javaagent.jar
+
+  gout-postgres:
+    image: 'postgres:16.5-alpine'
+    container_name: gout-backend-postgres
+    env_file:
+      - db.env
+    volumes: # Persist data
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  gout-lgtm:
+    image: grafana/otel-lgtm
+    container_name: gout-backend-lgtm
+    env_file:
+      - gout.env
+    ports:
+      - '4317:4317'
+      - '4318:4318'
+      - '3000:3000'
+
+volumes:
+  pgdata:

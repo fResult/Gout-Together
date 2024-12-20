@@ -50,7 +50,7 @@ public class ErrorHelper {
       String methodName, Class<?> entityClass, String subResourceName, String subResourceValue) {
     return () -> {
       logger.warn(
-          "[{}] {} with {} id [{}] not found",
+          "[{}] {} with {} [{}] not found",
           methodName,
           entityClass.getSimpleName(),
           subResourceName,
