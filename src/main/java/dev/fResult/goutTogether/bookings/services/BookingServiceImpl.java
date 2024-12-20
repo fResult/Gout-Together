@@ -129,6 +129,7 @@ public class BookingServiceImpl implements BookingService {
             BookingStatus.CANCELLED,
             null);
 
+    qrCodeService.deleteQrCodeRefByBookingId(id);
     if (qrCodeRef.status() == QrCodeStatus.ACTIVATED) return refundedBookingInfo;
 
     tourCountService.decrementTourCount(body.tourId());
