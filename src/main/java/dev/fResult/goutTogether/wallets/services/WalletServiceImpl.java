@@ -184,8 +184,10 @@ public class WalletServiceImpl implements WalletService {
                       String.valueOf(tour.tourCompanyId())));
 
       return new Pair<>(userWallet, tourCompanyWallet);
-    } catch (InterruptedException | ExecutionException ex) {
-      throw new RuntimeException("Failed to get user wallets", ex);
+    } catch (ExecutionException ex) {
+      throw ErrorHelper.throwMatchedException(ex.getCause(), "Failed to get wallets");
+    } catch (InterruptedException ex) {
+      throw new RuntimeException("Task interrupted", ex);
     }
   }
 
