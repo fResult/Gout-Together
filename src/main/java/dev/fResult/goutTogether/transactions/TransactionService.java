@@ -14,10 +14,14 @@ public class TransactionService {
   }
 
   public Transaction createTransaction(Transaction transaction) {
-    logger.debug("[createTransaction] Creating transaction: {}", transaction);
+    logger.debug(
+        "[createTransaction] Creating {}: {}", Transaction.class.getSimpleName(), transaction);
 
     var createdTransaction = transactionRepository.save(transaction);
-    logger.info("[createTransaction] Transaction created: {}", createdTransaction);
+    logger.info(
+        "[createTransaction] New {} is created: {}",
+        Transaction.class.getSimpleName(),
+        createdTransaction);
 
     return createdTransaction;
   }
