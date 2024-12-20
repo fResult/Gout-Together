@@ -237,37 +237,20 @@ public class WalletServiceImpl implements WalletService {
             Instant.now(),
             tourCompanyWalletBalanceToUpdate);
 
-    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-      // TODO: Make pessimistic lock to avoid race condition
-      var futureUpdatedUserWallet =
-          CompletableFuture.supplyAsync(
-              () -> userWalletRepository.save(userWalletToUpdate), executor);
-      var futureUpdatedCompanyWallet =
-          CompletableFuture.supplyAsync(
-              () -> tourCompanyWalletRepository.save(tourCompanyWalletToUpdate), executor);
+    // TODO: Make pessimistic lock to avoid race condition
+    var updatedUserWallet = userWalletRepository.save(userWalletToUpdate);
+    var updatedCompanyWallet = tourCompanyWalletRepository.save(tourCompanyWalletToUpdate);
 
-      CompletableFuture.allOf(futureUpdatedUserWallet, futureUpdatedCompanyWallet).join();
+    logger.info(
+        "[transferMoney] {} {} from {} id [{}] to {} id [{}] is transferred",
+        TransactionType.BOOKING,
+        amount,
+        UserWallet.class.getSimpleName(),
+        userWallet.id(),
+        TourCompanyWallet.class.getSimpleName(),
+        companyWallet.id());
 
-      var updatedUserWallet = futureUpdatedUserWallet.get();
-      var updatedCompanyWallet = futureUpdatedCompanyWallet.get();
-
-      logger.info(
-          "[transferMoney] {} {} from {} id [{}] to {} id [{}] is transferred",
-          TransactionType.BOOKING,
-          amount,
-          UserWallet.class.getSimpleName(),
-          userWallet.id(),
-          TourCompanyWallet.class.getSimpleName(),
-          companyWallet.id());
-
-      return new Pair<>(updatedUserWallet, updatedCompanyWallet);
-    } catch (ExecutionException | InterruptedException ex) {
-      var errorMessage =
-          String.format(
-              "Failed to transfer money between %s and %s",
-              User.class.getSimpleName(), TourCompanyWallet.class.getSimpleName());
-      throw new RuntimeException(errorMessage, ex);
-    }
+    return new Pair<>(updatedUserWallet, updatedCompanyWallet);
   }
 
   private Pair<UserWallet, TourCompanyWallet> transferMoneyForRefund(
