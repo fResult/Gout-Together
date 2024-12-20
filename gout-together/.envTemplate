@@ -1,10 +1,10 @@
+# OTEL
 JAVA_TOOL_OPTION="-javaagent:build/agent/opentelemetry-javaagent.jar"
 OTEL_SERVICE_NAME=
 OTEL_EXPORTER_OTLP_ENDPOINT=
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 OTEL_RESOURCE_ATTRIBUTES="service.name=gout,service.instance.id=gout,env=dev"
-
-# Logs are disabled by default
+## Logs are disabled by default
 OTEL_LOGS_EXPORTER=otlp
 OTEL_METRIC_EXPORT_INTERVAL=500
 OTEL_BSP_SCHEDULE_DELAY=500

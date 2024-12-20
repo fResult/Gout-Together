@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -84,6 +85,20 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
     logger.warn("Refresh token expired: {}", ex.getMessage());
 
     return ResponseEntity.of(detail).build();
+  }
+
+  @ExceptionHandler(InternalAuthenticationServiceException.class)
+  protected ResponseEntity<?> handleInternalAuthenticationServiceException(
+      InternalAuthenticationServiceException ex) {
+    Throwable cause = ex.getCause();
+    if (cause instanceof EntityNotFoundException)
+      return handleEntityNotFoundException((EntityNotFoundException) cause);
+
+    var detail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    logger.error("Internal authentication service error: {}", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(detail);
   }
 
   @ExceptionHandler(Exception.class)

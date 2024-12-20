@@ -46,3 +46,9 @@ logs/
 private_key_pkcs8.pem
 private_key.pem
 public_key.pem
+
+### Container Deployment ###
+postgres-data/
+db.env
+gout.env
+opentelemetry-javaagent.jar
