@@ -1,8 +1,0 @@
-docker:
-  host: "unix:///Users/fresult/.colima/default/docker.sock"
-  client:
-    strategy: "org.testcontainers.dockerclient.UnixSocketClientProviderStrategy"
-
-testcontainers:
-  reuse:
-    enable: true
