@@ -39,6 +39,9 @@ out/
 ### App Log ###
 logs/
 
+### Java Agent ###
+opentelemetry-javaagent.jar
+
 ### App Environment ###
 .env
 
