@@ -170,4 +170,32 @@ class WalletServiceTest {
     assertEquals(mockUserWallet, actualUserWallet.getFirst());
     assertEquals(mockTourCompanyWallet, actualUserWallet.getSecond());
   }
+
+  @Test
+  void whenGetConsumerAndCompanyWalletsButUserIdIsNullThenThrowException() {
+    // Arrange
+    var TOUR_ID = 1;
+    AggregateReference<User, Integer> userIdRef = null;
+    var expectedErrorMessage =
+        String.format(
+            "%s with userId [%s] tourId [%s] not found",
+            Booking.class.getSimpleName(), null, TOUR_ID);
+
+    var mockBooking =
+        Booking.of(
+            1,
+            null,
+            AggregateReference.<Tour, Integer>to(TOUR_ID),
+            BookingStatus.PENDING.name(),
+            Instant.now(),
+            Instant.now(),
+            IDEMPOTENCY_KEY);
+
+    // Actual
+    Executable actualUserWallet = () -> walletService.getConsumerAndTourCompanyWallets(mockBooking);
+
+    // Assert
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualUserWallet);
+    assertEquals(expectedErrorMessage, exception.getMessage());
+  }
 }
