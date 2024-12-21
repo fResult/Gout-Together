@@ -87,7 +87,6 @@ tasks.withType<BootJar> {
 }
 
 tasks.withType<BootRun> {
-  sourceResources(sourceSets["main"])
   doFirst {
     jvmArgs(listOf("-javaagent:build/agent/opentelemetry-javaagent.jar"))
     val dotenv = Dotenv.configure().load()
