@@ -1,12 +1,22 @@
 package dev.fResult.goutTogether.tours;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
+
 import dev.fResult.goutTogether.common.enumurations.TourStatus;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
+import dev.fResult.goutTogether.common.exceptions.InsufficientTourCountException;
 import dev.fResult.goutTogether.tours.entities.Tour;
 import dev.fResult.goutTogether.tours.entities.TourCount;
 import dev.fResult.goutTogether.tours.repositories.TourCountRepository;
 import dev.fResult.goutTogether.tours.services.TourCountService;
 import dev.fResult.goutTogether.tours.services.TourService;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -14,16 +24,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TourCountServiceTest {
@@ -88,6 +88,54 @@ class TourCountServiceTest {
 
     // Assert
     var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
+  @Test
+  void whenIncrementTourCountButTourCountNotFoundThenThrowException() {
+    // Arrange
+    var expectedErrorMessage =
+        String.format(
+            "%s with tourId [%d] not found", TourCount.class.getSimpleName(), NOT_FOUND_TOUR_ID);
+
+    when(tourCountRepository.findOneByTourId(AggregateReference.to(NOT_FOUND_TOUR_ID)))
+        .thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualExecutable = () -> tourCountService.incrementTourCount(NOT_FOUND_TOUR_ID);
+
+    // Assert
+    var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
+  @Test
+  void whenIncrementTourCountButTourAmountExceededLimitThenThrowException() {
+    // Arrange
+    var TOUR_AMOUNT_LIMIT = 5;
+    var expectedErrorMessage =
+        String.format(
+            "%s amount is insufficient for this operation", TourCount.class.getSimpleName());
+    var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+    var mockTour =
+        Tour.of(
+            TOUR_ID,
+            AggregateReference.to(1),
+            "Hanoi City 3 days",
+            "Camping in Hanoi",
+            "Hanoi, Vietnam",
+            TOUR_AMOUNT_LIMIT,
+            Instant.now().plus(45, ChronoUnit.DAYS),
+            TourStatus.APPROVED.name());
+    var mockTourCount = TourCount.of(1, tourRef, TOUR_AMOUNT_LIMIT);
+    when(tourService.getTourById(TOUR_ID)).thenReturn(mockTour);
+    when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.of(mockTourCount));
+
+    // Actual
+    Executable actualExecutable = () -> tourCountService.incrementTourCount(TOUR_ID);
+
+    // Assert
+    var exception = assertThrows(InsufficientTourCountException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
