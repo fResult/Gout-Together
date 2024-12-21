@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -95,23 +96,6 @@ class WalletServiceTest {
   }
 
   @Test
-  void whenDeleteConsumerWalletThenSuccess() {
-    // Arrange
-    var USER_ID = 1;
-    var userRef = AggregateReference.<User, Integer>to(USER_ID);
-    var walletToDelete = UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), BigDecimal.ZERO);
-    when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(walletToDelete));
-    doNothing().when(userWalletRepository).delete(any(UserWallet.class));
-
-    // Actual
-    var actualIsSuccess = walletService.deleteConsumerWalletByUserId(USER_WALLET_ID);
-
-    // Assert
-    verify(userWalletRepository, times(1)).delete(walletToDelete);
-    assertTrue(actualIsSuccess);
-  }
-
-  @Test
   void whenCreateCompanyWalletThenSuccess() {
     // Arrange
     var COMPANY_ID = 1;
@@ -129,100 +113,159 @@ class WalletServiceTest {
   }
 
   @Test
-  void whenGetConsumerAndCompanyWalletsThenSuccess() {
-    // Arrange
-    var COMPANY_WALLET_ID = 12;
-    var userRef = AggregateReference.<User, Integer>to(1);
-    var tourRef = AggregateReference.<Tour, Integer>to(1);
-    var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(1);
-    var mockBooking =
-        Booking.of(
-            1,
-            userRef,
-            tourRef,
-            BookingStatus.PENDING.name(),
-            Instant.now(),
-            Instant.now(),
-            IDEMPOTENCY_KEY);
-    var mockTour =
-        Tour.of(
-            1,
-            tourCompanyRef,
-            "",
-            "Camping in Bangkok",
-            "Bangkok, Thailand",
-            10,
-            Instant.now().plus(45, ChronoUnit.DAYS),
-            TourStatus.APPROVED.name());
-    var mockUserWallet = UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), BigDecimal.ZERO);
-    var mockTourCompanyWallet =
-        TourCompanyWallet.of(COMPANY_WALLET_ID, tourCompanyRef, Instant.now(), BigDecimal.ZERO);
-
-    when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserWallet));
-    when(tourService.getTourById(anyInt())).thenReturn(mockTour);
-    when(tourCompanyWalletRepository.findOneByTourCompanyId(tourCompanyRef))
-        .thenReturn(Optional.of(mockTourCompanyWallet));
-
-    // Actual
-    var actualUserWallet = walletService.getConsumerAndTourCompanyWallets(mockBooking);
-
-    // Assert
-    assertEquals(mockUserWallet, actualUserWallet.getFirst());
-    assertEquals(mockTourCompanyWallet, actualUserWallet.getSecond());
-  }
-
-  @Test
-  void whenGetConsumerAndCompanyWalletsButUserIdIsNullThenThrowException() {
-    // Arrange
-    var TOUR_ID = 1;
-    AggregateReference<User, Integer> userIdRef = null;
-    var expectedErrorMessage =
-        String.format(
-            "%s with userId [%s] tourId [%s] not found",
-            Booking.class.getSimpleName(), null, TOUR_ID);
-
-    var mockBooking =
-        Booking.of(
-            1,
-            null,
-            AggregateReference.<Tour, Integer>to(TOUR_ID),
-            BookingStatus.PENDING.name(),
-            Instant.now(),
-            Instant.now(),
-            IDEMPOTENCY_KEY);
-
-    // Actual
-    Executable actualUserWallet = () -> walletService.getConsumerAndTourCompanyWallets(mockBooking);
-
-    // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualUserWallet);
-    assertEquals(expectedErrorMessage, exception.getMessage());
-  }
-
-  @Test
-  void whenGetConsumerAndCompanyWalletsButTourCompanyIdIsNullThenThrowException() {
+  void whenDeleteConsumerWalletThenSuccess() {
     // Arrange
     var USER_ID = 1;
-    AggregateReference<Tour, Integer> userIdRef = null;
-    var expectedErrorMessage =
-        String.format(
-            "%s with userId [%s] tourId [%s] not found",
-            Booking.class.getSimpleName(), USER_ID, null);
-    var mockBooking =
-        Booking.of(
-            1,
-            AggregateReference.<User, Integer>to(USER_ID),
-            null,
-            BookingStatus.PENDING.name(),
-            Instant.now(),
-            Instant.now(),
-            IDEMPOTENCY_KEY);
+    var userRef = AggregateReference.<User, Integer>to(USER_ID);
+    var walletToDelete = UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), BigDecimal.ZERO);
+    when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(walletToDelete));
+    doNothing().when(userWalletRepository).delete(any(UserWallet.class));
 
     // Actual
-    Executable actualUserWallet = () -> walletService.getConsumerAndTourCompanyWallets(mockBooking);
+    var actualIsSuccess = walletService.deleteConsumerWalletByUserId(USER_WALLET_ID);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualUserWallet);
-    assertEquals(expectedErrorMessage, exception.getMessage());
+    verify(userWalletRepository, times(1)).delete(walletToDelete);
+    assertTrue(actualIsSuccess);
+  }
+
+  @Nested
+  class GetConsumerAndCompanyWalletsTest {
+    private final int USER_ID = 1;
+    private final int TOUR_ID = 1;
+    private final int COMPANY_WALLET_ID = 12;
+
+    private Booking buildMockBooking(
+        AggregateReference<User, Integer> userRef, AggregateReference<Tour, Integer> tourRef) {
+
+      return Booking.of(
+          1,
+          userRef,
+          tourRef,
+          BookingStatus.PENDING.name(),
+          Instant.now(),
+          Instant.now(),
+          IDEMPOTENCY_KEY);
+    }
+
+    private UserWallet buildMockUserWallet(AggregateReference<User, Integer> userRef) {
+      return UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), BigDecimal.ZERO);
+    }
+
+    @Test
+    void thenSuccess() {
+      // Arrange
+      var userRef = AggregateReference.<User, Integer>to(1);
+      var tourRef = AggregateReference.<Tour, Integer>to(1);
+      var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(1);
+      var mockBooking = buildMockBooking(userRef, tourRef);
+      var mockTour =
+          Tour.of(
+              TOUR_ID,
+              tourCompanyRef,
+              "",
+              "Camping in Bangkok",
+              "Bangkok, Thailand",
+              10,
+              Instant.now().plus(45, ChronoUnit.DAYS),
+              TourStatus.APPROVED.name());
+      var mockUserWallet = UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), BigDecimal.ZERO);
+      var mockTourCompanyWallet =
+          TourCompanyWallet.of(COMPANY_WALLET_ID, tourCompanyRef, Instant.now(), BigDecimal.ZERO);
+
+      when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserWallet));
+      when(tourService.getTourById(anyInt())).thenReturn(mockTour);
+      when(tourCompanyWalletRepository.findOneByTourCompanyId(tourCompanyRef))
+          .thenReturn(Optional.of(mockTourCompanyWallet));
+
+      // Actual
+      var actualUserWallet = walletService.getConsumerAndTourCompanyWallets(mockBooking);
+
+      // Assert
+      assertEquals(mockUserWallet, actualUserWallet.getFirst());
+      assertEquals(mockTourCompanyWallet, actualUserWallet.getSecond());
+    }
+
+    @Test
+    void butUserIdIsNullThenThrowException() {
+      // Arrange
+      var TOUR_ID = 1;
+      AggregateReference<User, Integer> userIdRef = null;
+      var expectedErrorMessage =
+          String.format(
+              "%s with userId [%s] tourId [%s] not found",
+              Booking.class.getSimpleName(), null, TOUR_ID);
+
+      var mockBooking =
+          Booking.of(
+              1,
+              null,
+              AggregateReference.<Tour, Integer>to(TOUR_ID),
+              BookingStatus.PENDING.name(),
+              Instant.now(),
+              Instant.now(),
+              IDEMPOTENCY_KEY);
+
+      // Actual
+      Executable actualUserWallet =
+          () -> walletService.getConsumerAndTourCompanyWallets(mockBooking);
+
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualUserWallet);
+      assertEquals(expectedErrorMessage, exception.getMessage());
+    }
+
+    @Test
+    void butTourCompanyIdIsNullThenThrowException() {
+      // Arrange
+      var USER_ID = 1;
+      AggregateReference<Tour, Integer> userIdRef = null;
+      var expectedErrorMessage =
+          String.format(
+              "%s with userId [%s] tourId [%s] not found",
+              Booking.class.getSimpleName(), USER_ID, null);
+      var mockBooking =
+          Booking.of(
+              1,
+              AggregateReference.<User, Integer>to(USER_ID),
+              null,
+              BookingStatus.PENDING.name(),
+              Instant.now(),
+              Instant.now(),
+              IDEMPOTENCY_KEY);
+
+      // Actual
+      Executable actualUserWallet =
+          () -> walletService.getConsumerAndTourCompanyWallets(mockBooking);
+
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualUserWallet);
+      assertEquals(expectedErrorMessage, exception.getMessage());
+    }
+
+    @Test
+    void butTourNotFoundThenThrowException() {
+      // Arrange
+      var USER_ID = 1;
+      var TOUR_ID = 1;
+      var expectedErrorMessage =
+          String.format("%s id [%d] not found", Tour.class.getSimpleName(), TOUR_ID);
+      var userRef = AggregateReference.<User, Integer>to(USER_ID);
+      var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+      var mockBooking = buildMockBooking(userRef, tourRef);
+      var mockUserWallet = buildMockUserWallet(userRef);
+
+      when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserWallet));
+      when(tourService.getTourById(TOUR_ID))
+          .thenThrow(new EntityNotFoundException(expectedErrorMessage));
+
+      // Actual
+      Executable actualUserWallet =
+          () -> walletService.getConsumerAndTourCompanyWallets(mockBooking);
+
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualUserWallet);
+      assertEquals(expectedErrorMessage, exception.getMessage());
+    }
   }
 }
