@@ -52,13 +52,15 @@ public class TourCountService {
       throw errorHelper.insufficientTourCount("incrementTourCount", tour.numberOfPeople()).get();
     }
 
-    var tourCountToIncrement = tourCount.increaseAmount(tourCountAmount);
-    tourCountRepository.save(tourCountToIncrement);
+    var incrementedTourCountToUpdate = tourCount.increaseAmount(tourCountAmount);
+    tourCountRepository.save(incrementedTourCountToUpdate);
 
     logger.info(
-        "[incrementTourCount] Incremented {} to {}",
+        "[incrementTourCount] {} is incremented with tourId [{}] from {} to {}",
         TourCount.class.getSimpleName(),
-        tourCount.amount());
+        tourId,
+        tourCount.amount(),
+        incrementedTourCountToUpdate.amount());
   }
 
   public void decrementTourCount(int tourId) {
@@ -75,12 +77,14 @@ public class TourCountService {
                     "decrementTourCount", TourCount.class, "tourId", String.valueOf(tourId)));
 
     var tourCountAmount = 1;
-    var tourCountToDecrement = tourCount.decreaseAmount(tourCountAmount);
-    tourCountRepository.save(tourCountToDecrement);
+    var decrementTourCountToUpdate = tourCount.decreaseAmount(tourCountAmount);
+    tourCountRepository.save(decrementTourCountToUpdate);
 
     logger.info(
-        "[decrementTourCount] Decremented {} with tourId to [{}]",
+        "[decrementTourCount] {} is decremented tourId [{}] from {} to {}",
         TourCount.class.getSimpleName(),
-        tourId);
+        tourId,
+        tourCount.amount(),
+        decrementTourCountToUpdate.amount());
   }
 }
