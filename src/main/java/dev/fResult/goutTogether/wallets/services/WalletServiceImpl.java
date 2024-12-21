@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import kotlin.Pair;
@@ -157,7 +158,7 @@ public class WalletServiceImpl implements WalletService {
           Booking.class.getSimpleName());
       throw new EntityNotFoundException(
           String.format(
-              "[getConsumerAndTourCompanyWallets] %s with userId [%s] tourId [%s] not found",
+              "%s with userId [%s] tourId [%s] not found",
               Booking.class.getSimpleName(), getIdOrNull(userRef), getIdOrNull(tourRef)));
     }
 
@@ -184,7 +185,7 @@ public class WalletServiceImpl implements WalletService {
                       String.valueOf(tour.tourCompanyId())));
 
       return new Pair<>(userWallet, tourCompanyWallet);
-    } catch (ExecutionException ex) {
+    } catch (CompletionException | ExecutionException ex) {
       throw ErrorHelper.throwMatchedException(ex.getCause(), "Failed to get wallets");
     } catch (InterruptedException ex) {
       throw new RuntimeException("Task interrupted", ex);
