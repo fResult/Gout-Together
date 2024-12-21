@@ -1,6 +1,6 @@
 # OTEL
-JAVA_TOOL_OPTION="-javaagent:build/agent/opentelemetry-javaagent.jar"
-OTEL_SERVICE_NAME=
+JAVA_TOOL_OPTIONS="-javaagent:build/agent/opentelemetry-javaagent.jar"
+OTEL_SERVICE_NAME=gout
 OTEL_EXPORTER_OTLP_ENDPOINT=
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 OTEL_RESOURCE_ATTRIBUTES="service.name=gout,service.instance.id=gout,env=dev"
