@@ -9,6 +9,7 @@ import dev.fResult.goutTogether.common.enumurations.BookingStatus;
 import dev.fResult.goutTogether.common.enumurations.TourStatus;
 import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
+import dev.fResult.goutTogether.common.exceptions.InsufficientBalanceException;
 import dev.fResult.goutTogether.common.utils.UUIDV7;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tours.entities.Tour;
@@ -419,5 +420,29 @@ class WalletServiceTest {
       assertEquals(expectedUserWallet, actualWallets.getFirst());
       assertEquals(expectedCompanyWallet, actualWallets.getSecond());
     }
+
+    @Test
+    void butInsufficientBalanceThenThrowException() {
+      // Arrange
+      var expectedErrorMessage =
+          String.format(
+              "%s balance is insufficient for this operation", UserWallet.class.getSimpleName());
+      var mockUserWallet = buildMockUserWallet(USER_ID);
+      var mockTourCompanyWallet = buildMockCompanyWallet(COMPANY_ID);
+
+      // Actual
+      Executable actualExecutable =
+          () ->
+              walletService.transferMoney(
+                  mockUserWallet,
+                  mockTourCompanyWallet,
+                  AMOUNT_OVER_USER_BALANCE,
+                  TransactionType.BOOKING);
+
+      // Assert
+      var exception = assertThrowsExactly(InsufficientBalanceException.class, actualExecutable);
+      assertEquals(expectedErrorMessage, exception.getMessage());
+    }
+  }
   }
 }
