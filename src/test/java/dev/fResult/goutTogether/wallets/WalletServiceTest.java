@@ -52,6 +52,18 @@ class WalletServiceTest {
   @Mock TourService tourService;
   @Mock TransactionRepository transactionRepository;
 
+  private UserWallet buildMockUserWallet(int userId, BigDecimal balance) {
+    return UserWallet.of(USER_WALLET_ID, AggregateReference.to(userId), Instant.now(), balance);
+  }
+
+  private TourCompanyWallet buildMockCompanyWallet(int tourCompanyId, BigDecimal balance) {
+    return TourCompanyWallet.of(
+        1,
+        AggregateReference.to(tourCompanyId),
+        Instant.now().minus(30, ChronoUnit.HOURS),
+        balance);
+  }
+
   @Test
   void whenCreateConsumerWalletThenSuccess() {
     // Arrange
@@ -375,30 +387,10 @@ class WalletServiceTest {
     }
   }
 
-  private UserWallet buildMockUserWallet(int userId, BigDecimal balance) {
-    return UserWallet.of(USER_WALLET_ID, AggregateReference.to(userId), Instant.now(), balance);
-  }
-
-  private TourCompanyWallet buildMockCompanyWallet(int tourCompanyId, BigDecimal balance) {
-    return TourCompanyWallet.of(
-        1,
-        AggregateReference.to(tourCompanyId),
-        Instant.now().minus(30, ChronoUnit.HOURS),
-        balance);
-  }
-
   @Nested
   class WithdrawCompanyWalletTest {
     private final int TOUR_COMPANY_ID = 2;
     private final int TOUR_COMPANY_WALLET_ID = 1;
-
-    private TourCompanyWallet buildTourCompanyWallet(int tourCompanyId, BigDecimal balance) {
-      return TourCompanyWallet.of(
-          TOUR_COMPANY_WALLET_ID,
-          AggregateReference.to(tourCompanyId),
-          Instant.now().minus(4, ChronoUnit.HOURS),
-          balance);
-    }
 
     @Test
     void whenSuccess() {
@@ -409,9 +401,9 @@ class WalletServiceTest {
       var body = WalletWithdrawRequest.of(AMOUNT_TO_WITHDRAW);
       var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
 
-      var mockCompanyWallet = buildTourCompanyWallet(TOUR_COMPANY_ID, CURRENT_BALANCE);
+      var mockCompanyWallet = buildMockCompanyWallet(TOUR_COMPANY_ID, CURRENT_BALANCE);
       var mockCompanyWalletToWithdraw =
-          buildTourCompanyWallet(TOUR_COMPANY_ID, BALANCE_AFTER_WITHDRAW);
+          buildMockCompanyWallet(TOUR_COMPANY_ID, BALANCE_AFTER_WITHDRAW);
       var expectedCompanyWalletInfo =
           TourCompanyWalletInfoResponse.of(
               TOUR_COMPANY_WALLET_ID, TOUR_COMPANY_ID, BALANCE_AFTER_WITHDRAW);
