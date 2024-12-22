@@ -379,8 +379,10 @@ class WalletServiceTest {
     private final BigDecimal AMOUNT_OVER_USER_BALANCE = BigDecimal.valueOf(201);
     private final BigDecimal CURRENT_USER_BALANCE = BigDecimal.valueOf(200);
     private final BigDecimal CURRENT_COMPANY_BALANCE = BigDecimal.valueOf(300);
-    private final BigDecimal USER_BALANCE_AFTER_TRANSFER = CURRENT_USER_BALANCE.subtract(AMOUNT_TO_TRANSFER);
-    private final BigDecimal COMPANY_BALANCE_AFTER_TRANSFER = CURRENT_COMPANY_BALANCE.add(AMOUNT_TO_TRANSFER);
+    private final BigDecimal USER_BALANCE_AFTER_TRANSFER =
+        CURRENT_USER_BALANCE.subtract(AMOUNT_TO_TRANSFER);
+    private final BigDecimal COMPANY_BALANCE_AFTER_TRANSFER =
+        CURRENT_COMPANY_BALANCE.add(AMOUNT_TO_TRANSFER);
 
     private UserWallet buildMockUserWallet(int userId) {
       return UserWallet.of(
@@ -401,7 +403,7 @@ class WalletServiceTest {
       var userRef = AggregateReference.<User, Integer>to(USER_ID);
       var companyRef = AggregateReference.<TourCompany, Integer>to(COMPANY_ID);
       var userWalletInput = buildMockUserWallet(USER_ID);
-      var mockCompanyWalletInput = buildMockCompanyWallet(COMPANY_ID);
+      var companyWalletInput = buildMockCompanyWallet(COMPANY_ID);
       var expectedUserWallet =
           UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), USER_BALANCE_AFTER_TRANSFER);
       var expectedCompanyWallet =
@@ -414,7 +416,7 @@ class WalletServiceTest {
       // Actual
       var actualWallets =
           walletService.transferMoney(
-              userWalletInput, mockCompanyWalletInput, AMOUNT_TO_TRANSFER, TransactionType.BOOKING);
+              userWalletInput, companyWalletInput, AMOUNT_TO_TRANSFER, TransactionType.BOOKING);
 
       // Assert
       assertEquals(expectedUserWallet, actualWallets.getFirst());
@@ -427,15 +429,15 @@ class WalletServiceTest {
       var expectedErrorMessage =
           String.format(
               "%s balance is insufficient for this operation", UserWallet.class.getSimpleName());
-      var mockUserWallet = buildMockUserWallet(USER_ID);
-      var mockTourCompanyWallet = buildMockCompanyWallet(COMPANY_ID);
+      var userWalletInput = buildMockUserWallet(USER_ID);
+      var tourCompanyWalletInput = buildMockCompanyWallet(COMPANY_ID);
 
       // Actual
       Executable actualExecutable =
           () ->
               walletService.transferMoney(
-                  mockUserWallet,
-                  mockTourCompanyWallet,
+                  userWalletInput,
+                  tourCompanyWalletInput,
                   AMOUNT_OVER_USER_BALANCE,
                   TransactionType.BOOKING);
 
