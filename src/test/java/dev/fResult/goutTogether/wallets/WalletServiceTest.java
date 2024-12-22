@@ -10,6 +10,7 @@ import dev.fResult.goutTogether.common.enumurations.TourStatus;
 import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.exceptions.InsufficientBalanceException;
+import dev.fResult.goutTogether.common.exceptions.UnsupportedTransactionTypeException;
 import dev.fResult.goutTogether.common.utils.UUIDV7;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tours.entities.Tour;
@@ -371,132 +372,166 @@ class WalletServiceTest {
     }
   }
 
+  private UserWallet buildMockUserWallet(int userId, BigDecimal balance) {
+    return UserWallet.of(USER_WALLET_ID, AggregateReference.to(userId), Instant.now(), balance);
+  }
+
+  private TourCompanyWallet buildMockCompanyWallet(int tourCompanyId, BigDecimal balance) {
+    return TourCompanyWallet.of(
+        1,
+        AggregateReference.to(tourCompanyId),
+        Instant.now().minus(30, ChronoUnit.HOURS),
+        balance);
+  }
+
   @Nested
-  class TransferMoneyForBookingTest {
-    private final int USER_ID = 1;
-    private final int COMPANY_ID = 2;
-    private final BigDecimal AMOUNT_TO_TRANSFER = BigDecimal.valueOf(100);
-    private final BigDecimal AMOUNT_OVER_USER_BALANCE = BigDecimal.valueOf(201);
-    private final BigDecimal CURRENT_USER_BALANCE = BigDecimal.valueOf(200);
-    private final BigDecimal CURRENT_COMPANY_BALANCE = BigDecimal.valueOf(300);
-    private final BigDecimal USER_BALANCE_AFTER_TRANSFER =
-        CURRENT_USER_BALANCE.subtract(AMOUNT_TO_TRANSFER);
-    private final BigDecimal COMPANY_BALANCE_AFTER_TRANSFER =
-        CURRENT_COMPANY_BALANCE.add(AMOUNT_TO_TRANSFER);
+  class TransferMoneyTest {
+    @Nested
+    class TransferMoneyForBookingTest {
+      private final int USER_ID = 1;
+      private final int COMPANY_ID = 2;
+      private final BigDecimal AMOUNT_TO_TRANSFER = BigDecimal.valueOf(100);
+      private final BigDecimal AMOUNT_OVER_USER_BALANCE = BigDecimal.valueOf(201);
+      private final BigDecimal CURRENT_USER_BALANCE = BigDecimal.valueOf(200);
+      private final BigDecimal CURRENT_COMPANY_BALANCE = BigDecimal.valueOf(300);
+      private final BigDecimal USER_BALANCE_AFTER_TRANSFER =
+          CURRENT_USER_BALANCE.subtract(AMOUNT_TO_TRANSFER);
+      private final BigDecimal COMPANY_BALANCE_AFTER_TRANSFER =
+          CURRENT_COMPANY_BALANCE.add(AMOUNT_TO_TRANSFER);
 
-    private UserWallet buildMockUserWallet(int userId) {
-      return UserWallet.of(
-          USER_WALLET_ID, AggregateReference.to(userId), Instant.now(), CURRENT_USER_BALANCE);
+      @Test
+      void thenSuccess() {
+        // Arrange
+        var userRef = AggregateReference.<User, Integer>to(USER_ID);
+        var companyRef = AggregateReference.<TourCompany, Integer>to(COMPANY_ID);
+        var userWalletInput = buildMockUserWallet(USER_ID, CURRENT_USER_BALANCE);
+        var companyWalletInput = buildMockCompanyWallet(COMPANY_ID, CURRENT_COMPANY_BALANCE);
+        var expectedUserWallet =
+            UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), USER_BALANCE_AFTER_TRANSFER);
+        var expectedCompanyWallet =
+            TourCompanyWallet.of(1, companyRef, Instant.now(), COMPANY_BALANCE_AFTER_TRANSFER);
+
+        when(userWalletRepository.save(any(UserWallet.class))).thenReturn(expectedUserWallet);
+        when(tourCompanyWalletRepository.save(any(TourCompanyWallet.class)))
+            .thenReturn(expectedCompanyWallet);
+
+        // Actual
+        var actualWallets =
+            walletService.transferMoney(
+                userWalletInput, companyWalletInput, AMOUNT_TO_TRANSFER, TransactionType.BOOKING);
+
+        // Assert
+        assertEquals(expectedUserWallet, actualWallets.getFirst());
+        assertEquals(expectedCompanyWallet, actualWallets.getSecond());
+      }
+
+      @Test
+      void butInsufficientBalanceThenThrowException() {
+        // Arrange
+        var expectedErrorMessage =
+            String.format(
+                "%s balance is insufficient for this operation", UserWallet.class.getSimpleName());
+        var userWalletInput = buildMockUserWallet(USER_ID, CURRENT_USER_BALANCE);
+        var tourCompanyWalletInput = buildMockCompanyWallet(COMPANY_ID, CURRENT_COMPANY_BALANCE);
+
+        // Actual
+        Executable actualExecutable =
+            () ->
+                walletService.transferMoney(
+                    userWalletInput,
+                    tourCompanyWalletInput,
+                    AMOUNT_OVER_USER_BALANCE,
+                    TransactionType.BOOKING);
+
+        // Assert
+        var exception = assertThrowsExactly(InsufficientBalanceException.class, actualExecutable);
+        assertEquals(expectedErrorMessage, exception.getMessage());
+      }
     }
 
-    private TourCompanyWallet buildMockCompanyWallet(int tourCompanyId) {
-      return TourCompanyWallet.of(
-          1,
-          AggregateReference.to(tourCompanyId),
-          Instant.now().minus(30, ChronoUnit.HOURS),
-          CURRENT_COMPANY_BALANCE);
+    @Nested
+    class TransferMoneyForRefundTest {
+      private final int COMPANY_ID = 2;
+      private final int USER_ID = 1;
+      private final BigDecimal AMOUNT_TO_TRANSFER = BigDecimal.valueOf(100);
+      private final BigDecimal CURRENT_COMPANY_BALANCE = BigDecimal.valueOf(300);
+      private final BigDecimal CURRENT_USER_BALANCE = BigDecimal.valueOf(200);
+      private final BigDecimal COMPANY_BALANCE_AFTER_TRANSFER =
+          CURRENT_COMPANY_BALANCE.subtract(AMOUNT_TO_TRANSFER);
+      private final BigDecimal USER_BALANCE_AFTER_TRANSFER =
+          CURRENT_USER_BALANCE.add(AMOUNT_TO_TRANSFER);
+
+      @Test
+      void thenSuccess() {
+        // Arrange
+        var userWalletInput = buildMockUserWallet(USER_ID, CURRENT_USER_BALANCE);
+        var companyWalletInput = buildMockCompanyWallet(COMPANY_ID, CURRENT_COMPANY_BALANCE);
+        var userRef = AggregateReference.<User, Integer>to(USER_ID);
+        var companyRef = AggregateReference.<TourCompany, Integer>to(COMPANY_ID);
+        var expectedUserWallet =
+            UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), USER_BALANCE_AFTER_TRANSFER);
+        var expectedCompanyWallet =
+            TourCompanyWallet.of(1, companyRef, Instant.now(), COMPANY_BALANCE_AFTER_TRANSFER);
+
+        when(userWalletRepository.save(any(UserWallet.class))).thenReturn(expectedUserWallet);
+        when(tourCompanyWalletRepository.save(any(TourCompanyWallet.class)))
+            .thenReturn(expectedCompanyWallet);
+
+        // Actual
+        var actualTransferredWallets =
+            walletService.transferMoney(
+                userWalletInput, companyWalletInput, AMOUNT_TO_TRANSFER, TransactionType.REFUND);
+
+        // Assert
+        assertEquals(expectedUserWallet, actualTransferredWallets.getFirst());
+        assertEquals(expectedCompanyWallet, actualTransferredWallets.getSecond());
+      }
     }
 
     @Test
-    void thenSuccess() {
+    void forTopUpButUnsupportedThenThrowError() {
       // Arrange
-      var userRef = AggregateReference.<User, Integer>to(USER_ID);
-      var companyRef = AggregateReference.<TourCompany, Integer>to(COMPANY_ID);
-      var userWalletInput = buildMockUserWallet(USER_ID);
-      var companyWalletInput = buildMockCompanyWallet(COMPANY_ID);
-      var expectedUserWallet =
-          UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), USER_BALANCE_AFTER_TRANSFER);
-      var expectedCompanyWallet =
-          TourCompanyWallet.of(1, companyRef, Instant.now(), COMPANY_BALANCE_AFTER_TRANSFER);
-
-      when(userWalletRepository.save(any(UserWallet.class))).thenReturn(expectedUserWallet);
-      when(tourCompanyWalletRepository.save(any(TourCompanyWallet.class)))
-          .thenReturn(expectedCompanyWallet);
-
-      // Actual
-      var actualWallets =
-          walletService.transferMoney(
-              userWalletInput, companyWalletInput, AMOUNT_TO_TRANSFER, TransactionType.BOOKING);
-
-      // Assert
-      assertEquals(expectedUserWallet, actualWallets.getFirst());
-      assertEquals(expectedCompanyWallet, actualWallets.getSecond());
-    }
-
-    @Test
-    void butInsufficientBalanceThenThrowException() {
-      // Arrange
+      var AMOUNT_TO_TRANSFER = BigDecimal.valueOf(200);
       var expectedErrorMessage =
           String.format(
-              "%s balance is insufficient for this operation", UserWallet.class.getSimpleName());
-      var userWalletInput = buildMockUserWallet(USER_ID);
-      var tourCompanyWalletInput = buildMockCompanyWallet(COMPANY_ID);
+              "Transaction type [%s] is not supported for this transferring method",
+              TransactionType.TOP_UP);
+      var userWalletInput = buildMockUserWallet(1, BigDecimal.ZERO);
+      var companyWalletInput = buildMockCompanyWallet(2, BigDecimal.ZERO);
 
       // Actual
       Executable actualExecutable =
           () ->
               walletService.transferMoney(
-                  userWalletInput,
-                  tourCompanyWalletInput,
-                  AMOUNT_OVER_USER_BALANCE,
-                  TransactionType.BOOKING);
+                  userWalletInput, companyWalletInput, AMOUNT_TO_TRANSFER, TransactionType.TOP_UP);
 
       // Assert
-      var exception = assertThrowsExactly(InsufficientBalanceException.class, actualExecutable);
+      var exception =
+          assertThrowsExactly(UnsupportedTransactionTypeException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
-    }
-  }
-
-  @Nested
-  class TransferMoneyForRefundTest {
-    private final int COMPANY_ID = 2;
-    private final int USER_ID = 1;
-    private final BigDecimal AMOUNT_TO_TRANSFER = BigDecimal.valueOf(100);
-    private final BigDecimal CURRENT_COMPANY_BALANCE = BigDecimal.valueOf(300);
-    private final BigDecimal CURRENT_USER_BALANCE = BigDecimal.valueOf(200);
-    private final BigDecimal COMPANY_BALANCE_AFTER_TRANSFER =
-        CURRENT_COMPANY_BALANCE.subtract(AMOUNT_TO_TRANSFER);
-    private final BigDecimal USER_BALANCE_AFTER_TRANSFER =
-        CURRENT_USER_BALANCE.add(AMOUNT_TO_TRANSFER);
-
-    private UserWallet buildMockUserWallet(int userId) {
-      return UserWallet.of(
-          USER_WALLET_ID, AggregateReference.to(userId), Instant.now(), CURRENT_USER_BALANCE);
-    }
-
-    private TourCompanyWallet buildMockCompanyWallet(int tourCompanyId) {
-      return TourCompanyWallet.of(
-          1,
-          AggregateReference.to(tourCompanyId),
-          Instant.now().minus(30, ChronoUnit.HOURS),
-          CURRENT_COMPANY_BALANCE);
     }
 
     @Test
-    void thenSuccess() {
-      // Arrange
-      var userWalletInput = buildMockUserWallet(USER_ID);
-      var companyWalletInput = buildMockCompanyWallet(COMPANY_ID);
-      var userRef = AggregateReference.<User, Integer>to(USER_ID);
-      var companyRef = AggregateReference.<TourCompany, Integer>to(COMPANY_ID);
-      var expectedUserWallet =
-          UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), USER_BALANCE_AFTER_TRANSFER);
-      var expectedCompanyWallet =
-          TourCompanyWallet.of(1, companyRef, Instant.now(), COMPANY_BALANCE_AFTER_TRANSFER);
-
-      when(userWalletRepository.save(any(UserWallet.class))).thenReturn(expectedUserWallet);
-      when(tourCompanyWalletRepository.save(any(TourCompanyWallet.class)))
-          .thenReturn(expectedCompanyWallet);
+    void forWithdrawButUnsupportedThenThrowError() {
+       // Arrange
+      var AMOUNT_TO_TRANSFER = BigDecimal.valueOf(200);
+      var expectedErrorMessage =
+          String.format(
+              "Transaction type [%s] is not supported for this transferring method",
+              TransactionType.WITHDRAW);
+      var userWalletInput = buildMockUserWallet(1, BigDecimal.ZERO);
+      var companyWalletInput = buildMockCompanyWallet(2, BigDecimal.ZERO);
 
       // Actual
-      var actualTransferredWallets =
-          walletService.transferMoney(
-              userWalletInput, companyWalletInput, AMOUNT_TO_TRANSFER, TransactionType.REFUND);
+      Executable actualExecutable =
+          () ->
+              walletService.transferMoney(
+                  userWalletInput, companyWalletInput, AMOUNT_TO_TRANSFER, TransactionType.WITHDRAW);
 
       // Assert
-      assertEquals(expectedUserWallet, actualTransferredWallets.getFirst());
-      assertEquals(expectedCompanyWallet, actualTransferredWallets.getSecond());
+      var exception =
+          assertThrowsExactly(UnsupportedTransactionTypeException.class, actualExecutable);
+      assertEquals(expectedErrorMessage, exception.getMessage());
     }
-  }
   }
 }
