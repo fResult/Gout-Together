@@ -2,6 +2,7 @@ package dev.fResult.goutTogether.wallets.services;
 
 import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.common.enumurations.TransactionType;
+import dev.fResult.goutTogether.wallets.dtos.TourCompanyWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.UserWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.WalletTopUpRequest;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
@@ -12,7 +13,7 @@ import kotlin.Pair;
 public interface WalletService {
   UserWallet createConsumerWallet(int userId);
 
-  UserWalletInfoResponse getConsumerWalletByUserId(int userId);
+  UserWalletInfoResponse getConsumerWalletInfoByUserId(int userId);
 
   UserWalletInfoResponse topUpConsumerWallet(
       int userId, String idempotentKey, WalletTopUpRequest body);
@@ -20,6 +21,8 @@ public interface WalletService {
   boolean deleteConsumerWalletByUserId(int userId);
 
   TourCompanyWallet createTourCompanyWallet(int tourCompanyId);
+
+  TourCompanyWalletInfoResponse getTourCompanyWalletInfoByTourCompanyId(int tourCompanyId);
 
   Pair<UserWallet, TourCompanyWallet> getConsumerAndTourCompanyWallets(Booking booking);
 

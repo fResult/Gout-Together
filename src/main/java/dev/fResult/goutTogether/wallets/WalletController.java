@@ -34,7 +34,7 @@ public class WalletController {
     var jwt = (Jwt) authentication.getPrincipal();
     var userId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
 
-    return ResponseEntity.ok(walletService.getConsumerWalletByUserId(Integer.parseInt(userId)));
+    return ResponseEntity.ok(walletService.getConsumerWalletInfoByUserId(Integer.parseInt(userId)));
   }
 
   // User -> Top-up (Assume doing via application, bank deduct in the background)
@@ -60,8 +60,15 @@ public class WalletController {
 
   // Company → See own wallet
   @GetMapping("/my-company")
-  public ResponseEntity<TourCompanyWalletInfoResponse> getMyCompanyWallet() {
-    throw new UnsupportedOperationException("Not Implement Yet");
+  public ResponseEntity<TourCompanyWalletInfoResponse> getMyCompanyWallet(
+      Authentication authentication) {
+    var jwt = (Jwt) authentication.getPrincipal();
+    var companyId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
+
+    var companyWalletInfo =
+        walletService.getTourCompanyWalletInfoByTourCompanyId(Integer.parseInt(companyId));
+
+    return ResponseEntity.ok(companyWalletInfo);
   }
 
   // Company -> pay to bank account

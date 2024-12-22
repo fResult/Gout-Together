@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.common.utils.UUIDV7;
+import dev.fResult.goutTogether.wallets.dtos.TourCompanyWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.UserWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.WalletTopUpRequest;
 import dev.fResult.goutTogether.wallets.entities.UserWallet;
@@ -49,11 +50,11 @@ class WalletControllerTest {
     mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
   }
 
-  private Authentication buildAuthentication(int userId, UserRoleName roleName) {
+  private Authentication buildAuthentication(int resourceId, UserRoleName roleName) {
     var jwt =
         Jwt.withTokenValue("token")
             .header("alg", "none")
-            .claim(RESOURCE_ID_CLAIM, String.valueOf(userId))
+            .claim(RESOURCE_ID_CLAIM, String.valueOf(resourceId))
             .claim(ROLES_CLAIM, List.of("ROLE_" + roleName.name()))
             .build();
     return new JwtAuthenticationToken(jwt);
@@ -68,7 +69,7 @@ class WalletControllerTest {
         UserWallet.of(1, AggregateReference.to(USER_ID), Instant.now(), BigDecimal.TEN);
     var expectedUserWalletInfo =
         UserWalletInfoResponse.of(userWallet.id(), USER_ID, userWallet.balance());
-    when(walletService.getConsumerWalletByUserId(anyInt())).thenReturn(expectedUserWalletInfo);
+    when(walletService.getConsumerWalletInfoByUserId(anyInt())).thenReturn(expectedUserWalletInfo);
 
     // Actual
     var resultActions = mockMvc.perform(get(WALLET_API + "/me").principal(authentication));
@@ -104,5 +105,25 @@ class WalletControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.userId").value(USER_ID))
         .andExpect(jsonPath("$.balance").value(expectedBalanceAfterTopUp));
+  }
+
+  @Test
+  void whenGetMyTourCompanyWalletThenSuccess() throws Exception {
+    // Arrange
+    var TOUR_COMPANY_ID = 2;
+    var BALANCE = BigDecimal.valueOf(1_000_000);
+    var authentication = buildAuthentication(TOUR_COMPANY_ID, UserRoleName.COMPANY);
+    var expectedCompanyWalletInfo = TourCompanyWalletInfoResponse.of(3, TOUR_COMPANY_ID, BALANCE);
+    when(walletService.getTourCompanyWalletInfoByTourCompanyId(TOUR_COMPANY_ID))
+        .thenReturn(expectedCompanyWalletInfo);
+
+    // Actual
+    var resultActions = mockMvc.perform(get(WALLET_API + "/my-company").principal(authentication));
+
+    // Assert
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.tourCompanyId").value(TOUR_COMPANY_ID))
+        .andExpect(jsonPath("$.balance").value(BALANCE));
   }
 }
