@@ -11,6 +11,7 @@ import dev.fResult.goutTogether.auths.controllers.AuthController;
 import dev.fResult.goutTogether.auths.dtos.LoginRequest;
 import dev.fResult.goutTogether.auths.dtos.LoginResponse;
 import dev.fResult.goutTogether.auths.dtos.LogoutInfo;
+import dev.fResult.goutTogether.auths.dtos.RefreshTokenRequest;
 import dev.fResult.goutTogether.auths.services.AuthService;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.common.utils.UUIDV7;
@@ -32,6 +33,7 @@ import org.springframework.web.context.WebApplicationContext;
 @WebMvcTest(AuthController.class)
 class AuthControllerTest {
   private final String AUTH_API = "/api/v1/auths";
+  private final int USER_ID = 1;
 
   @Autowired private WebApplicationContext webApplicationContext;
   @Autowired private ObjectMapper objectMapper;
@@ -58,7 +60,6 @@ class AuthControllerTest {
   @Test
   void whenLoginThenSuccess() throws Exception {
     // Arrange
-    var USER_ID = 1;
     var body = new LoginRequest("username", "password");
     var expectedLoggedInUser =
         new LoginResponse(
@@ -81,9 +82,33 @@ class AuthControllerTest {
   }
 
   @Test
+  void whenRefreshTokenThenSuccess() throws Exception {
+    // Arrange
+    var refreshToken = UUIDV7.randomUUID().toString();
+    var body = new RefreshTokenRequest(UserRoleName.CONSUMER, USER_ID, refreshToken);
+    var expectedRotatedLoggedInUser =
+        new LoginResponse(USER_ID, TOKEN_TYPE, "%(!(@)*$&(!&^^%$##!&", refreshToken);
+
+    when(authService.refreshToken(Mockito.any())).thenReturn(expectedRotatedLoggedInUser);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            post(AUTH_API + "/refresh")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.userId").value(USER_ID))
+        .andExpect(jsonPath("$.tokenType").value(TOKEN_TYPE))
+        .andExpect(jsonPath("$.refreshToken").value(refreshToken));
+  }
+
+  @Test
   void whenLogoutThenSuccess() throws Exception {
     // Arrange
-    var USER_ID = 1;
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
     var mockLogoutInfoInput = LogoutInfo.of(USER_ID, UserRoleName.CONSUMER.name());
 
