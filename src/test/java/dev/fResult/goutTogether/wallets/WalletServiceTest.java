@@ -374,15 +374,16 @@ class WalletServiceTest {
   class TransferMoneyForBookingTest {
     private final int USER_ID = 1;
     private final int COMPANY_ID = 2;
-    private final BigDecimal AMOUNT = BigDecimal.valueOf(100);
-    private final BigDecimal USER_BALANCE = BigDecimal.valueOf(200);
-    private final BigDecimal COMPANY_BALANCE = BigDecimal.valueOf(300);
-    private final BigDecimal USER_BALANCE_AFTER_TRANSFER = USER_BALANCE.subtract(AMOUNT);
-    private final BigDecimal COMPANY_BALANCE_AFTER_TRANSFER = COMPANY_BALANCE.add(AMOUNT);
+    private final BigDecimal AMOUNT_TO_TRANSFER = BigDecimal.valueOf(100);
+    private final BigDecimal AMOUNT_OVER_USER_BALANCE = BigDecimal.valueOf(201);
+    private final BigDecimal CURRENT_USER_BALANCE = BigDecimal.valueOf(200);
+    private final BigDecimal CURRENT_COMPANY_BALANCE = BigDecimal.valueOf(300);
+    private final BigDecimal USER_BALANCE_AFTER_TRANSFER = CURRENT_USER_BALANCE.subtract(AMOUNT_TO_TRANSFER);
+    private final BigDecimal COMPANY_BALANCE_AFTER_TRANSFER = CURRENT_COMPANY_BALANCE.add(AMOUNT_TO_TRANSFER);
 
     private UserWallet buildMockUserWallet(int userId) {
       return UserWallet.of(
-          USER_WALLET_ID, AggregateReference.to(userId), Instant.now(), USER_BALANCE);
+          USER_WALLET_ID, AggregateReference.to(userId), Instant.now(), CURRENT_USER_BALANCE);
     }
 
     private TourCompanyWallet buildMockCompanyWallet(int tourCompanyId) {
@@ -390,7 +391,7 @@ class WalletServiceTest {
           1,
           AggregateReference.to(tourCompanyId),
           Instant.now().minus(30, ChronoUnit.HOURS),
-          COMPANY_BALANCE);
+          CURRENT_COMPANY_BALANCE);
     }
 
     @Test
@@ -412,7 +413,7 @@ class WalletServiceTest {
       // Actual
       var actualWallets =
           walletService.transferMoney(
-              userWalletInput, mockCompanyWalletInput, AMOUNT, TransactionType.BOOKING);
+              userWalletInput, mockCompanyWalletInput, AMOUNT_TO_TRANSFER, TransactionType.BOOKING);
 
       // Assert
       assertEquals(expectedUserWallet, actualWallets.getFirst());
