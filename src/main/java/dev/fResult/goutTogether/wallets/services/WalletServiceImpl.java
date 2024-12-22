@@ -313,7 +313,8 @@ public class WalletServiceImpl implements WalletService {
     return userWalletRepository
         .findOneByUserId(AggregateReference.to(userId))
         .orElseThrow(
-            errorHelper.entityNotFound("findUserWalletByUserId", UserWallet.class, userId));
+            errorHelper.entityWithSubResourceNotFound(
+                "findUserWalletByUserId", UserWallet.class, "userId", String.valueOf(userId)));
   }
 
   private Transaction createTopUpTransaction(
