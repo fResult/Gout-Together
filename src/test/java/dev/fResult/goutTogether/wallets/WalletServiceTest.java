@@ -42,7 +42,9 @@ import org.springframework.data.jdbc.core.mapping.AggregateReference;
 
 @ExtendWith(MockitoExtension.class)
 class WalletServiceTest {
-  private static final int USER_WALLET_ID = 1;
+  private final int USER_WALLET_ID = 1;
+  private final int TOUR_COMPANY_WALLET_ID = 2;
+
   private static final String IDEMPOTENCY_KEY = UUIDV7.randomUUID().toString();
 
   @InjectMocks private WalletServiceImpl walletService;
@@ -58,7 +60,7 @@ class WalletServiceTest {
 
   private TourCompanyWallet buildMockCompanyWallet(int tourCompanyId, BigDecimal balance) {
     return TourCompanyWallet.of(
-        1,
+        TOUR_COMPANY_WALLET_ID,
         AggregateReference.to(tourCompanyId),
         Instant.now().minus(30, ChronoUnit.HOURS),
         balance);
@@ -247,6 +249,44 @@ class WalletServiceTest {
     assertTrue(actualIsSuccess);
   }
 
+  @Test
+  void whenGetCompanyWalletThenSuccess() {
+    // Arrange
+    var TOUR_COMPANY_ID = 1;
+    var companyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
+    var mockCompanyWallet = buildMockCompanyWallet(TOUR_COMPANY_ID, BigDecimal.ZERO);
+    var expectedFoundCompanyWalletInfo =
+        TourCompanyWalletInfoResponse.of(TOUR_COMPANY_WALLET_ID, TOUR_COMPANY_ID, BigDecimal.ZERO);
+
+    when(tourCompanyWalletRepository.findOneByTourCompanyId(companyRef))
+        .thenReturn(Optional.of(mockCompanyWallet));
+
+    // Actual
+    var actualFoundWallet = walletService.getTourCompanyWalletInfoByTourCompanyId(TOUR_COMPANY_ID);
+
+    // Assert
+    assertEquals(expectedFoundCompanyWalletInfo, actualFoundWallet);
+  }
+
+  @Test
+  void whenGetCompanyWalletButNotFoundThenThrowEntityNotFoundException() {
+    // Arrange
+    var NOT_FOUND_USER_ID = 99999;
+    var expectedErrorMessage =
+        String.format(
+            "%s with userId [%s] not found", UserWallet.class.getSimpleName(), NOT_FOUND_USER_ID);
+    var notFoundUserRef = AggregateReference.<User, Integer>to(NOT_FOUND_USER_ID);
+    when(userWalletRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualExecutable =
+        () -> walletService.getConsumerWalletInfoByUserId(NOT_FOUND_USER_ID);
+
+    // Assert
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
   @Nested
   class GetConsumerAndCompanyWalletsTest {
     private final int USER_ID = 1;
@@ -390,7 +430,6 @@ class WalletServiceTest {
   @Nested
   class WithdrawCompanyWalletTest {
     private final int TOUR_COMPANY_ID = 2;
-    private final int TOUR_COMPANY_WALLET_ID = 1;
 
     @Test
     void whenSuccess() {
