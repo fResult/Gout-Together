@@ -1,8 +1,7 @@
 package dev.fResult.goutTogether.wallets;
 
-import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
-import static dev.fResult.goutTogether.common.Constants.ROLES_CLAIM;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static dev.fResult.goutTogether.common.Constants.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,6 +14,7 @@ import dev.fResult.goutTogether.common.utils.UUIDV7;
 import dev.fResult.goutTogether.wallets.dtos.TourCompanyWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.UserWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.WalletTopUpRequest;
+import dev.fResult.goutTogether.wallets.dtos.WalletWithdrawRequest;
 import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import dev.fResult.goutTogether.wallets.services.WalletService;
 import java.math.BigDecimal;
@@ -36,9 +36,10 @@ import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(WalletController.class)
 class WalletControllerTest {
-  private  final String WALLET_API = "/api/v1/wallets";
+  private final String WALLET_API = "/api/v1/wallets";
   private final int USER_ID = 1;
   private final int TOUR_COMPANY_ID = 2;
+  private final String IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
 
   @Autowired private WebApplicationContext webApplicationContext;
   @Autowired private ObjectMapper objectMapper;
@@ -83,7 +84,6 @@ class WalletControllerTest {
   void whenTopUpUserWalletThenSuccess() throws Exception {
     // Arrange
     var AMOUNT_TO_TOP_UP = BigDecimal.valueOf(300);
-    var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
     var body = WalletTopUpRequest.of(AMOUNT_TO_TOP_UP);
     var expectedBalanceAfterTopUp = AMOUNT_TO_TOP_UP.add(BigDecimal.valueOf(100));
@@ -126,5 +126,34 @@ class WalletControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.tourCompanyId").value(TOUR_COMPANY_ID))
         .andExpect(jsonPath("$.balance").value(BALANCE));
+  }
+
+  @Test
+  void whenWithdrawMoneyThenSuccess() throws Exception {
+    // Arrange
+    var AMOUNT_TO_WITHDRAW = BigDecimal.valueOf(80_000);
+    var BALANCE_AFTER_WITHDRAW = BigDecimal.valueOf(920_000);
+    var authentication = buildAuthentication(TOUR_COMPANY_ID, UserRoleName.COMPANY);
+    var body = WalletWithdrawRequest.of(AMOUNT_TO_WITHDRAW);
+    var expectedCompanyWalletInfo =
+        TourCompanyWalletInfoResponse.of(2, TOUR_COMPANY_ID, BALANCE_AFTER_WITHDRAW);
+
+    when(walletService.withdrawTourCompanyWallet(anyInt(), anyString(), any(WalletWithdrawRequest.class)))
+        .thenReturn(expectedCompanyWalletInfo);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            post(WALLET_API + "/withdraw")
+                .header("idempotent-key", IDEMPOTENT_KEY)
+                .principal(authentication)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.tourCompanyId").value(TOUR_COMPANY_ID))
+        .andExpect(jsonPath("$.balance").value(BALANCE_AFTER_WITHDRAW));
   }
 }

@@ -12,6 +12,7 @@ import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.wallets.dtos.TourCompanyWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.UserWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.WalletTopUpRequest;
+import dev.fResult.goutTogether.wallets.dtos.WalletWithdrawRequest;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
 import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import dev.fResult.goutTogether.wallets.repositories.TourCompanyWalletRepository;
@@ -151,10 +152,20 @@ public class WalletServiceImpl implements WalletService {
 
   @Override
   public TourCompanyWalletInfoResponse getTourCompanyWalletInfoByTourCompanyId(int tourCompanyId) {
-    logger.debug("[getTourCompanyWalletInfoByTourCompanyId] Getting {} by tourCompanyId: {}", TourCompanyWallet.class.getSimpleName(), tourCompanyId);
+    logger.debug(
+        "[getTourCompanyWalletInfoByTourCompanyId] Getting {} by tourCompanyId: {}",
+        TourCompanyWallet.class.getSimpleName(),
+        tourCompanyId);
     var tourCompanyWallet = getTourCompanyWalletByTourCompanyId(tourCompanyId);
 
     return TourCompanyWalletInfoResponse.fromDao(tourCompanyWallet);
+  }
+
+  @Override
+  public TourCompanyWalletInfoResponse withdrawTourCompanyWallet(
+      int tourCompanyId, String idempotentKey, WalletWithdrawRequest body) {
+
+    throw new UnsupportedOperationException("Not Implemented Yet");
   }
 
   @Override
