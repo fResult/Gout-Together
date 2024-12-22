@@ -36,7 +36,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(WalletController.class)
 class WalletControllerTest {
-  private static final String WALLET_API = "/api/v1/wallets";
+  private  final String WALLET_API = "/api/v1/wallets";
+  private final int USER_ID = 1;
+  private final int TOUR_COMPANY_ID = 2;
 
   @Autowired private WebApplicationContext webApplicationContext;
   @Autowired private ObjectMapper objectMapper;
@@ -63,7 +65,6 @@ class WalletControllerTest {
   @Test
   void whenGetMyUserWalletThenSuccess() throws Exception {
     // Arrange
-    var USER_ID = 1;
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
     var userWallet =
         UserWallet.of(1, AggregateReference.to(USER_ID), Instant.now(), BigDecimal.TEN);
@@ -81,13 +82,13 @@ class WalletControllerTest {
   @Test
   void whenTopUpUserWalletThenSuccess() throws Exception {
     // Arrange
-    var USER_ID = 1;
     var AMOUNT_TO_TOP_UP = BigDecimal.valueOf(300);
     var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
     var body = WalletTopUpRequest.of(AMOUNT_TO_TOP_UP);
     var expectedBalanceAfterTopUp = AMOUNT_TO_TOP_UP.add(BigDecimal.valueOf(100));
     var expectedUserWalletInfo = UserWalletInfoResponse.of(1, USER_ID, expectedBalanceAfterTopUp);
+
     when(walletService.topUpConsumerWallet(USER_ID, IDEMPOTENT_KEY, body))
         .thenReturn(expectedUserWalletInfo);
 
@@ -110,10 +111,10 @@ class WalletControllerTest {
   @Test
   void whenGetMyTourCompanyWalletThenSuccess() throws Exception {
     // Arrange
-    var TOUR_COMPANY_ID = 2;
     var BALANCE = BigDecimal.valueOf(1_000_000);
     var authentication = buildAuthentication(TOUR_COMPANY_ID, UserRoleName.COMPANY);
     var expectedCompanyWalletInfo = TourCompanyWalletInfoResponse.of(3, TOUR_COMPANY_ID, BALANCE);
+
     when(walletService.getTourCompanyWalletInfoByTourCompanyId(TOUR_COMPANY_ID))
         .thenReturn(expectedCompanyWalletInfo);
 
