@@ -148,6 +148,43 @@ class WalletServiceTest {
       // Assert
       assertEquals(expectedUpdatedUserWallet, actualUpdatedUserWallet);
     }
+
+    @Test
+    void butTransactionAlreadyExistsThenReturnUserWalletWithoutUpdate() {
+      // Arrange
+      var body = WalletTopUpRequest.of(AMOUNT);
+      var userRef = AggregateReference.<User, Integer>to(USER_ID);
+      var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(1);
+      var bookingRef = AggregateReference.<Booking, Integer>to(1);
+      var mockUserWallet =
+          UserWallet.of(
+              USER_WALLET_ID,
+              userRef,
+              Instant.now().minus(1, ChronoUnit.DAYS),
+              BigDecimal.valueOf(200));
+      var mockTransaction =
+          Transaction.of(
+              1,
+              userRef,
+              tourCompanyRef,
+              bookingRef,
+              Instant.now().minusSeconds(10),
+              AMOUNT,
+              TransactionType.TOP_UP,
+              IDEMPOTENCY_KEY);
+      var expectedUpdatedUserWallet =
+              UserWalletInfoResponse.of(USER_WALLET_ID, USER_ID, mockUserWallet.balance());
+
+      when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserWallet));
+      when(transactionRepository.findOneByIdempotentKey(anyString()))
+          .thenReturn(Optional.of(mockTransaction));
+
+      // Actual
+      var actualUpdatedUserWallet =
+              walletService.topUpConsumerWallet(USER_ID, IDEMPOTENCY_KEY, body);
+
+      // Assert
+    }
   }
 
   @Test
