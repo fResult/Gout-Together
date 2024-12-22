@@ -388,6 +388,74 @@ class WalletServiceTest {
   }
 
   @Nested
+  class WithdrawCompanyWalletTest {
+    private final int TOUR_COMPANY_ID = 2;
+    private final int TOUR_COMPANY_WALLET_ID = 1;
+
+    private TourCompanyWallet buildTourCompanyWallet(int tourCompanyId, BigDecimal balance) {
+      return TourCompanyWallet.of(
+          TOUR_COMPANY_WALLET_ID,
+          AggregateReference.to(tourCompanyId),
+          Instant.now().minus(4, ChronoUnit.HOURS),
+          balance);
+    }
+
+    @Test
+    void whenSuccess() {
+      // Arrange
+      var AMOUNT_TO_WITHDRAW = BigDecimal.valueOf(80_000);
+      var CURRENT_BALANCE = BigDecimal.valueOf(1_000_000);
+      var BALANCE_AFTER_WITHDRAW = BigDecimal.valueOf(920_000);
+      var body = WalletWithdrawRequest.of(AMOUNT_TO_WITHDRAW);
+      var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
+
+      var mockCompanyWallet = buildTourCompanyWallet(TOUR_COMPANY_ID, CURRENT_BALANCE);
+      var mockCompanyWalletToWithdraw =
+          buildTourCompanyWallet(TOUR_COMPANY_ID, BALANCE_AFTER_WITHDRAW);
+      var expectedCompanyWalletInfo =
+          TourCompanyWalletInfoResponse.of(
+              TOUR_COMPANY_WALLET_ID, TOUR_COMPANY_ID, BALANCE_AFTER_WITHDRAW);
+
+      when(tourCompanyWalletRepository.findOneByTourCompanyId(tourCompanyRef))
+          .thenReturn(Optional.of(mockCompanyWallet));
+      when(tourCompanyWalletRepository.save(any(TourCompanyWallet.class)))
+          .thenReturn(mockCompanyWalletToWithdraw);
+
+      // Actual
+      var actualWithdrewWallet =
+          walletService.withdrawTourCompanyWallet(TOUR_COMPANY_ID, IDEMPOTENCY_KEY, body);
+
+      // Assert
+      assertEquals(expectedCompanyWalletInfo, actualWithdrewWallet);
+    }
+
+    @Test
+    void butWalletNotFoundThenThrowException() {
+      // Arrange
+      var NOT_FOUND_TOUR_COMPANY_ID = 99999;
+      var body = WalletWithdrawRequest.of(BigDecimal.TEN);
+      var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(NOT_FOUND_TOUR_COMPANY_ID);
+      var expectedErrorMessage =
+          String.format(
+              "%s with %s [%s] not found",
+              TourCompanyWallet.class.getSimpleName(), "tourCompanyId", NOT_FOUND_TOUR_COMPANY_ID);
+
+      when(tourCompanyWalletRepository.findOneByTourCompanyId(tourCompanyRef))
+          .thenReturn(Optional.empty());
+
+      // Actual
+      Executable actualExecutable =
+          () ->
+              walletService.withdrawTourCompanyWallet(
+                  NOT_FOUND_TOUR_COMPANY_ID, IDEMPOTENCY_KEY, body);
+
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      assertEquals(expectedErrorMessage, exception.getMessage());
+    }
+  }
+
+  @Nested
   class TransferMoneyTest {
     @Nested
     class TransferMoneyForBookingTest {
@@ -449,49 +517,6 @@ class WalletServiceTest {
         // Assert
         var exception = assertThrowsExactly(InsufficientBalanceException.class, actualExecutable);
         assertEquals(expectedErrorMessage, exception.getMessage());
-      }
-    }
-
-    @Nested
-    class WithdrawCompanyWalletTest {
-      private final int TOUR_COMPANY_ID = 2;
-      private final int TOUR_COMPANY_WALLET_ID = 1;
-
-      private TourCompanyWallet buildTourCompanyWallet(int tourCompanyId, BigDecimal balance) {
-        return TourCompanyWallet.of(
-            TOUR_COMPANY_WALLET_ID,
-            AggregateReference.to(tourCompanyId),
-            Instant.now().minus(4, ChronoUnit.HOURS),
-            balance);
-      }
-
-      @Test
-      void whenSuccess() {
-        // Arrange
-        var AMOUNT_TO_WITHDRAW = BigDecimal.valueOf(80_000);
-        var CURRENT_BALANCE = BigDecimal.valueOf(1_000_000);
-        var BALANCE_AFTER_WITHDRAW = BigDecimal.valueOf(920_000);
-        var body = WalletWithdrawRequest.of(AMOUNT_TO_WITHDRAW);
-        var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
-
-        var mockCompanyWallet = buildTourCompanyWallet(TOUR_COMPANY_ID, CURRENT_BALANCE);
-        var mockCompanyWalletToWithdraw =
-            buildTourCompanyWallet(TOUR_COMPANY_ID, BALANCE_AFTER_WITHDRAW);
-        var expectedCompanyWalletInfo =
-            TourCompanyWalletInfoResponse.of(
-                TOUR_COMPANY_WALLET_ID, TOUR_COMPANY_ID, BALANCE_AFTER_WITHDRAW);
-
-        when(tourCompanyWalletRepository.findOneByTourCompanyId(tourCompanyRef))
-            .thenReturn(Optional.of(mockCompanyWallet));
-        when(tourCompanyWalletRepository.save(any(TourCompanyWallet.class)))
-            .thenReturn(mockCompanyWalletToWithdraw);
-
-        // Actual
-        var actualWithdrewWallet =
-            walletService.withdrawTourCompanyWallet(TOUR_COMPANY_ID, IDEMPOTENCY_KEY, body);
-
-        // Assert
-        assertEquals(expectedCompanyWalletInfo, actualWithdrewWallet);
       }
     }
 
