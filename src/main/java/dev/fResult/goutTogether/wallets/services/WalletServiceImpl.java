@@ -9,6 +9,7 @@ import dev.fResult.goutTogether.transactions.Transaction;
 import dev.fResult.goutTogether.transactions.TransactionHelper;
 import dev.fResult.goutTogether.transactions.TransactionRepository;
 import dev.fResult.goutTogether.users.entities.User;
+import dev.fResult.goutTogether.wallets.dtos.TourCompanyWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.UserWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.WalletTopUpRequest;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
@@ -69,9 +70,9 @@ public class WalletServiceImpl implements WalletService {
   }
 
   @Override
-  public UserWalletInfoResponse getConsumerWalletByUserId(int userId) {
+  public UserWalletInfoResponse getConsumerWalletInfoByUserId(int userId) {
     logger.debug(
-        "[getConsumerWalletByUserId] Getting {} by userId: {}",
+        "[getConsumerWalletInfoByUserId] Getting {} by userId: {}",
         UserWallet.class.getSimpleName(),
         userId);
 
@@ -146,6 +147,14 @@ public class WalletServiceImpl implements WalletService {
         createdWallet);
 
     return createdWallet;
+  }
+
+  @Override
+  public TourCompanyWalletInfoResponse getTourCompanyWalletInfoByTourCompanyId(int tourCompanyId) {
+    logger.debug("[getTourCompanyWalletInfoByTourCompanyId] Getting {} by tourCompanyId: {}", TourCompanyWallet.class.getSimpleName(), tourCompanyId);
+    var tourCompanyWallet = getTourCompanyWalletByTourCompanyId(tourCompanyId);
+
+    return TourCompanyWalletInfoResponse.fromDao(tourCompanyWallet);
   }
 
   @Override
@@ -306,7 +315,7 @@ public class WalletServiceImpl implements WalletService {
 
   private UserWallet getUserWalletByUserId(int userId) {
     logger.debug(
-        "[findUserWalletByUserId] Finding {} by userId: {}",
+        "[getUserWalletByUserId] Getting {} by userId [{}]",
         UserWallet.class.getSimpleName(),
         userId);
 
@@ -314,7 +323,7 @@ public class WalletServiceImpl implements WalletService {
         .findOneByUserId(AggregateReference.to(userId))
         .orElseThrow(
             errorHelper.entityWithSubResourceNotFound(
-                "findUserWalletByUserId", UserWallet.class, "userId", String.valueOf(userId)));
+                "getUserWalletByUserId", UserWallet.class, "userId", String.valueOf(userId)));
   }
 
   private Transaction createTopUpTransaction(
@@ -328,6 +337,22 @@ public class WalletServiceImpl implements WalletService {
         Transaction.class.getSimpleName(),
         createdTransaction);
     return createdTransaction;
+  }
+
+  private TourCompanyWallet getTourCompanyWalletByTourCompanyId(int tourCompanyId) {
+    logger.debug(
+        "[getTourCompanyWalletByTourCompanyId] Getting {} by tourCompanyId [{}]",
+        TourCompanyWallet.class.getSimpleName(),
+        tourCompanyId);
+
+    return tourCompanyWalletRepository
+        .findOneByTourCompanyId(AggregateReference.to(tourCompanyId))
+        .orElseThrow(
+            errorHelper.entityWithSubResourceNotFound(
+                "getTourCompanyWalletByTourCompanyId",
+                TourCompanyWallet.class,
+                "tourCompanyId",
+                String.valueOf(tourCompanyId)));
   }
 
   private Integer getIdOrNull(AggregateReference<?, Integer> resourceRef) {
