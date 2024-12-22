@@ -49,10 +49,9 @@ public class AuthController {
   @PostMapping("/logout")
   public ResponseEntity<Void> logout(Authentication authentication) {
     var jwt = (Jwt) authentication.getPrincipal();
-    var claims = jwt.getClaims();
-    var resourceId = (long) claims.get(RESOURCE_ID_CLAIM);
-    var roles = (String) claims.get(ROLES_CLAIM);
-    var logoutInfo = LogoutInfo.of(Math.toIntExact(resourceId), roles);
+    var resourceId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
+    var roles = jwt.getClaimAsString(ROLES_CLAIM);
+    var logoutInfo = LogoutInfo.of(Integer.parseInt(resourceId), roles);
     logger.debug("[logout] Logging out by username [{}]", authentication.getName());
     authService.logout(logoutInfo);
 
