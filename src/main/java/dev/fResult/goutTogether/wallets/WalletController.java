@@ -5,6 +5,7 @@ import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
 import dev.fResult.goutTogether.wallets.dtos.TourCompanyWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.UserWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.WalletTopUpRequest;
+import dev.fResult.goutTogether.wallets.dtos.WalletWithdrawRequest;
 import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import dev.fResult.goutTogether.wallets.services.WalletService;
 import org.hibernate.validator.constraints.UUID;
@@ -72,10 +73,25 @@ public class WalletController {
   }
 
   // Company -> pay to bank account
-  @PostMapping
-  public ResponseEntity<TourCompanyWalletInfoResponse> withdrawMoney() {
-    logger.info("Assume pay to bank");
+  @PostMapping("/withdraw")
+  public ResponseEntity<TourCompanyWalletInfoResponse> withdrawTourCompanyWallet(
+      @Validated @RequestBody WalletWithdrawRequest body,
+      @RequestHeader("idempotent-key") @UUID(message = "wrong format for headers `idempotent-key`")
+          String idempotentKey,
+      Authentication authentication) {
 
-    throw new UnsupportedOperationException("Not Implement Yet");
+    var jwt = (Jwt) authentication.getPrincipal();
+    var companyId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
+
+    logger.info("Assume pay to bank");
+    logger.debug(
+        "[withdrawMoney] Withdrawing up {} by tourCompanyId [{}]",
+        UserWallet.class.getSimpleName(),
+        companyId);
+
+    var withdrewCompanyInfo =
+        walletService.withdrawTourCompanyWallet(Integer.parseInt(companyId), idempotentKey, body);
+
+    return ResponseEntity.ok(withdrewCompanyInfo);
   }
 }
