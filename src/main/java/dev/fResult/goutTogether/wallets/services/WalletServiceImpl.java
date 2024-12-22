@@ -165,7 +165,24 @@ public class WalletServiceImpl implements WalletService {
   public TourCompanyWalletInfoResponse withdrawTourCompanyWallet(
       int tourCompanyId, String idempotentKey, WalletWithdrawRequest body) {
 
-    throw new UnsupportedOperationException("Not Implemented Yet");
+    logger.debug(
+        "[withdrawTourCompanyWallet] Withdrawing {} by tourCompanyId: {}",
+        TourCompanyWallet.class.getSimpleName(),
+        tourCompanyId);
+
+    var companyWallet = getTourCompanyWalletByTourCompanyId(tourCompanyId);
+    var balanceToWithdraw = companyWallet.balance().subtract(body.amount());
+    var companyWalletToWithdraw =
+        TourCompanyWallet.of(
+            companyWallet.id(), companyWallet.tourCompanyId(), Instant.now(), balanceToWithdraw);
+    var withdrewCompanyWallet = tourCompanyWalletRepository.save(companyWalletToWithdraw);
+
+    logger.info(
+        "[withdrawTourCompanyWallet] {} is withdrew: {}",
+        TourCompanyWallet.class.getSimpleName(),
+        withdrewCompanyWallet);
+
+    return TourCompanyWalletInfoResponse.fromDao(withdrewCompanyWallet);
   }
 
   @Override

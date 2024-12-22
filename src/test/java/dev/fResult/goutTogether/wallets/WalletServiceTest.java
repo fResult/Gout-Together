@@ -18,8 +18,10 @@ import dev.fResult.goutTogether.tours.services.TourService;
 import dev.fResult.goutTogether.transactions.Transaction;
 import dev.fResult.goutTogether.transactions.TransactionRepository;
 import dev.fResult.goutTogether.users.entities.User;
+import dev.fResult.goutTogether.wallets.dtos.TourCompanyWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.UserWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.WalletTopUpRequest;
+import dev.fResult.goutTogether.wallets.dtos.WalletWithdrawRequest;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
 import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import dev.fResult.goutTogether.wallets.repositories.TourCompanyWalletRepository;
@@ -95,7 +97,8 @@ class WalletServiceTest {
     when(userWalletRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> walletService.getConsumerWalletInfoByUserId(NOT_FOUND_USER_ID);
+    Executable actualExecutable =
+        () -> walletService.getConsumerWalletInfoByUserId(NOT_FOUND_USER_ID);
 
     // Assert
     var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
@@ -450,6 +453,49 @@ class WalletServiceTest {
     }
 
     @Nested
+    class WithdrawCompanyWalletTest {
+      private final int TOUR_COMPANY_ID = 2;
+      private final int TOUR_COMPANY_WALLET_ID = 1;
+
+      private TourCompanyWallet buildTourCompanyWallet(int tourCompanyId, BigDecimal balance) {
+        return TourCompanyWallet.of(
+            TOUR_COMPANY_WALLET_ID,
+            AggregateReference.to(tourCompanyId),
+            Instant.now().minus(4, ChronoUnit.HOURS),
+            balance);
+      }
+
+      @Test
+      void whenSuccess() {
+        // Arrange
+        var AMOUNT_TO_WITHDRAW = BigDecimal.valueOf(80_000);
+        var CURRENT_BALANCE = BigDecimal.valueOf(1_000_000);
+        var BALANCE_AFTER_WITHDRAW = BigDecimal.valueOf(920_000);
+        var body = WalletWithdrawRequest.of(AMOUNT_TO_WITHDRAW);
+        var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
+
+        var mockCompanyWallet = buildTourCompanyWallet(TOUR_COMPANY_ID, CURRENT_BALANCE);
+        var mockCompanyWalletToWithdraw =
+            buildTourCompanyWallet(TOUR_COMPANY_ID, BALANCE_AFTER_WITHDRAW);
+        var expectedCompanyWalletInfo =
+            TourCompanyWalletInfoResponse.of(
+                TOUR_COMPANY_WALLET_ID, TOUR_COMPANY_ID, BALANCE_AFTER_WITHDRAW);
+
+        when(tourCompanyWalletRepository.findOneByTourCompanyId(tourCompanyRef))
+            .thenReturn(Optional.of(mockCompanyWallet));
+        when(tourCompanyWalletRepository.save(any(TourCompanyWallet.class)))
+            .thenReturn(mockCompanyWalletToWithdraw);
+
+        // Actual
+        var actualWithdrewWallet =
+            walletService.withdrawTourCompanyWallet(TOUR_COMPANY_ID, IDEMPOTENCY_KEY, body);
+
+        // Assert
+        assertEquals(expectedCompanyWalletInfo, actualWithdrewWallet);
+      }
+    }
+
+    @Nested
     class TransferMoneyForRefundTest {
       private final int COMPANY_ID = 2;
       private final int USER_ID = 1;
@@ -513,7 +559,7 @@ class WalletServiceTest {
 
     @Test
     void forWithdrawButUnsupportedThenThrowError() {
-       // Arrange
+      // Arrange
       var AMOUNT_TO_TRANSFER = BigDecimal.valueOf(200);
       var expectedErrorMessage =
           String.format(
@@ -526,7 +572,10 @@ class WalletServiceTest {
       Executable actualExecutable =
           () ->
               walletService.transferMoney(
-                  userWalletInput, companyWalletInput, AMOUNT_TO_TRANSFER, TransactionType.WITHDRAW);
+                  userWalletInput,
+                  companyWalletInput,
+                  AMOUNT_TO_TRANSFER,
+                  TransactionType.WITHDRAW);
 
       // Assert
       var exception =

@@ -138,7 +138,8 @@ class WalletControllerTest {
     var expectedCompanyWalletInfo =
         TourCompanyWalletInfoResponse.of(2, TOUR_COMPANY_ID, BALANCE_AFTER_WITHDRAW);
 
-    when(walletService.withdrawTourCompanyWallet(anyInt(), anyString(), any(WalletWithdrawRequest.class)))
+    when(walletService.withdrawTourCompanyWallet(
+            anyInt(), anyString(), any(WalletWithdrawRequest.class)))
         .thenReturn(expectedCompanyWalletInfo);
 
     // Actual
