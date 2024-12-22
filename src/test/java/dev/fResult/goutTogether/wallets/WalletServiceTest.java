@@ -120,6 +120,7 @@ class WalletServiceTest {
   @Nested
   class TopUpConsumerWalletTest {
     private final int USER_ID = 1;
+    private final int NOT_FOUND_USER_ID = 99999;
     private final BigDecimal AMOUNT = BigDecimal.valueOf(100);
     private final String IDEMPOTENCY_KEY = UUIDV7.randomUUID().toString();
 
@@ -173,7 +174,7 @@ class WalletServiceTest {
               TransactionType.TOP_UP,
               IDEMPOTENCY_KEY);
       var expectedUpdatedUserWallet =
-              UserWalletInfoResponse.of(USER_WALLET_ID, USER_ID, mockUserWallet.balance());
+          UserWalletInfoResponse.of(USER_WALLET_ID, USER_ID, mockUserWallet.balance());
 
       when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserWallet));
       when(transactionRepository.findOneByIdempotentKey(anyString()))
@@ -181,9 +182,28 @@ class WalletServiceTest {
 
       // Actual
       var actualUpdatedUserWallet =
-              walletService.topUpConsumerWallet(USER_ID, IDEMPOTENCY_KEY, body);
+          walletService.topUpConsumerWallet(USER_ID, IDEMPOTENCY_KEY, body);
 
       // Assert
+    }
+
+    @Test
+    void butWalletNotFoundThenThrowException() {
+      // Arrange
+      var expectedErrorMessage =
+          String.format(
+              "%s with userId [%s] not found", UserWallet.class.getSimpleName(), NOT_FOUND_USER_ID);
+      var body = WalletTopUpRequest.of(AMOUNT);
+      var notFoundUserRef = AggregateReference.<User, Integer>to(NOT_FOUND_USER_ID);
+      when(userWalletRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
+
+      // Actual
+      Executable actualExecutable =
+          () -> walletService.topUpConsumerWallet(NOT_FOUND_USER_ID, IDEMPOTENCY_KEY, body);
+
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
 
