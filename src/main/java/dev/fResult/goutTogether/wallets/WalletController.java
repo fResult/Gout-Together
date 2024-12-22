@@ -37,7 +37,7 @@ public class WalletController {
     return ResponseEntity.ok(walletService.getConsumerWalletByUserId(Integer.parseInt(userId)));
   }
 
-  // User -> Top-up (Assume doing via application, bank deduct on the background)
+  // User -> Top-up (Assume doing via application, bank deduct in the background)
   @PostMapping("/top-up")
   public ResponseEntity<UserWalletInfoResponse> topUpUserWallet(
       @Validated @RequestBody WalletTopUpRequest body,
