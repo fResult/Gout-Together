@@ -174,7 +174,7 @@ class WalletServiceTest {
               TransactionType.TOP_UP,
               IDEMPOTENCY_KEY);
       var expectedUpdatedUserWallet =
-          UserWalletInfoResponse.of(USER_WALLET_ID, USER_ID, mockUserWallet.balance());
+          UserWalletInfoResponse.of(USER_WALLET_ID, USER_ID, CURRENT_BALANCE);
 
       when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserWallet));
       when(transactionRepository.findOneByIdempotentKey(anyString()))
@@ -185,6 +185,7 @@ class WalletServiceTest {
           walletService.topUpConsumerWallet(USER_ID, IDEMPOTENCY_KEY, body);
 
       // Assert
+      assertEquals(expectedUpdatedUserWallet, actualUpdatedUserWallet);
     }
 
     @Test
