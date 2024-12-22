@@ -369,4 +369,54 @@ class WalletServiceTest {
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
+
+  @Nested
+  class TransferMoneyForBookingTest {
+    private final int USER_ID = 1;
+    private final int COMPANY_ID = 2;
+    private final BigDecimal AMOUNT = BigDecimal.valueOf(100);
+    private final BigDecimal USER_BALANCE = BigDecimal.valueOf(200);
+    private final BigDecimal COMPANY_BALANCE = BigDecimal.valueOf(300);
+    private final BigDecimal USER_BALANCE_AFTER_TRANSFER = USER_BALANCE.subtract(AMOUNT);
+    private final BigDecimal COMPANY_BALANCE_AFTER_TRANSFER = COMPANY_BALANCE.add(AMOUNT);
+
+    private UserWallet buildMockUserWallet(int userId) {
+      return UserWallet.of(
+          USER_WALLET_ID, AggregateReference.to(userId), Instant.now(), USER_BALANCE);
+    }
+
+    private TourCompanyWallet buildMockCompanyWallet(int tourCompanyId) {
+      return TourCompanyWallet.of(
+          1,
+          AggregateReference.to(tourCompanyId),
+          Instant.now().minus(30, ChronoUnit.HOURS),
+          COMPANY_BALANCE);
+    }
+
+    @Test
+    void thenSuccess() {
+      // Arrange
+      var userRef = AggregateReference.<User, Integer>to(USER_ID);
+      var companyRef = AggregateReference.<TourCompany, Integer>to(COMPANY_ID);
+      var userWalletInput = buildMockUserWallet(USER_ID);
+      var mockCompanyWalletInput = buildMockCompanyWallet(COMPANY_ID);
+      var expectedUserWallet =
+          UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), USER_BALANCE_AFTER_TRANSFER);
+      var expectedCompanyWallet =
+          TourCompanyWallet.of(1, companyRef, Instant.now(), COMPANY_BALANCE_AFTER_TRANSFER);
+
+      when(userWalletRepository.save(any(UserWallet.class))).thenReturn(expectedUserWallet);
+      when(tourCompanyWalletRepository.save(any(TourCompanyWallet.class)))
+          .thenReturn(expectedCompanyWallet);
+
+      // Actual
+      var actualWallets =
+          walletService.transferMoney(
+              userWalletInput, mockCompanyWalletInput, AMOUNT, TransactionType.BOOKING);
+
+      // Assert
+      assertEquals(expectedUserWallet, actualWallets.getFirst());
+      assertEquals(expectedCompanyWallet, actualWallets.getSecond());
+    }
+  }
 }
