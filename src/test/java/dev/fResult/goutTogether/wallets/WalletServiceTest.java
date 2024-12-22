@@ -81,7 +81,7 @@ class WalletServiceTest {
   }
 
   @Test
-  void whenFindConsumerWalletThenSuccess() {
+  void whenGetConsumerWalletThenSuccess() {
     // Arrange
     var USER_ID = 1;
     var userRef = AggregateReference.<User, Integer>to(USER_ID);
@@ -99,7 +99,7 @@ class WalletServiceTest {
   }
 
   @Test
-  void whenFindConsumerWalletButNotFoundThenThrowEntityNotFoundException() {
+  void whenGetConsumerWalletButNotFoundThenThrowEntityNotFoundException() {
     // Arrange
     var NOT_FOUND_USER_ID = 99999;
     var expectedErrorMessage =
