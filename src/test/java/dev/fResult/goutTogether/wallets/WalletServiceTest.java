@@ -122,21 +122,42 @@ class WalletServiceTest {
     private final int USER_ID = 1;
     private final int NOT_FOUND_USER_ID = 99999;
     private final BigDecimal AMOUNT = BigDecimal.valueOf(100);
+    private final BigDecimal CURRENT_BALANCE = BigDecimal.ZERO;
+    private final BigDecimal BALANCE_TO_UPDATE = CURRENT_BALANCE.add(AMOUNT);
     private final String IDEMPOTENCY_KEY = UUIDV7.randomUUID().toString();
+
+    private UserWallet buildUserWallet(BigDecimal balance) {
+      return UserWallet.of(
+          USER_WALLET_ID,
+          AggregateReference.to(USER_ID),
+          Instant.now().minus(1, ChronoUnit.DAYS),
+          balance);
+    }
+
+    private Transaction buildTopUpTransaction(
+        int userId, int tourCompanyId, int bookingId, BigDecimal amount) {
+
+      return Transaction.of(
+          1,
+          AggregateReference.<User, Integer>to(userId),
+          AggregateReference.<TourCompany, Integer>to(tourCompanyId),
+          AggregateReference.<Booking, Integer>to(bookingId),
+          Instant.now().minusSeconds(10),
+          amount,
+          TransactionType.TOP_UP,
+          IDEMPOTENCY_KEY);
+    }
 
     @Test
     void thenSuccess() {
       // Arrange
       var body = WalletTopUpRequest.of(AMOUNT);
       var userRef = AggregateReference.<User, Integer>to(USER_ID);
-      var mockUserWallet =
-          UserWallet.of(
-              USER_WALLET_ID, userRef, Instant.now().minus(1, ChronoUnit.DAYS), BigDecimal.ZERO);
-      var balanceToUpdate = mockUserWallet.balance().add(AMOUNT);
+      var mockUserWallet = buildUserWallet(CURRENT_BALANCE);
       var mockUpdatedUserWallet =
-          UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), balanceToUpdate);
+          UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), BALANCE_TO_UPDATE);
       var expectedUpdatedUserWallet =
-          UserWalletInfoResponse.of(USER_WALLET_ID, USER_ID, balanceToUpdate);
+          UserWalletInfoResponse.of(USER_WALLET_ID, USER_ID, BALANCE_TO_UPDATE);
 
       when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserWallet));
       when(transactionRepository.findOneByIdempotentKey(anyString())).thenReturn(Optional.empty());
@@ -155,24 +176,8 @@ class WalletServiceTest {
       // Arrange
       var body = WalletTopUpRequest.of(AMOUNT);
       var userRef = AggregateReference.<User, Integer>to(USER_ID);
-      var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(1);
-      var bookingRef = AggregateReference.<Booking, Integer>to(1);
-      var mockUserWallet =
-          UserWallet.of(
-              USER_WALLET_ID,
-              userRef,
-              Instant.now().minus(1, ChronoUnit.DAYS),
-              BigDecimal.valueOf(200));
-      var mockTransaction =
-          Transaction.of(
-              1,
-              userRef,
-              tourCompanyRef,
-              bookingRef,
-              Instant.now().minusSeconds(10),
-              AMOUNT,
-              TransactionType.TOP_UP,
-              IDEMPOTENCY_KEY);
+      var mockUserWallet = buildUserWallet(CURRENT_BALANCE);
+      var mockTransaction = buildTopUpTransaction(USER_ID, 1, 1, AMOUNT);
       var expectedUpdatedUserWallet =
           UserWalletInfoResponse.of(USER_WALLET_ID, USER_ID, CURRENT_BALANCE);
 
