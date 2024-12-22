@@ -7,13 +7,17 @@ import static org.mockito.Mockito.*;
 import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.common.enumurations.BookingStatus;
 import dev.fResult.goutTogether.common.enumurations.TourStatus;
+import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.utils.UUIDV7;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tours.entities.Tour;
 import dev.fResult.goutTogether.tours.services.TourService;
+import dev.fResult.goutTogether.transactions.Transaction;
+import dev.fResult.goutTogether.transactions.TransactionRepository;
 import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.wallets.dtos.UserWalletInfoResponse;
+import dev.fResult.goutTogether.wallets.dtos.WalletTopUpRequest;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
 import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import dev.fResult.goutTogether.wallets.repositories.TourCompanyWalletRepository;
@@ -42,6 +46,7 @@ class WalletServiceTest {
   @Mock UserWalletRepository userWalletRepository;
   @Mock TourCompanyWalletRepository tourCompanyWalletRepository;
   @Mock TourService tourService;
+  @Mock TransactionRepository transactionRepository;
 
   @Test
   void whenCreateConsumerWalletThenSuccess() {
@@ -110,6 +115,39 @@ class WalletServiceTest {
 
     // Assert
     assertEquals(mockCreatedCompanyWallet, actualCreatedWallet);
+  }
+
+  @Nested
+  class TopUpConsumerWalletTest {
+    private final int USER_ID = 1;
+    private final BigDecimal AMOUNT = BigDecimal.valueOf(100);
+    private final String IDEMPOTENCY_KEY = UUIDV7.randomUUID().toString();
+
+    @Test
+    void thenSuccess() {
+      // Arrange
+      var body = WalletTopUpRequest.of(AMOUNT);
+      var userRef = AggregateReference.<User, Integer>to(USER_ID);
+      var mockUserWallet =
+          UserWallet.of(
+              USER_WALLET_ID, userRef, Instant.now().minus(1, ChronoUnit.DAYS), BigDecimal.ZERO);
+      var balanceToUpdate = mockUserWallet.balance().add(AMOUNT);
+      var mockUpdatedUserWallet =
+          UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), balanceToUpdate);
+      var expectedUpdatedUserWallet =
+          UserWalletInfoResponse.of(USER_WALLET_ID, USER_ID, balanceToUpdate);
+
+      when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserWallet));
+      when(transactionRepository.findOneByIdempotentKey(anyString())).thenReturn(Optional.empty());
+      when(userWalletRepository.save(any(UserWallet.class))).thenReturn(mockUpdatedUserWallet);
+
+      // Actual
+      var actualUpdatedUserWallet =
+          walletService.topUpConsumerWallet(USER_ID, IDEMPOTENCY_KEY, body);
+
+      // Assert
+      assertEquals(expectedUpdatedUserWallet, actualUpdatedUserWallet);
+    }
   }
 
   @Test
