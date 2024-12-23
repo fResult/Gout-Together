@@ -15,6 +15,7 @@ import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserUpdateRequest;
+import dev.fResult.goutTogether.users.entities.User;
 import dev.fResult.goutTogether.users.services.UserService;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,12 +79,11 @@ public class UserSelfManagedControllerTest {
   @Test
   void whenUpdateMyUserThenSuccess() throws Exception {
     // Arrange
-    var email = "john.w@example.com";
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, email);
+    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
     var LAST_NAME_TO_UPDATE = "Utah";
     var body = UserUpdateRequest.of(null, LAST_NAME_TO_UPDATE, null);
     var expectedUpdatedUserInfo =
-        UserInfoResponse.of(USER_ID, "John", LAST_NAME_TO_UPDATE, email, "0999999999");
+        UserInfoResponse.of(USER_ID, "John", LAST_NAME_TO_UPDATE, EMAIL, "0999999999");
     when(userService.updateUserById(USER_ID, body)).thenReturn(expectedUpdatedUserInfo);
 
     // Actual
@@ -104,8 +104,7 @@ public class UserSelfManagedControllerTest {
   @Test
   void whenUpdateMyUserButNotFoundThenReturn404() throws Exception {
     // Arrange
-    var email = "john.w@example.com";
-    var authentication = buildAuthentication(NOT_FOUND_USER_ID, UserRoleName.CONSUMER, email);
+    var authentication = buildAuthentication(NOT_FOUND_USER_ID, UserRoleName.CONSUMER, EMAIL);
     var body = UserUpdateRequest.of(null, "Utah", null);
     when(userService.updateUserById(NOT_FOUND_USER_ID, body))
         .thenThrow(EntityNotFoundException.class);
@@ -125,7 +124,6 @@ public class UserSelfManagedControllerTest {
   @Test
   void whenChangeMyPasswordThenSuccess() throws Exception {
     // Arrange
-    var USER_ID = 1;
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
     var body = UserChangePasswordRequest.of("0ldP@ssw0rd", "NewP@ssw0rd");
     var expectedUpdatePasswordResult = UpdatePasswordResult.SUCCESS;
@@ -148,7 +146,6 @@ public class UserSelfManagedControllerTest {
   @Test
   void whenChangeMyPasswordButCredentialNotFoundThenReturn404() throws Exception {
     // Arrange
-    var USER_ID = 1;
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
     var body = UserChangePasswordRequest.of("0ldP@ssw0rd", "NewP@ssw0rd");
 
