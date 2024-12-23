@@ -233,6 +233,25 @@ public class UserControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").value(expectedUpdatePasswordResult.name()));
   }
+
+  @Test
+  void whenChangePasswordButCredentialNotFoundThenReturn404() throws Exception {
+    // Arrange
+    var body = UserChangePasswordRequest.of("0ldP@$$w@rd", "N3wP@$$w0rd");
+    when(userService.changePasswordByUserId(anyInt(), any(UserChangePasswordRequest.class)))
+        .thenThrow(EntityNotFoundException.class);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            patch(USER_API + "/{id}/password", NOT_FOUND_USER_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    resultActions.andExpect(status().isNotFound());
+  }
+
   @Test
   void whenDeleteUserByIdThenSuccess() throws Exception {
     // Arrange
