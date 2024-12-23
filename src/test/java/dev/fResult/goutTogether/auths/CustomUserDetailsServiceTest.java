@@ -54,18 +54,19 @@ class CustomUserDetailsServiceTest {
   }
 
   @Test
-  void whenLoadCompanyDetailsByUsernameButNotFoundThenThrowException() {
+  void whenLoadCompanyDetailsByUsernameButCompanyNotFoundThenThrowException() {
     // Arrange
-    var USERNAME = "DisasterTour";
+    var NOT_FOUND_USERNAME = "NonExistentCompany";
     var expectedErrorMessage =
         String.format(
-            "%s with username [%s] not found", TourCompanyLogin.class.getSimpleName(), USERNAME);
+            "%s with username [%s] not found",
+            TourCompanyLogin.class.getSimpleName(), NOT_FOUND_USERNAME);
 
     when(tourCompanyLoginRepository.findOneByUsername(anyString())).thenReturn(Optional.empty());
 
     // Actual
     Executable actualLoadedCompanyDetails =
-        () -> customUserDetailsService.loadUserByUsername(USERNAME);
+        () -> customUserDetailsService.loadUserByUsername(NOT_FOUND_USERNAME);
 
     // Assert
     var exception = assertThrowsExactly(EntityNotFoundException.class, actualLoadedCompanyDetails);
