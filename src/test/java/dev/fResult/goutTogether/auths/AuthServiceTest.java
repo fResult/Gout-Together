@@ -58,7 +58,7 @@ class AuthServiceTest {
         List.of(NOT_FOUND_USER_ID_2, USER_ID_1, NOT_FOUND_USER_ID_1, USER_ID_3);
 
     @Test
-    void whenFindUserCredentialsByUserIdsThenSuccess() {
+    void byUserIdsThenSuccess() {
       // Arrange
       var mockUserLogin1 =
           UserLogin.of(
@@ -81,7 +81,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void whenFindUserCredentialsByUserIdsButSomeAreNotFoundThenThrowEntityNotFoundException() {
+    void byUserIdsButSomeAreNotFoundThenThrowEntityNotFoundException() {
       // Arrange
       var expectedErrorMessage =
           String.format( // TODO: Refactor this part to a ErrorMessageHelper's method
@@ -111,7 +111,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void whenFindUserCredentialByUserIdThenSuccess() {
+    void byUserIdThenSuccess() {
       // Arrange
       var mockUserLogin =
           UserLogin.of(
@@ -127,7 +127,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void whenFindUserCredentialByUserIdButNotFoundThenThrowException() {
+    void byUserIdButNotFoundThenThrowException() {
       // Arrange
       var expectedErrorMessage =
           String.format(
@@ -147,7 +147,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void whenFindUserCredentialByEmailThenSuccess() {
+    void byEmailThenSuccess() {
       // Arrange
       var mockUserLogin =
           UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, ENCRYPTED_PASSWORD);
@@ -163,7 +163,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void whenFindUserCredentialByEmailButNotFoundThenReturnEmpty() {
+    void byEmailButNotFoundThenReturnEmpty() {
       // Arrange
       when(userLoginRepository.findOneByEmail(NOT_FOUND_EMAIL)).thenReturn(Optional.empty());
 
@@ -178,7 +178,7 @@ class AuthServiceTest {
   @Nested
   class CreateUserCredentialTest {
     @Test
-    void whenCreateUserCredentialThenSuccess() {
+    void thenSuccess() {
       // Arrange
       var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
       var mockUserLoginToCreate = UserLogin.of(1, userRef, TARGET_EMAIL, ENCRYPTED_PASSWORD);
@@ -198,7 +198,7 @@ class AuthServiceTest {
   @Nested
   class DeleteUserCredentialTest {
     @Test
-    void whenDeleteUserCredentialByIdThenSuccess() {
+    void byIdThenSuccess() {
       // Arrange
       var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
       var mockCredentialToDelete = UserLogin.of(1, userRef, "email@example.com", "password");
@@ -214,7 +214,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void whenDeleteUserCredentialByIdButNotFoundThenThrowException() {
+    void byIdButNotFoundThenThrowException() {
       // Arrange
       var expectedErrorMessage =
           String.format(
@@ -245,7 +245,7 @@ class AuthServiceTest {
   @Nested
   class FindTourCompanyCredentialTest {
     @Test
-    void whenFindCompanyCredentialByUsernameThenSuccess() {
+    void byUsernameThenSuccess() {
       // Arrange
       var mockTourCompanyLogin =
           TourCompanyLogin.of(1, AggregateReference.to(1), TARGET_USERNAME, ENCRYPTED_PASSWORD);
@@ -262,7 +262,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void whenFindCompanyCredentialByUsernameButNotFoundThenReturnEmpty() {
+    void byUsernameButNotFoundThenReturnEmpty() {
       // Arrange
       when(tourCompanyLoginRepository.findOneByUsername(NOT_FOUND_USERNAME))
           .thenReturn(Optional.empty());
@@ -276,7 +276,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void whenFindCompanyCredentialByCompanyIdThenSuccess() {
+    void byCompanyIdThenSuccess() {
       // Arrange
       AggregateReference<TourCompany, Integer> tourCompanyRef =
           AggregateReference.to(TOUR_COMPANY_ID);
@@ -294,7 +294,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void whenFindCompanyCredentialByCompanyIdButNotFoundThenThrowException() {
+    void byCompanyIdButNotFoundThenThrowException() {
       // Arrange
       var expectedErrorMessage =
           String.format(
@@ -319,7 +319,7 @@ class AuthServiceTest {
   @Nested
   class CreateTourCompanyLoginTest {
     @Test
-    void whenCreateCompanyLoginThenSuccess() {
+    void thenSuccess() {
       // Arrange
       var companyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
       var mockCompanyLoginToCreate =
@@ -341,7 +341,7 @@ class AuthServiceTest {
   @Nested
   class DeleteCompanyLoginTest {
     @Test
-    void whenDeleteCompanyLoginByIdThenSuccess() {
+    void thenSuccess() {
       // Arrange
       var companyRef = AggregateReference.<TourCompany, Integer>to(USER_ID_1);
       var mockCompanyLoginToDelete =
@@ -359,7 +359,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void whenDeleteCompanyLoginByIdButNotFoundThenThrowException() {
+    void byIdButNotFoundThenThrowException() {
       // Arrange
       var expectedErrorMessage =
           String.format(
