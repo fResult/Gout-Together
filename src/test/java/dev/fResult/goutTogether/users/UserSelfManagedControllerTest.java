@@ -177,4 +177,21 @@ public class UserSelfManagedControllerTest {
     // Assert
     resultActions.andExpect(status().isOk()).andExpect(jsonPath("$").value(expectedDeleteResult));
   }
+
+  @Test
+  void whenDeleteMyUserButUserNotFoundThenReturn404() throws Exception {
+    // Arrange
+    var authentication = buildAuthentication(NOT_FOUND_USER_ID, UserRoleName.CONSUMER, EMAIL);
+    var expectedDeleteResult =
+        String.format(
+            "Delete %s by id [%d] successfully", User.class.getSimpleName(), NOT_FOUND_USER_ID);
+
+    when(userService.deleteUserById(NOT_FOUND_USER_ID)).thenThrow(EntityNotFoundException.class);
+
+    // Actual
+    var resultActions = mockMvc.perform(delete(MY_USER_API).principal(authentication));
+
+    // Assert
+    resultActions.andExpect(status().isNotFound());
+  }
 }
