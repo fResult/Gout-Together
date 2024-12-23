@@ -76,6 +76,29 @@ class CustomUserDetailsServiceTest {
     var exception = assertThrowsExactly(EntityNotFoundException.class, actualLoadedUserDetails);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
+
+  @Test
+  void whenLoadUserDetailsByUsernameButUserRoleNotFoundThenThrowException() {
+    // Arrange
+    var NOT_FOUND_USER_ID = 99999;
+    var expectedErrorMessage =
+        String.format(
+            "%s with userId [%d] not found", UserLogin.class.getSimpleName(), NOT_FOUND_USER_ID);
+    var HASHED_PASSWORD = "H@shedP@ssw0rd";
+    var userRef = AggregateReference.<User, Integer>to(NOT_FOUND_USER_ID);
+    var mockUserLogin = UserLogin.of(1, userRef, EMAIL, HASHED_PASSWORD);
+
+    when(userLoginRepository.findOneByEmail(anyString())).thenReturn(Optional.of(mockUserLogin));
+    when(userRoleRepository.findOneByUserId(mockUserLogin.userId())).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualLoadedUserDetails = () -> customUserDetailsService.loadUserByUsername(EMAIL);
+
+    // Assert
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualLoadedUserDetails);
+    assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
   @Test
   void whenLoadCompanyDetailsByUsernameSuccess() {
     // Arrange
