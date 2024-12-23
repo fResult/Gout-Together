@@ -4,18 +4,21 @@ import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
 import static dev.fResult.goutTogether.common.Constants.ROLES_CLAIM;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
+import dev.fResult.goutTogether.users.dtos.UserUpdateRequest;
 import dev.fResult.goutTogether.users.services.UserService;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -63,5 +66,32 @@ public class UserSelfManagedControllerTest {
 
     // Assert
     resultActions.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(USER_ID));
+  }
+
+  @Test
+  void whenUpdateMyUserThenSuccess() throws Exception {
+    // Arrange
+    var USER_ID = 1;
+    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
+    var LAST_NAME_TO_UPDATE = "Utah";
+    var body = UserUpdateRequest.of(null, LAST_NAME_TO_UPDATE, null);
+    var expectedUpdatedUserInfo =
+        UserInfoResponse.of(
+            USER_ID, "John", LAST_NAME_TO_UPDATE, "john.w@example.com", "0999999999");
+    when(userService.updateUserById(USER_ID, body)).thenReturn(expectedUpdatedUserInfo);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            patch(MY_USER_API)
+                .principal(authentication)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(USER_ID))
+        .andExpect(jsonPath("$.lastName").value(LAST_NAME_TO_UPDATE));
   }
 }
