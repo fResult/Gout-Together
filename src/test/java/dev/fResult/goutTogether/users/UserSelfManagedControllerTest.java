@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
 import dev.fResult.goutTogether.users.dtos.UserUpdateRequest;
 import dev.fResult.goutTogether.users.services.UserService;
@@ -93,5 +94,26 @@ public class UserSelfManagedControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(USER_ID))
         .andExpect(jsonPath("$.lastName").value(LAST_NAME_TO_UPDATE));
+  }
+
+  @Test
+  void whenUpdateMyUserButNotFoundThenReturn404() throws Exception {
+    // Arrange
+    var NOT_FOUND_USER_ID = 99999;
+    var authentication = buildAuthentication(NOT_FOUND_USER_ID, UserRoleName.CONSUMER);
+    var body = UserUpdateRequest.of(null, "Utah", null);
+    when(userService.updateUserById(NOT_FOUND_USER_ID, body)).thenThrow(EntityNotFoundException.class);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            patch(MY_USER_API)
+                .principal(authentication)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    resultActions
+        .andExpect(status().isNotFound());
   }
 }
