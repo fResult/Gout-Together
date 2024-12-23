@@ -43,11 +43,13 @@ class AuthServiceTest {
   private final List<Integer> USER_IDS = List.of(USER_ID_1, USER_ID_2, USER_ID_3);
   private final String TARGET_EMAIL = "target@email.com";
   private final String NOT_FOUND_EMAIL = "in_existing@email.com";
+  private final String PASSWORD = "P@$$w0rd";
 
   private final int TOUR_COMPANY_ID = 1;
   private final int NOT_FOUND_TOUR_COMPANY_ID = 99999;
   private final String TARGET_USERNAME = "target_username";
   private final String NOT_FOUND_USERNAME = "in_existing_username";
+  private final String NOT_MATCHED_PASSWORD = "wrong_password";
 
   private final String ENCRYPTED_PASSWORD =
       "$argon2id$v=19$m=16384,t=2,p=1$NDMxQRhx/yCgg2uNT4GMfA$DZEh4+dJNDDtv8DHxvw7Tm1rXSHWlG/Wxf8S/rrAtTI";
@@ -172,6 +174,22 @@ class AuthServiceTest {
 
       // Assert
       assertTrue(actualFoundUserLogin.isEmpty());
+    }
+
+    @Test
+    void byEmailAndPasswordThenSuccess() {
+      // Arrange
+      var mockUserLogin =
+          UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, ENCRYPTED_PASSWORD);
+      when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
+      when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+
+      // Actual
+      var actualFoundUserLogin =
+          authService.findUserCredentialByEmailAndPassword(TARGET_EMAIL, PASSWORD);
+
+      // Assert
+      assertEquals(Optional.of(mockUserLogin), actualFoundUserLogin);
     }
   }
 
