@@ -37,15 +37,38 @@ class CustomUserDetailsServiceTest {
   @Mock private TourCompanyLoginRepository tourCompanyLoginRepository;
 
   @Test
-  void whenLoadUserDetailsByEmailSuccess() {
+  void whenLoadUserAdminDetailsByEmailSuccess() {
     // Arrange
     var USER_ID = 1;
-    var ROLE = UserRoleName.CONSUMER;
+    var ROLE = UserRoleName.ADMIN;
     var HASHED_PASSWORD = "H@shedP@ssw0rd";
     var userRef = AggregateReference.<User, Integer>to(USER_ID);
     var roleRef = AggregateReference.<Role, Integer>to(ROLE.getId());
     var mockUserLogin = UserLogin.of(1, userRef, EMAIL, HASHED_PASSWORD);
     var mockUserRole = UserRole.of(1, userRef, roleRef);
+    var expectedAuthenticatedUser = AuthenticatedUser.of(USER_ID, EMAIL, HASHED_PASSWORD, ROLE);
+
+    when(userLoginRepository.findOneByEmail(anyString())).thenReturn(Optional.of(mockUserLogin));
+    when(userRoleRepository.findOneByUserId(mockUserLogin.userId()))
+        .thenReturn(Optional.of(mockUserRole));
+
+    // Actual
+    var actualLoadedUserDetails = customUserDetailsService.loadUserByUsername(EMAIL);
+
+    // Assert
+    assertEquals(expectedAuthenticatedUser, actualLoadedUserDetails);
+  }
+
+  @Test
+  void whenLoadUserConsumerDetailsByEmailSuccess() {
+    // Arrange
+    var USER_ID = 2;
+    var ROLE = UserRoleName.CONSUMER;
+    var HASHED_PASSWORD = "H@shedP@ssw0rd";
+    var userRef = AggregateReference.<User, Integer>to(USER_ID);
+    var roleRef = AggregateReference.<Role, Integer>to(ROLE.getId());
+    var mockUserLogin = UserLogin.of(2, userRef, EMAIL, HASHED_PASSWORD);
+    var mockUserRole = UserRole.of(2, userRef, roleRef);
     var expectedAuthenticatedUser = AuthenticatedUser.of(USER_ID, EMAIL, HASHED_PASSWORD, ROLE);
 
     when(userLoginRepository.findOneByEmail(anyString())).thenReturn(Optional.of(mockUserLogin));
