@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.fResult.goutTogether.auths.dtos.UserChangePasswordRequest;
+import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
 import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
@@ -211,6 +213,26 @@ public class UserControllerTest {
     resultActions.andExpect(status().isConflict());
   }
 
+  @Test
+  void whenChangePasswordThenSuccess() throws Exception {
+    // Arrange
+    var body = Map.of("oldPassword", "old-password", "newPassword", "new-password");
+    var expectedUpdatePasswordResult = UpdatePasswordResult.SUCCESS;
+    when(userService.changePasswordByUserId(anyInt(), any(UserChangePasswordRequest.class)))
+        .thenReturn(expectedUpdatePasswordResult);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            patch(USER_API + "/{id}/password", USER_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").value(expectedUpdatePasswordResult.name()));
+  }
   @Test
   void whenDeleteUserByIdThenSuccess() throws Exception {
     // Arrange
