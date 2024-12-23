@@ -144,4 +144,25 @@ public class UserSelfManagedControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").value(expectedUpdatePasswordResult.name()));
   }
+
+  @Test
+  void whenChangeMyPasswordButCredentialNotFoundThenReturn404() throws Exception {
+    // Arrange
+    var USER_ID = 1;
+    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    var body = UserChangePasswordRequest.of("0ldP@ssw0rd", "NewP@ssw0rd");
+
+    when(userService.changePassword(EMAIL, body)).thenThrow(EntityNotFoundException.class);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            patch(MY_USER_API + "/password")
+                .principal(authentication)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    resultActions.andExpect(status().isNotFound());
+  }
 }
