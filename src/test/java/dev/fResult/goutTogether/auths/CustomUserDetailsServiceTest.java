@@ -29,6 +29,7 @@ import org.springframework.data.jdbc.core.mapping.AggregateReference;
 
 @ExtendWith(MockitoExtension.class)
 class CustomUserDetailsServiceTest {
+  private final String EMAIL = "user1@example.com";
 
   @InjectMocks private CustomUserDetailsService customUserDetailsService;
   @Mock private UserRoleRepository userRoleRepository;
@@ -38,7 +39,6 @@ class CustomUserDetailsServiceTest {
   @Test
   void whenLoadUserDetailsByEmailSuccess() {
     // Arrange
-    var EMAIL = "user1@example.com";
     var USER_ID = 1;
     var ROLE = UserRoleName.CONSUMER;
     var HASHED_PASSWORD = "H@shedP@ssw0rd";
@@ -59,6 +59,23 @@ class CustomUserDetailsServiceTest {
     assertEquals(expectedAuthenticatedUser, actualLoadedUserDetails);
   }
 
+  @Test
+  void whenLoadUserDetailsByUsernameButUserNotFoundThenThrowException() {
+    // Arrange
+    var NOT_FOUND_EMAIL = "in_existing@email.com";
+    var expectedErrorMessage =
+        String.format(
+            "%s with email [%s] not found", UserLogin.class.getSimpleName(), NOT_FOUND_EMAIL);
+    when(userLoginRepository.findOneByEmail(anyString())).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualLoadedUserDetails =
+        () -> customUserDetailsService.loadUserByUsername(NOT_FOUND_EMAIL);
+
+    // Assert
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualLoadedUserDetails);
+    assertEquals(expectedErrorMessage, exception.getMessage());
+  }
   @Test
   void whenLoadCompanyDetailsByUsernameSuccess() {
     // Arrange
