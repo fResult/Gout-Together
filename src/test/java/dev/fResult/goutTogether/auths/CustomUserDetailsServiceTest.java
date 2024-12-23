@@ -7,12 +7,16 @@ import static org.mockito.Mockito.when;
 
 import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
+import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.repositories.UserLoginRepository;
 import dev.fResult.goutTogether.auths.services.CustomUserDetailsService;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
+import dev.fResult.goutTogether.users.entities.Role;
+import dev.fResult.goutTogether.users.entities.User;
+import dev.fResult.goutTogether.users.entities.UserRole;
 import dev.fResult.goutTogether.users.repositories.UserRoleRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -30,6 +34,30 @@ class CustomUserDetailsServiceTest {
   @Mock private UserRoleRepository userRoleRepository;
   @Mock private UserLoginRepository userLoginRepository;
   @Mock private TourCompanyLoginRepository tourCompanyLoginRepository;
+
+  @Test
+  void whenLoadUserDetailsByEmailSuccess() {
+    // Arrange
+    var EMAIL = "user1@example.com";
+    var USER_ID = 1;
+    var ROLE = UserRoleName.CONSUMER;
+    var HASHED_PASSWORD = "H@shedP@ssw0rd";
+    var userRef = AggregateReference.<User, Integer>to(USER_ID);
+    var roleRef = AggregateReference.<Role, Integer>to(ROLE.getId());
+    var mockUserLogin = UserLogin.of(1, userRef, EMAIL, HASHED_PASSWORD);
+    var mockUserRole = UserRole.of(1, userRef, roleRef);
+    var expectedAuthenticatedUser = AuthenticatedUser.of(USER_ID, EMAIL, HASHED_PASSWORD, ROLE);
+
+    when(userLoginRepository.findOneByEmail(anyString())).thenReturn(Optional.of(mockUserLogin));
+    when(userRoleRepository.findOneByUserId(mockUserLogin.userId()))
+        .thenReturn(Optional.of(mockUserRole));
+
+    // Actual
+    var actualLoadedUserDetails = customUserDetailsService.loadUserByUsername(EMAIL);
+
+    // Assert
+    assertEquals(expectedAuthenticatedUser, actualLoadedUserDetails);
+  }
 
   @Test
   void whenLoadCompanyDetailsByUsernameSuccess() {
