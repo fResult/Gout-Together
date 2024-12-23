@@ -191,6 +191,19 @@ class AuthServiceTest {
       // Assert
       assertEquals(Optional.of(mockUserLogin), actualFoundUserLogin);
     }
+
+    @Test
+    void byEmailAndPasswordButNotFoundThenReturnEmpty() {
+      // Arrange
+      when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.empty());
+
+      // Actual
+      var actualFoundUserLogin =
+          authService.findUserCredentialByEmailAndPassword(TARGET_EMAIL, PASSWORD);
+
+      // Assert
+      assertEquals(Optional.empty(), actualFoundUserLogin);
+    }
   }
 
   @Nested
