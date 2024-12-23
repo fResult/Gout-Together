@@ -26,7 +26,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -257,6 +256,24 @@ class UserServiceTest {
 
     // Assert
     assertEquals(expectedChangedPassword, actualChangedPassword);
+  }
+
+  @Test()
+  void whenChangePasswordByUserIdButUserNotFoundThenSuccess() {
+    // Arrange
+    var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
+    var expectedErrorMessage =
+        String.format("%s password is in correct", User.class.getSimpleName());
+
+    when(authService.updateUserPasswordByUserId(anyInt(), anyString(), anyString()))
+        .thenThrow(new EntityNotFoundException(expectedErrorMessage));
+
+    // Actual
+    Executable actualExecutable = () -> userService.changePasswordByUserId(USER_ID, body);
+
+    // Assert
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test()
