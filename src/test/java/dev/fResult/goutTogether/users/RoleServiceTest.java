@@ -75,4 +75,18 @@ class RoleServiceTest {
     // Assert
     assertTrue(actualDeleteResult);
   }
+
+  @Test
+  void whenDeleteUserRoleByUserIdButNotFoundThenThrowException() {
+    // Arrange
+    var USER_ID = 1;
+    var userRef = AggregateReference.<User, Integer>to(USER_ID);
+    when(userRoleRepository.findOneByUserId(userRef)).thenReturn(Optional.empty());
+
+    // Actual
+    var actualDeleteResult = roleService.deleteUserRoleByUserId(USER_ID);
+
+    // Assert
+    assertFalse(actualDeleteResult);
+  }
 }
