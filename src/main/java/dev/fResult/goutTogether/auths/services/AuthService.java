@@ -22,7 +22,7 @@ public interface AuthService {
 
   UserLogin updateUserPasswordByUserId(int userId, String oldPassword, String newPassword);
 
-  UserLogin updateUserPassword(String email, String oldPassword, String newPassword);
+  UserLogin updateUserPasswordByEmail(String email, String oldPassword, String newPassword);
 
   boolean deleteUserCredentialByUserId(int userId);
 

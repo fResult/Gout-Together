@@ -126,7 +126,7 @@ public class UserSelfManagedControllerTest {
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
     var body = UserChangePasswordRequest.of("0ldP@ssw0rd", "NewP@ssw0rd");
     var expectedUpdatePasswordResult = UpdatePasswordResult.SUCCESS;
-    when(userService.changePassword(EMAIL, body)).thenReturn(expectedUpdatePasswordResult);
+    when(userService.changePasswordByEmail(EMAIL, body)).thenReturn(expectedUpdatePasswordResult);
 
     // Actual
     var resultActions =
@@ -148,7 +148,7 @@ public class UserSelfManagedControllerTest {
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
     var body = UserChangePasswordRequest.of("0ldP@ssw0rd", "NewP@ssw0rd");
 
-    when(userService.changePassword(EMAIL, body)).thenThrow(EntityNotFoundException.class);
+    when(userService.changePasswordByEmail(EMAIL, body)).thenThrow(EntityNotFoundException.class);
 
     // Actual
     var resultActions =

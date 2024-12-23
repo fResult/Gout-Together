@@ -19,7 +19,7 @@ public interface UserService {
 
   UpdatePasswordResult changePasswordByUserId(int id, UserChangePasswordRequest body);
 
-  UpdatePasswordResult changePassword(String email, UserChangePasswordRequest body);
+  UpdatePasswordResult changePasswordByEmail(String email, UserChangePasswordRequest body);
 
   boolean deleteUserById(int id);
 }

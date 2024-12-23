@@ -146,7 +146,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public UserLogin updateUserPassword(String email, String oldPassword, String newPassword) {
+  public UserLogin updateUserPasswordByEmail(String email, String oldPassword, String newPassword) {
     var userCredential =
         findUserCredentialByEmailAndPassword(email, oldPassword)
             .orElseThrow(

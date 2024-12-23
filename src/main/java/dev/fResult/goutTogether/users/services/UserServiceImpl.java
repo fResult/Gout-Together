@@ -111,10 +111,10 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UpdatePasswordResult changePassword(String email, UserChangePasswordRequest body) {
+  public UpdatePasswordResult changePasswordByEmail(String email, UserChangePasswordRequest body) {
     logger.debug("[changePassword] {} email {} is updating", User.class.getSimpleName(), email);
     var updatedUserCredential =
-        authService.updateUserPassword(email, body.oldPassword(), body.newPassword());
+        authService.updateUserPasswordByEmail(email, body.oldPassword(), body.newPassword());
 
     logger.info(
         "[changePassword] {} id [{}] is updated",
