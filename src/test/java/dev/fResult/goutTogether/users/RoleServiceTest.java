@@ -1,11 +1,14 @@
 package dev.fResult.goutTogether.users;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.users.entities.Role;
+import dev.fResult.goutTogether.users.entities.UserRole;
 import dev.fResult.goutTogether.users.repositories.RoleRepository;
+import dev.fResult.goutTogether.users.repositories.UserRoleRepository;
 import dev.fResult.goutTogether.users.services.RoleService;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
@@ -13,11 +16,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
 
 @ExtendWith(MockitoExtension.class)
 class RoleServiceTest {
   @InjectMocks private RoleService roleService;
+
   @Mock private RoleRepository roleRepository;
+  @Mock private UserRoleRepository userRoleRepository;
 
   @Test
   void shouldReturnRoles() {
@@ -31,5 +37,22 @@ class RoleServiceTest {
 
     assertEquals(mockRoles.size(), actualRoles.size());
     assertEquals(mockRoles, actualRoles);
+  }
+
+  @Test
+  void whenBindNewUserRoleThenSuccess() {
+    // Arrange
+    var USER_ID = 1;
+    var ROLE = UserRoleName.CONSUMER;
+    var mockUserRole =
+        UserRole.of(1, AggregateReference.to(USER_ID), AggregateReference.to(ROLE.getId()));
+
+    when(userRoleRepository.save(any(UserRole.class))).thenReturn(mockUserRole);
+
+    // Actual
+    var actualUserRole = roleService.bindNewUser(USER_ID, ROLE);
+
+    // Assert
+    assertEquals(mockUserRole, actualUserRole);
   }
 }
