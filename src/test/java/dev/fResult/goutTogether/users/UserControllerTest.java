@@ -121,7 +121,7 @@ public class UserControllerTest {
     var resultActions =
         mockMvc.perform(
             post(USER_API)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(body)));
 
     // Assert
@@ -139,7 +139,7 @@ public class UserControllerTest {
     var resultActions =
         mockMvc.perform(
             post(USER_API)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(body)));
 
     // Assert
@@ -162,7 +162,7 @@ public class UserControllerTest {
     var resultActions =
         mockMvc.perform(
             patch(USER_API + "/{id}", USER_ID)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(body)));
 
     // Assert
@@ -184,7 +184,7 @@ public class UserControllerTest {
     var resultActions =
         mockMvc.perform(
             patch(USER_API + "/{id}", NOT_FOUND_USER_ID)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(body)));
 
     // Assert
@@ -204,7 +204,7 @@ public class UserControllerTest {
     var resultActions =
         mockMvc.perform(
             post(USER_API)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(body)));
 
     // Assert
