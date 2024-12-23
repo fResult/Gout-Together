@@ -26,7 +26,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.Disabled;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -242,10 +242,23 @@ class UserServiceTest {
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
-  // TODO: Handle this test
-  @Disabled("Test not implemented yet.")
   @Test()
-  void whenChangePasswordThenSuccess() {
+  void whenChangePasswordByUserIdThenSuccess() {
+    // Arrange
+    var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
+    var mockUserCredential = buildUserCredential(USER_ID, EXISTING_EMAIL);
+    var expectedChangedPassword = UpdatePasswordResult.SUCCESS;
+
+    when(authService.updateUserPasswordByUserId(anyInt(), anyString(), anyString()))
+        .thenReturn(mockUserCredential);
+
+    // Actual
+    var actualChangedPassword = userService.changePasswordByUserId(USER_ID, body);
+
+    // Assert
+    assertEquals(expectedChangedPassword, actualChangedPassword);
+  }
+
   @Test()
   void whenChangePasswordByEmailThenSuccess() {
     // Arrange
