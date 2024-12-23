@@ -30,7 +30,11 @@ import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(UserSelfManagedController.class)
 public class UserSelfManagedControllerTest {
-  private static final String MY_USER_API = "/api/v1/me";
+  private final String MY_USER_API = "/api/v1/me";
+  private final int USER_ID = 1;
+  private final int NOT_FOUND_USER_ID = 99999;
+  private final String EMAIL = "john.w@example.com";
+  private final String NOT_FOUND_EMAIL = "in_existing@email.com";
 
   @Autowired private WebApplicationContext webApplicationContext;
   @Autowired private ObjectMapper objectMapper;
@@ -44,10 +48,11 @@ public class UserSelfManagedControllerTest {
     mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
   }
 
-  private Authentication buildAuthentication(int resourceId, UserRoleName roleName) {
+  private Authentication buildAuthentication(int resourceId, UserRoleName roleName, String email) {
     var jwt =
         Jwt.withTokenValue("token")
             .header("alg", "none")
+            .claim("sub", email)
             .claim(RESOURCE_ID_CLAIM, String.valueOf(resourceId))
             .claim(ROLES_CLAIM, List.of("ROLE_" + roleName.name()))
             .build();
@@ -57,10 +62,9 @@ public class UserSelfManagedControllerTest {
   @Test
   void whenGetMyUserThenSuccess() throws Exception {
     // Arrange
-    var USER_ID = 1;
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
+    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
     when(userService.getUserById(USER_ID))
-        .thenReturn(UserInfoResponse.of(USER_ID, "John", "Wick", "john.w@email.com", "0999999999"));
+        .thenReturn(UserInfoResponse.of(USER_ID, "John", "Wick", EMAIL, "0999999999"));
 
     // Actual
     var resultActions = mockMvc.perform(get(MY_USER_API).principal(authentication));
@@ -72,13 +76,12 @@ public class UserSelfManagedControllerTest {
   @Test
   void whenUpdateMyUserThenSuccess() throws Exception {
     // Arrange
-    var USER_ID = 1;
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
+    var email = "john.w@example.com";
+    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, email);
     var LAST_NAME_TO_UPDATE = "Utah";
     var body = UserUpdateRequest.of(null, LAST_NAME_TO_UPDATE, null);
     var expectedUpdatedUserInfo =
-        UserInfoResponse.of(
-            USER_ID, "John", LAST_NAME_TO_UPDATE, "john.w@example.com", "0999999999");
+        UserInfoResponse.of(USER_ID, "John", LAST_NAME_TO_UPDATE, email, "0999999999");
     when(userService.updateUserById(USER_ID, body)).thenReturn(expectedUpdatedUserInfo);
 
     // Actual
@@ -99,10 +102,11 @@ public class UserSelfManagedControllerTest {
   @Test
   void whenUpdateMyUserButNotFoundThenReturn404() throws Exception {
     // Arrange
-    var NOT_FOUND_USER_ID = 99999;
-    var authentication = buildAuthentication(NOT_FOUND_USER_ID, UserRoleName.CONSUMER);
+    var email = "john.w@example.com";
+    var authentication = buildAuthentication(NOT_FOUND_USER_ID, UserRoleName.CONSUMER, email);
     var body = UserUpdateRequest.of(null, "Utah", null);
-    when(userService.updateUserById(NOT_FOUND_USER_ID, body)).thenThrow(EntityNotFoundException.class);
+    when(userService.updateUserById(NOT_FOUND_USER_ID, body))
+        .thenThrow(EntityNotFoundException.class);
 
     // Actual
     var resultActions =
@@ -112,6 +116,9 @@ public class UserSelfManagedControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(body)));
 
+    // Assert
+    resultActions.andExpect(status().isNotFound());
+  }
     // Assert
     resultActions
         .andExpect(status().isNotFound());
