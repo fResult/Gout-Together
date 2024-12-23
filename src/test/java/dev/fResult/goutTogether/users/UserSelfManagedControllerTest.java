@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.fResult.goutTogether.auths.dtos.UserChangePasswordRequest;
+import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
@@ -119,8 +121,27 @@ public class UserSelfManagedControllerTest {
     // Assert
     resultActions.andExpect(status().isNotFound());
   }
+
+  @Test
+  void whenChangeMyPasswordThenSuccess() throws Exception {
+    // Arrange
+    var USER_ID = 1;
+    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    var body = UserChangePasswordRequest.of("0ldP@ssw0rd", "NewP@ssw0rd");
+    var expectedUpdatePasswordResult = UpdatePasswordResult.SUCCESS;
+    when(userService.changePassword(EMAIL, body)).thenReturn(expectedUpdatePasswordResult);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            patch(MY_USER_API + "/password")
+                .principal(authentication)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)));
+
     // Assert
     resultActions
-        .andExpect(status().isNotFound());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").value(expectedUpdatePasswordResult.name()));
   }
 }
