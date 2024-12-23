@@ -3,8 +3,7 @@ package dev.fResult.goutTogether.users;
 import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
 import static dev.fResult.goutTogether.common.Constants.ROLES_CLAIM;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -161,5 +160,21 @@ public class UserSelfManagedControllerTest {
 
     // Assert
     resultActions.andExpect(status().isNotFound());
+  }
+
+  @Test
+  void whenDeleteMyUserThenSuccess() throws Exception {
+    // Arrange
+    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    var expectedDeleteResult =
+        String.format("Delete %s by id [%d] successfully", User.class.getSimpleName(), USER_ID);
+
+    when(userService.deleteUserById(USER_ID)).thenReturn(true);
+
+    // Actual
+    var resultActions = mockMvc.perform(delete(MY_USER_API).principal(authentication));
+
+    // Assert
+    resultActions.andExpect(status().isOk()).andExpect(jsonPath("$").value(expectedDeleteResult));
   }
 }
