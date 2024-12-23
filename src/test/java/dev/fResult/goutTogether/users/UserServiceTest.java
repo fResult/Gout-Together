@@ -259,7 +259,7 @@ class UserServiceTest {
   }
 
   @Test()
-  void whenChangePasswordByUserIdButUserNotFoundThenSuccess() {
+  void whenChangePasswordByUserIdButUserNotFoundThenReturn404() {
     // Arrange
     var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
     var expectedErrorMessage =
@@ -290,6 +290,24 @@ class UserServiceTest {
 
     // Assert
     assertEquals(expectedChangedPassword, actualChangedPassword);
+  }
+
+  @Test()
+  void whenChangePasswordByEmailButUserNotFoundThenReturn404() {
+    // Arrange
+    var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
+    var expectedErrorMessage =
+        String.format("%s password is in correct", User.class.getSimpleName());
+
+    when(authService.updateUserPasswordByEmail(anyString(), anyString(), anyString()))
+        .thenThrow(new EntityNotFoundException(expectedErrorMessage));
+
+    // Actual
+    Executable actualExecutable = () -> userService.changePasswordByEmail(EXISTING_EMAIL, body);
+
+    // Assert
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test
