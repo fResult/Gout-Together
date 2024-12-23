@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import dev.fResult.goutTogether.auths.dtos.UserChangePasswordRequest;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.services.AuthService;
+import dev.fResult.goutTogether.common.enumurations.UpdatePasswordResult;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
@@ -48,6 +50,10 @@ class UserServiceTest {
   @Mock private AuthService authService;
   @Mock private WalletService walletService;
   @Mock private RoleService roleService;
+
+  private UserLogin buildUserCredential(int userId, String email) {
+    return UserLogin.of(10, AggregateReference.to(userId), email, "encryptedPassword");
+  }
 
   @Test
   void whenGetUsersThenSuccess() {
@@ -240,11 +246,20 @@ class UserServiceTest {
   @Disabled("Test not implemented yet.")
   @Test()
   void whenChangePasswordThenSuccess() {
+  @Test()
+  void whenChangePasswordByEmailThenSuccess() {
     // Arrange
+    var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
+    var mockUserCredential = buildUserCredential(USER_ID, EXISTING_EMAIL);
+    var expectedChangedPassword = UpdatePasswordResult.SUCCESS;
+    when(authService.updateUserPasswordByEmail(anyString(), anyString(), anyString()))
+        .thenReturn(mockUserCredential);
 
     // Actual
+    var actualChangedPassword = userService.changePasswordByEmail(EXISTING_EMAIL, body);
 
     // Assert
+    assertEquals(expectedChangedPassword, actualChangedPassword);
   }
 
   @Test

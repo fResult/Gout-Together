@@ -55,7 +55,7 @@ public class UserSelfManagedController {
     logger.debug(
         "[changePassword] Changing {} password by email [{}]", User.class.getSimpleName(), email);
 
-    return ResponseEntity.ok(userService.changePassword(email, body));
+    return ResponseEntity.ok(userService.changePasswordByEmail(email, body));
   }
 
   @DeleteMapping
