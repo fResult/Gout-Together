@@ -546,7 +546,7 @@ class AuthServiceTest {
   }
 
   @Test
-  void whenRefreshConsumerTokenThenRefreshTokenAlreadyExpired() {
+  void whenRefreshConsumerTokenThenRefreshTokenAlreadyExpiredThenThrowException() {
     // Arrange
     var ROLE = UserRoleName.CONSUMER;
     var REFRESH_TOKEN = UUIDV7.randomUUID().toString();
