@@ -73,6 +73,10 @@ class AuthServiceTest {
     return UserLogin.of(id, AggregateReference.to(userId), TARGET_EMAIL, ENCRYPTED_PASSWORD);
   }
 
+  private TourCompanyLogin buildTourCompanyLogin(int id, int companyId) {
+    return TourCompanyLogin.of(id, AggregateReference.to(companyId), TARGET_USERNAME, ENCRYPTED_PASSWORD);
+  }
+
   @Nested
   class FindUserCredentialTest {
     private final List<Integer> SOME_NOT_FOUND_USER_IDS =
@@ -229,8 +233,8 @@ class AuthServiceTest {
     @Test
     void thenSuccess() {
       // Arrange
-      var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
-      var mockUserLoginToCreate = UserLogin.of(1, userRef, TARGET_EMAIL, ENCRYPTED_PASSWORD);
+      var mockUserLoginToCreate = buildUserLogin(1, USER_ID_1);
+
       when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
       when(userLoginRepository.save(any(UserLogin.class))).thenReturn(mockUserLoginToCreate);
 
@@ -250,7 +254,7 @@ class AuthServiceTest {
     void byIdThenSuccess() {
       // Arrange
       var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
-      var mockCredentialToDelete = UserLogin.of(1, userRef, "email@example.com", "password");
+      var mockCredentialToDelete = buildUserLogin(1, USER_ID_1);
       doReturn(mockCredentialToDelete).when(authService).findUserCredentialByUserId(anyInt());
       doNothing().when(userLoginRepository).delete(any(UserLogin.class));
 
@@ -296,8 +300,7 @@ class AuthServiceTest {
     @Test
     void byUsernameThenSuccess() {
       // Arrange
-      var mockTourCompanyLogin =
-          TourCompanyLogin.of(1, AggregateReference.to(1), TARGET_USERNAME, ENCRYPTED_PASSWORD);
+      var mockTourCompanyLogin = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
       when(tourCompanyLoginRepository.findOneByUsername(TARGET_USERNAME))
           .thenReturn(Optional.of(mockTourCompanyLogin));
 
@@ -329,8 +332,8 @@ class AuthServiceTest {
       // Arrange
       AggregateReference<TourCompany, Integer> tourCompanyRef =
           AggregateReference.to(TOUR_COMPANY_ID);
-      var mockTourCompanyLogin =
-          TourCompanyLogin.of(1, tourCompanyRef, "MyTour", ENCRYPTED_PASSWORD);
+      var mockTourCompanyLogin = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
+
       when(tourCompanyLoginRepository.findOneByTourCompanyId(tourCompanyRef))
           .thenReturn(Optional.of(mockTourCompanyLogin));
 
@@ -371,8 +374,8 @@ class AuthServiceTest {
     void thenSuccess() {
       // Arrange
       var companyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
-      var mockCompanyLoginToCreate =
-          TourCompanyLogin.of(1, companyRef, "MyTour", ENCRYPTED_PASSWORD);
+      var mockCompanyLoginToCreate = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
+
       when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
       when(tourCompanyLoginRepository.save(any(TourCompanyLogin.class)))
           .thenReturn(mockCompanyLoginToCreate);
@@ -393,8 +396,7 @@ class AuthServiceTest {
     void thenSuccess() {
       // Arrange
       var companyRef = AggregateReference.<TourCompany, Integer>to(USER_ID_1);
-      var mockCompanyLoginToDelete =
-          TourCompanyLogin.of(1, companyRef, "MyTour", ENCRYPTED_PASSWORD);
+      var mockCompanyLoginToDelete = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
       doReturn(mockCompanyLoginToDelete)
           .when(authService)
           .findTourCompanyCredentialByTourCompanyId(anyInt());
@@ -448,8 +450,7 @@ class AuthServiceTest {
     var accessToken = "access_token";
     var authenticatedUser = AuthenticatedUser.of(USER_ID_1, TARGET_EMAIL, ENCRYPTED_PASSWORD, ROLE);
     var mockAuthentication = new UsernamePasswordAuthenticationToken(authenticatedUser, PASSWORD);
-    var mockUserLogin =
-        UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, ENCRYPTED_PASSWORD);
+    var mockUserLogin = buildUserLogin(1, USER_ID_1);
     var mockRefreshToken = RefreshToken.of(1, refreshToken, Instant.now(), ROLE, USER_ID_1, false);
     var expectedLoggedInResp = LoginResponse.of(USER_ID_1, TOKEN_TYPE, accessToken, refreshToken);
 
@@ -485,10 +486,6 @@ class AuthServiceTest {
 
       return RefreshToken.of(
           REFRESH_TOKEN_ID, refreshToken, Instant.now(), role, resourceId, false);
-    }
-
-    private TourCompanyLogin buildCompanyLogin(int companyId) {
-      return TourCompanyLogin.of(1, AggregateReference.to(companyId), "MyTour", ENCRYPTED_PASSWORD);
     }
 
     @Test
@@ -583,7 +580,7 @@ class AuthServiceTest {
       var mockCurrentRefreshToken = buildCurrentRefreshToken(REFRESH_TOKEN, ROLE, TOUR_COMPANY_ID);
       var mockRotatedRefreshToken =
           buildRotatedRefreshToken(ROTATED_REFRESH_TOKEN, ROLE, TOUR_COMPANY_ID);
-      var mockTourCompanyLogin = buildCompanyLogin(TOUR_COMPANY_ID);
+      var mockTourCompanyLogin = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
       var expectedLoggedInResp =
           LoginResponse.of(TOUR_COMPANY_ID, TOKEN_TYPE, NEW_ACCESS_TOKEN, ROTATED_REFRESH_TOKEN);
 
