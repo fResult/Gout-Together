@@ -584,6 +584,41 @@ class AuthServiceTest {
       var exception = assertThrowsExactly(RefreshTokenExpiredException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
+
+    @Test
+    void ofTourCompanyAndTokenIsRotatedThenSuccess() {
+      // Arrange
+      var ROLE = UserRoleName.COMPANY;
+      var ROTATED_REFRESH_TOKEN = UUIDV7.randomUUID().toString();
+      var NEW_ACCESS_TOKEN = "new_access_token";
+      var body = RefreshTokenRequest.of(ROLE, TOUR_COMPANY_ID, REFRESH_TOKEN);
+      var mockCurrentRefreshToken = buildCurrentRefreshToken(REFRESH_TOKEN, ROLE, TOUR_COMPANY_ID);
+      var mockRotatedRefreshToken =
+          buildRotatedRefreshToken(ROTATED_REFRESH_TOKEN, ROLE, TOUR_COMPANY_ID);
+      var mockTourCompanyLogin =
+          TourCompanyLogin.of(1, AggregateReference.to(TOUR_COMPANY_ID), TARGET_EMAIL, PASSWORD);
+      var expectedLoggedInResp =
+          LoginResponse.of(TOUR_COMPANY_ID, TOKEN_TYPE, NEW_ACCESS_TOKEN, ROTATED_REFRESH_TOKEN);
+
+      when(refreshTokenRepository.findOneByToken(anyString()))
+          .thenReturn(Optional.of(mockCurrentRefreshToken));
+      when(tokenService.isRefreshTokenExpired(any(RefreshToken.class))).thenReturn(false);
+      doReturn(mockTourCompanyLogin)
+          .when(authService)
+          .findTourCompanyCredentialByTourCompanyId(anyInt());
+      when(tokenService.issueAccessToken(any(TourCompanyLogin.class), any(Instant.class)))
+          .thenReturn(NEW_ACCESS_TOKEN);
+      when(refreshTokenRepository.save(any(RefreshToken.class)))
+          .thenReturn(mockRotatedRefreshToken);
+      when(tokenService.rotateRefreshTokenIfNeed(any(RefreshToken.class)))
+          .thenReturn(ROTATED_REFRESH_TOKEN);
+
+      // Actual
+      var actualRefreshedToken = authService.refreshToken(body);
+
+      // Assert
+      assertEquals(expectedLoggedInResp, actualRefreshedToken);
+    }
     }
   }
 }
