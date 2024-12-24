@@ -1,17 +1,27 @@
 package dev.fResult.goutTogether.auths;
 
+import static dev.fResult.goutTogether.common.Constants.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
+import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
+import dev.fResult.goutTogether.auths.dtos.LoginRequest;
+import dev.fResult.goutTogether.auths.dtos.LoginResponse;
+import dev.fResult.goutTogether.auths.entities.RefreshToken;
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
+import dev.fResult.goutTogether.auths.repositories.RefreshTokenRepository;
 import dev.fResult.goutTogether.auths.repositories.UserLoginRepository;
 import dev.fResult.goutTogether.auths.services.AuthServiceImpl;
+import dev.fResult.goutTogether.auths.services.TokenService;
+import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
+import dev.fResult.goutTogether.common.utils.UUIDV7;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import dev.fResult.goutTogether.users.entities.User;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +34,9 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,8 +45,11 @@ class AuthServiceTest {
   @InjectMocks @Spy private AuthServiceImpl authService;
 
   @Mock private UserLoginRepository userLoginRepository;
+  @Mock private TokenService tokenService;
+  @Mock private AuthenticationManager authenticationManager;
   @Mock private TourCompanyLoginRepository tourCompanyLoginRepository;
   @Mock private PasswordEncoder passwordEncoder;
+  @Mock private RefreshTokenRepository refreshTokenRepository;
 
   private final int USER_ID_1 = 1;
   private final int USER_ID_2 = 3;
@@ -435,5 +451,35 @@ class AuthServiceTest {
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
+  }
+
+  @Test
+  void whenLoginByEmailThenSuccess() {
+    // Arrange
+    var ROLE = UserRoleName.CONSUMER;
+    var body = LoginRequest.of(TARGET_EMAIL, PASSWORD);
+    var refreshToken = UUIDV7.randomUUID().toString();
+    var accessToken = "access_token";
+    var authenticatedUser = AuthenticatedUser.of(USER_ID_1, TARGET_EMAIL, ENCRYPTED_PASSWORD, ROLE);
+    var mockAuthentication = new UsernamePasswordAuthenticationToken(authenticatedUser, PASSWORD);
+    var mockUserLogin =
+        UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, ENCRYPTED_PASSWORD);
+    var mockRefreshToken = RefreshToken.of(1, refreshToken, Instant.now(), ROLE, USER_ID_1, false);
+    var expectedLoggedInResp = LoginResponse.of(USER_ID_1, TOKEN_TYPE, accessToken, refreshToken);
+
+    when(authenticationManager.authenticate(any(Authentication.class)))
+        .thenReturn(mockAuthentication);
+    when(tokenService.issueAccessToken(any(AuthenticatedUser.class), any(Instant.class)))
+        .thenReturn(accessToken);
+    when(tokenService.issueRefreshToken()).thenReturn(refreshToken);
+    doReturn(true).when(authService).logout(any(AuthenticatedUser.class));
+    when(refreshTokenRepository.save(any(RefreshToken.class))).thenReturn(mockRefreshToken);
+
+    // Actual
+    var actualLoginResponse = authService.login(body);
+
+    // Assert
+    assertEquals(mockUserLogin.userId().getId(), actualLoginResponse.userId());
+    assertEquals(expectedLoggedInResp, actualLoginResponse);
   }
 }
