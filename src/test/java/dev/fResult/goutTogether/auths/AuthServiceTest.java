@@ -69,6 +69,10 @@ class AuthServiceTest {
   private final String ENCRYPTED_PASSWORD =
       "$argon2id$v=19$m=16384,t=2,p=1$NDMxQRhx/yCgg2uNT4GMfA$DZEh4+dJNDDtv8DHxvw7Tm1rXSHWlG/Wxf8S/rrAtTI";
 
+  private UserLogin buildUserLogin(int id, int userId) {
+    return UserLogin.of(id, AggregateReference.to(userId), TARGET_EMAIL, ENCRYPTED_PASSWORD);
+  }
+
   @Nested
   class FindUserCredentialTest {
     private final List<Integer> SOME_NOT_FOUND_USER_IDS =
@@ -77,15 +81,9 @@ class AuthServiceTest {
     @Test
     void byUserIdsThenSuccess() {
       // Arrange
-      var mockUserLogin1 =
-          UserLogin.of(
-              1, AggregateReference.to(USER_ID_1), "email1@example.com", ENCRYPTED_PASSWORD);
-      var mockUserLogin2 =
-          UserLogin.of(
-              2, AggregateReference.to(USER_ID_2), "email2@example.com", ENCRYPTED_PASSWORD);
-      var mockUserLogin3 =
-          UserLogin.of(
-              3, AggregateReference.to(USER_ID_3), "email3@example.com", ENCRYPTED_PASSWORD);
+      var mockUserLogin1 = buildUserLogin(1, USER_ID_1);
+      var mockUserLogin2 = buildUserLogin(2, USER_ID_2);
+      var mockUserLogin3 = buildUserLogin(3, USER_ID_3);
       var mockFoundUserLogins = List.of(mockUserLogin1, mockUserLogin2, mockUserLogin3);
 
       when(userLoginRepository.findByUserIdIn(anyList())).thenReturn(mockFoundUserLogins);
@@ -107,13 +105,8 @@ class AuthServiceTest {
               new HashSet<>(List.of(NOT_FOUND_USER_ID_2, NOT_FOUND_USER_ID_1))
                   .toString()
                   .replaceAll("[\\[\\]]", ""));
-      var mockUserLogin1 =
-          UserLogin.of(
-              1, AggregateReference.to(USER_ID_1), "email1@example.com", ENCRYPTED_PASSWORD);
-
-      var mockUserLogin3 =
-          UserLogin.of(
-              3, AggregateReference.to(USER_ID_3), "email3@example.com", ENCRYPTED_PASSWORD);
+      var mockUserLogin1 = buildUserLogin(1, USER_ID_1);
+      var mockUserLogin3 = buildUserLogin(3, USER_ID_3);
       var mockFoundUserLogins = List.of(mockUserLogin1, mockUserLogin3);
 
       when(userLoginRepository.findByUserIdIn(anyList())).thenReturn(mockFoundUserLogins);
@@ -130,9 +123,7 @@ class AuthServiceTest {
     @Test
     void byUserIdThenSuccess() {
       // Arrange
-      var mockUserLogin =
-          UserLogin.of(
-              1, AggregateReference.to(USER_ID_1), "email@example.com", ENCRYPTED_PASSWORD);
+      var mockUserLogin = buildUserLogin(1, USER_ID_1);
       var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
       when(userLoginRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserLogin));
 
@@ -166,9 +157,7 @@ class AuthServiceTest {
     @Test
     void byEmailThenSuccess() {
       // Arrange
-      var mockUserLogin =
-          UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, ENCRYPTED_PASSWORD);
-
+      var mockUserLogin = buildUserLogin(1, USER_ID_1);
       when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
 
       // Actual
@@ -194,8 +183,7 @@ class AuthServiceTest {
     @Test
     void byEmailAndPasswordThenSuccess() {
       // Arrange
-      var mockUserLogin =
-          UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, ENCRYPTED_PASSWORD);
+      var mockUserLogin = buildUserLogin(1, USER_ID_1);
       when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
       when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
@@ -223,8 +211,7 @@ class AuthServiceTest {
     @Test
     void byEmailAndPasswordButPasswordNotMatchedThenReturnEmpty() {
       // Arrange
-      var mockUserLogin =
-          UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, ENCRYPTED_PASSWORD);
+      var mockUserLogin = buildUserLogin(1, USER_ID_1);
       when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
       when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
@@ -500,10 +487,6 @@ class AuthServiceTest {
           REFRESH_TOKEN_ID, refreshToken, Instant.now(), role, resourceId, false);
     }
 
-    private UserLogin buildUserLogin(int userId) {
-      return UserLogin.of(1, AggregateReference.to(userId), TARGET_EMAIL, PASSWORD);
-    }
-
     private TourCompanyLogin buildCompanyLogin(int companyId) {
       return TourCompanyLogin.of(1, AggregateReference.to(companyId), "MyTour", ENCRYPTED_PASSWORD);
     }
@@ -518,7 +501,7 @@ class AuthServiceTest {
       var mockCurrentRefreshToken = buildCurrentRefreshToken(REFRESH_TOKEN, ROLE, USER_ID_1);
       var mockRotatedRefreshToken =
           buildRotatedRefreshToken(ROTATED_REFRESH_TOKEN, ROLE, USER_ID_1);
-      var mockUserLogin = buildUserLogin(USER_ID_1);
+      var mockUserLogin = buildUserLogin(1, USER_ID_1);
       var expectedLoggedInResp =
           LoginResponse.of(USER_ID_1, TOKEN_TYPE, NEW_ACCESS_TOKEN, ROTATED_REFRESH_TOKEN);
 
@@ -547,7 +530,7 @@ class AuthServiceTest {
       var NEW_ACCESS_TOKEN = "new_access_token";
       var body = RefreshTokenRequest.of(ROLE, USER_ID_1, REFRESH_TOKEN);
       var mockRefreshToken = buildRotatedRefreshToken(REFRESH_TOKEN, ROLE, USER_ID_1);
-      var mockUserLogin = buildUserLogin(USER_ID_2);
+      var mockUserLogin = buildUserLogin(2, USER_ID_2);
       var expectedLoggedInResp =
           LoginResponse.of(USER_ID_1, TOKEN_TYPE, NEW_ACCESS_TOKEN, REFRESH_TOKEN);
 
