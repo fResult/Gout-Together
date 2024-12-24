@@ -495,8 +495,17 @@ class AuthServiceTest {
 
     private RefreshToken buildRotatedRefreshToken(
         String refreshToken, UserRoleName role, int resourceId) {
+
       return RefreshToken.of(
           REFRESH_TOKEN_ID, refreshToken, Instant.now(), role, resourceId, false);
+    }
+
+    private UserLogin buildUserLogin(int userId) {
+      return UserLogin.of(1, AggregateReference.to(userId), TARGET_EMAIL, PASSWORD);
+    }
+
+    private TourCompanyLogin buildCompanyLogin(int companyId) {
+      return TourCompanyLogin.of(1, AggregateReference.to(companyId), "MyTour", ENCRYPTED_PASSWORD);
     }
 
     @Test
@@ -509,7 +518,7 @@ class AuthServiceTest {
       var mockCurrentRefreshToken = buildCurrentRefreshToken(REFRESH_TOKEN, ROLE, USER_ID_1);
       var mockRotatedRefreshToken =
           buildRotatedRefreshToken(ROTATED_REFRESH_TOKEN, ROLE, USER_ID_1);
-      var mockUserLogin = UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, PASSWORD);
+      var mockUserLogin = buildUserLogin(USER_ID_1);
       var expectedLoggedInResp =
           LoginResponse.of(USER_ID_1, TOKEN_TYPE, NEW_ACCESS_TOKEN, ROTATED_REFRESH_TOKEN);
 
@@ -537,10 +546,8 @@ class AuthServiceTest {
       var ROLE = UserRoleName.CONSUMER;
       var NEW_ACCESS_TOKEN = "new_access_token";
       var body = RefreshTokenRequest.of(ROLE, USER_ID_1, REFRESH_TOKEN);
-      var mockRefreshToken =
-          RefreshToken.of(
-              1, REFRESH_TOKEN, Instant.now().minusSeconds(90), ROLE, body.resourceId(), false);
-      var mockUserLogin = UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, PASSWORD);
+      var mockRefreshToken = buildRotatedRefreshToken(REFRESH_TOKEN, ROLE, USER_ID_1);
+      var mockUserLogin = buildUserLogin(USER_ID_2);
       var expectedLoggedInResp =
           LoginResponse.of(USER_ID_1, TOKEN_TYPE, NEW_ACCESS_TOKEN, REFRESH_TOKEN);
 
@@ -565,9 +572,7 @@ class AuthServiceTest {
       // Arrange
       var ROLE = UserRoleName.CONSUMER;
       var body = RefreshTokenRequest.of(ROLE, USER_ID_1, REFRESH_TOKEN);
-      var mockRefreshToken =
-          RefreshToken.of(
-              1, REFRESH_TOKEN, Instant.now().minusSeconds(90), ROLE, body.resourceId(), false);
+      var mockRefreshToken = buildCurrentRefreshToken(REFRESH_TOKEN, ROLE, USER_ID_1);
       var expectedErrorMessage =
           String.format(
               "%s is already expired, please re-login", RefreshToken.class.getSimpleName());
@@ -595,8 +600,7 @@ class AuthServiceTest {
       var mockCurrentRefreshToken = buildCurrentRefreshToken(REFRESH_TOKEN, ROLE, TOUR_COMPANY_ID);
       var mockRotatedRefreshToken =
           buildRotatedRefreshToken(ROTATED_REFRESH_TOKEN, ROLE, TOUR_COMPANY_ID);
-      var mockTourCompanyLogin =
-          TourCompanyLogin.of(1, AggregateReference.to(TOUR_COMPANY_ID), TARGET_EMAIL, PASSWORD);
+      var mockTourCompanyLogin = buildCompanyLogin(TOUR_COMPANY_ID);
       var expectedLoggedInResp =
           LoginResponse.of(TOUR_COMPANY_ID, TOKEN_TYPE, NEW_ACCESS_TOKEN, ROTATED_REFRESH_TOKEN);
 
