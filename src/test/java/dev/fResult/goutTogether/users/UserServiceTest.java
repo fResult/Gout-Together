@@ -93,7 +93,7 @@ class UserServiceTest {
 
     when(userRepository.findByFirstNameContaining(anyString(), any(Pageable.class)))
         .thenReturn(mockUserPage);
-    when(authService.findUserCredentialsByUserIds(anyCollection())).thenReturn(mockUserCredentials);
+    when(authService.getUserCredentialsByUserIds(anyCollection())).thenReturn(mockUserCredentials);
 
     // Actual
     var actualUsersResp = userService.getUsersByFirstName("", PageRequest.of(0, 3));
@@ -115,7 +115,7 @@ class UserServiceTest {
             mockUser.lastName(),
             mockUserCredential.email(),
             mockUser.phoneNumber());
-    when(authService.findUserCredentialByUserId(anyInt())).thenReturn(mockUserCredential);
+    when(authService.getUserCredentialByUserId(anyInt())).thenReturn(mockUserCredential);
     when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
 
     // Actual
@@ -216,7 +216,7 @@ class UserServiceTest {
 
     when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockExistingUser));
     when(userRepository.save(any(User.class))).thenReturn(mockUpdatedUser);
-    when(authService.findUserCredentialByUserId(anyInt())).thenReturn(mockUserCredential);
+    when(authService.getUserCredentialByUserId(anyInt())).thenReturn(mockUserCredential);
 
     // Actual
     var actualUpdatedUser = userService.updateUserById(USER_ID, body);

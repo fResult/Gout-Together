@@ -63,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public List<UserLogin> findUserCredentialsByUserIds(Collection<Integer> userIds) {
+  public List<UserLogin> getUserCredentialsByUserIds(Collection<Integer> userIds) {
     logger.debug(
         "[findUserCredentialsByUserIds] Finding {}s by userIds: {}", UserLogin.class, userIds);
     var foundCredentials = userLoginRepository.findByUserIdIn(userIds);
@@ -79,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public UserLogin findUserCredentialByUserId(int userId) {
+  public UserLogin getUserCredentialByUserId(int userId) {
     logger.debug(
         "[findUserCredentialByUserId] Finding {} by {}: {}", UserLogin.class, "userId", userId);
 
@@ -130,7 +130,7 @@ public class AuthServiceImpl implements AuthService {
     Predicate<UserLogin> checkUserPassword =
         credential -> passwordEncoder.matches(oldPassword, credential.password());
     var userCredential =
-        Optional.of(findUserCredentialByUserId(userId))
+        Optional.of(getUserCredentialByUserId(userId))
             .filter(checkUserPassword)
             .orElseThrow(
                 () ->
@@ -166,7 +166,7 @@ public class AuthServiceImpl implements AuthService {
         "[deleteUserCredentialById] Deleting {} by id: {}",
         UserLogin.class.getSimpleName(),
         userId);
-    var credentialToDelete = findUserCredentialByUserId(userId);
+    var credentialToDelete = getUserCredentialByUserId(userId);
 
     userLoginRepository.delete(credentialToDelete);
     logger.info(
@@ -397,7 +397,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   private String issueUserAccessToken(int userId) {
-    var userCredential = findUserCredentialByUserId(userId);
+    var userCredential = getUserCredentialByUserId(userId);
     return tokenService.issueAccessToken(userCredential, Instant.now());
   }
 
