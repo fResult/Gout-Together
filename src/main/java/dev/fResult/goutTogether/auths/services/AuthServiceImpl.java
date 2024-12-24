@@ -316,7 +316,7 @@ public class AuthServiceImpl implements AuthService {
     var refreshTokenRotation = tokenService.rotateRefreshTokenIfNeed(refreshToken);
 
     if (!refreshTokenRotation.equals(refreshToken.token())) {
-      var refreshTokenToUpdate =
+      var refreshTokenToBeExpired =
           RefreshToken.of(
               refreshToken.id(),
               refreshToken.token(),
@@ -324,7 +324,7 @@ public class AuthServiceImpl implements AuthService {
               refreshToken.usage(),
               refreshToken.resourceId(),
               true);
-      refreshTokenRepository.save(refreshTokenToUpdate);
+      refreshTokenRepository.save(refreshTokenToBeExpired);
 
       var newRefreshToken =
           RefreshToken.of(
@@ -334,7 +334,10 @@ public class AuthServiceImpl implements AuthService {
               refreshToken.usage(),
               refreshToken.resourceId(),
               false);
-      refreshTokenRepository.save(newRefreshToken);
+      var rotatedRefreshToken = refreshTokenRepository.save(newRefreshToken);
+
+      return LoginResponse.of(
+          rotatedRefreshToken.resourceId(), TOKEN_TYPE, refreshedAccessToken, refreshTokenRotation);
     }
 
     return LoginResponse.of(
