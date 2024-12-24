@@ -619,6 +619,26 @@ class AuthServiceTest {
       // Assert
       assertEquals(expectedLoggedInResp, actualRefreshedToken);
     }
+
+    @Test
+    void butNotFoundThenThrowException() {
+      // Arrange
+      var ROLE = UserRoleName.CONSUMER;
+      var NOT_FOUND_REFRESH_TOKEN = "NOT_FOUND_TOKEN";
+      var body = RefreshTokenRequest.of(ROLE, USER_ID_1, NOT_FOUND_REFRESH_TOKEN);
+      var expectedErrorMessage =
+          String.format(
+              "%s with %s [%s] not found",
+              RefreshToken.class.getSimpleName(), "token", NOT_FOUND_REFRESH_TOKEN);
+
+      when(refreshTokenRepository.findOneByToken(anyString())).thenReturn(Optional.empty());
+
+      // Actual
+      Executable actualExecutable = () -> authService.refreshToken(body);
+
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
 }
