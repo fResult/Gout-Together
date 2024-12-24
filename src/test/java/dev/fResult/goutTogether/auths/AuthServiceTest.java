@@ -544,4 +544,29 @@ class AuthServiceTest {
     // Assert
     assertEquals(expectedLoggedInResp, actualRefreshedToken);
   }
+
+  @Test
+  void whenRefreshConsumerTokenThenRefreshTokenAlreadyExpired() {
+    // Arrange
+    var ROLE = UserRoleName.CONSUMER;
+    var REFRESH_TOKEN = UUIDV7.randomUUID().toString();
+    var body = RefreshTokenRequest.of(ROLE, USER_ID_1, REFRESH_TOKEN);
+    var mockRefreshToken =
+        RefreshToken.of(
+            1, REFRESH_TOKEN, Instant.now().minusSeconds(90), ROLE, body.resourceId(), false);
+    var expectedErrorMessage =
+        String.format("%s is already expired, please re-login", RefreshToken.class.getSimpleName());
+
+    when(refreshTokenRepository.findOneByToken(anyString()))
+        .thenReturn(Optional.of(mockRefreshToken));
+    when(tokenService.isRefreshTokenExpired(any(RefreshToken.class))).thenReturn(true);
+    doReturn(true).when(authService).logout(any(LogoutInfo.class));
+
+    // Actual
+    Executable actualExecutable = () -> authService.refreshToken(body);
+
+    // Assert
+    var exception = assertThrowsExactly(RefreshTokenExpiredException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
+  }
 }

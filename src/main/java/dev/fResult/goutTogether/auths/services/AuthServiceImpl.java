@@ -293,19 +293,7 @@ public class AuthServiceImpl implements AuthService {
 
     var resourceId = body.resourceId();
     var refreshTokenExpired = tokenService.isRefreshTokenExpired(refreshToken);
-    if (refreshTokenExpired) {
-      logger.info(
-          "[refreshToken] {} token [{}] is already expired, please re-login",
-          refreshToken.token(),
-          RefreshToken.class.getSimpleName());
-      var logoutInfo = LogoutInfo.of(resourceId, refreshToken.usage().name());
-      logout(logoutInfo);
-
-      throw new RefreshTokenExpiredException(
-          String.format(
-              "[refreshToken] %s is already expired, please re-login",
-              RefreshToken.class.getSimpleName()));
-    }
+    throwExceptionIfRefreshTokenExpired(refreshTokenExpired, refreshToken, resourceId);
 
     var refreshedAccessToken =
         switch (body.usage()) {
@@ -387,6 +375,25 @@ public class AuthServiceImpl implements AuthService {
       throw errorHelper
           .someEntitiesMissing("findUserCredentialsByUserIds", UserLogin.class, notFoundUserIds)
           .get();
+  }
+
+  private void throwExceptionIfRefreshTokenExpired(
+      boolean refreshTokenExpired, RefreshToken refreshToken, Integer resourceId) {
+
+    if (refreshTokenExpired) {
+      logger.info(
+          "[refreshToken] {} token [{}] is already expired, please re-login",
+          refreshToken.token(),
+          RefreshToken.class.getSimpleName());
+      var logoutInfo = LogoutInfo.of(resourceId, refreshToken.usage().name());
+      logout(logoutInfo);
+
+      logger.warn("[refreshToken] {} is already expired, please re-login", refreshToken.token());
+      throw new RefreshTokenExpiredException(
+          String.format(
+              "%s is already expired, please re-login",
+              RefreshToken.class.getSimpleName()));
+    }
   }
 
   private String issueUserAccessToken(int userId) {
