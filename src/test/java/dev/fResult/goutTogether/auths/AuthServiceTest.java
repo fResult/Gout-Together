@@ -484,25 +484,37 @@ class AuthServiceTest {
 
   @Nested
   class RefreshTokenTest {
+    private final int REFRESH_TOKEN_ID = 1;
+    private final String REFRESH_TOKEN = UUIDV7.randomUUID().toString();
+
+    private RefreshToken buildCurrentRefreshToken(
+        String refreshToken, UserRoleName role, int resourceId) {
+      return RefreshToken.of(
+          REFRESH_TOKEN_ID, refreshToken, Instant.now().minusSeconds(90), role, resourceId, false);
+    }
+
+    private RefreshToken buildRotatedRefreshToken(
+        String refreshToken, UserRoleName role, int resourceId) {
+      return RefreshToken.of(
+          REFRESH_TOKEN_ID, refreshToken, Instant.now(), role, resourceId, false);
+    }
+
     @Test
     void ofConsumerAndTokenIsRotatedThenSuccess() {
       // Arrange
       var ROLE = UserRoleName.CONSUMER;
-      var REFRESH_TOKEN = UUIDV7.randomUUID().toString();
       var ROTATED_REFRESH_TOKEN = UUIDV7.randomUUID().toString();
       var NEW_ACCESS_TOKEN = "new_access_token";
       var body = RefreshTokenRequest.of(ROLE, USER_ID_1, REFRESH_TOKEN);
-      var mockRefreshToken =
-          RefreshToken.of(
-              1, REFRESH_TOKEN, Instant.now().minusSeconds(90), ROLE, body.resourceId(), false);
+      var mockCurrentRefreshToken = buildCurrentRefreshToken(REFRESH_TOKEN, ROLE, USER_ID_1);
       var mockRotatedRefreshToken =
-          RefreshToken.of(1, ROTATED_REFRESH_TOKEN, Instant.now(), ROLE, USER_ID_1, false);
+          buildRotatedRefreshToken(ROTATED_REFRESH_TOKEN, ROLE, USER_ID_1);
       var mockUserLogin = UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, PASSWORD);
       var expectedLoggedInResp =
           LoginResponse.of(USER_ID_1, TOKEN_TYPE, NEW_ACCESS_TOKEN, ROTATED_REFRESH_TOKEN);
 
       when(refreshTokenRepository.findOneByToken(anyString()))
-          .thenReturn(Optional.of(mockRefreshToken));
+          .thenReturn(Optional.of(mockCurrentRefreshToken));
       when(tokenService.isRefreshTokenExpired(any(RefreshToken.class))).thenReturn(false);
       doReturn(mockUserLogin).when(authService).findUserCredentialByUserId(anyInt());
       when(tokenService.issueAccessToken(any(UserLogin.class), any(Instant.class)))
@@ -523,7 +535,6 @@ class AuthServiceTest {
     void ofConsumerThenReturnCurrentRefreshToken() {
       // Arrange
       var ROLE = UserRoleName.CONSUMER;
-      var REFRESH_TOKEN = UUIDV7.randomUUID().toString();
       var NEW_ACCESS_TOKEN = "new_access_token";
       var body = RefreshTokenRequest.of(ROLE, USER_ID_1, REFRESH_TOKEN);
       var mockRefreshToken =
@@ -553,7 +564,6 @@ class AuthServiceTest {
     void ofConsumerThenRefreshTokenAlreadyExpiredThenThrowException() {
       // Arrange
       var ROLE = UserRoleName.CONSUMER;
-      var REFRESH_TOKEN = UUIDV7.randomUUID().toString();
       var body = RefreshTokenRequest.of(ROLE, USER_ID_1, REFRESH_TOKEN);
       var mockRefreshToken =
           RefreshToken.of(
