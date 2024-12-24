@@ -10,9 +10,9 @@ import dev.fResult.goutTogether.auths.entities.UserLogin;
 import java.util.*;
 
 public interface AuthService {
-  List<UserLogin> findUserCredentialsByUserIds(Collection<Integer> userIds);
+  List<UserLogin> getUserCredentialsByUserIds(Collection<Integer> userIds);
 
-  UserLogin findUserCredentialByUserId(int userId);
+  UserLogin getUserCredentialByUserId(int userId);
 
   Optional<UserLogin> findUserCredentialByEmail(String userEmail);
 

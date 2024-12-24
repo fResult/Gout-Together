@@ -150,12 +150,12 @@ public class UserServiceImpl implements UserService {
   private Map<Integer, UserLogin> buildUserIdToCredentialMap(Page<User> userPage) {
     var userIds = buildUniqueUserIds(userPage);
 
-    return authService.findUserCredentialsByUserIds(userIds).stream()
+    return authService.getUserCredentialsByUserIds(userIds).stream()
         .collect(Collectors.toMap(cred -> cred.userId().getId(), Function.identity()));
   }
 
   private UserInfoResponse toResponseWithUserCredential(User user) {
-    var userCredential = authService.findUserCredentialByUserId(user.id());
+    var userCredential = authService.getUserCredentialByUserId(user.id());
 
     return UserInfoResponse.fromUserDao(user, userCredential);
   }

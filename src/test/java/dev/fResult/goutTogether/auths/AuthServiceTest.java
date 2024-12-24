@@ -92,7 +92,7 @@ class AuthServiceTest {
       when(userLoginRepository.findByUserIdIn(anyList())).thenReturn(mockFoundUserLogins);
 
       // Actual
-      var actualFoundUserLogins = authService.findUserCredentialsByUserIds(USER_IDS);
+      var actualFoundUserLogins = authService.getUserCredentialsByUserIds(USER_IDS);
 
       // Assert
       assertEquals(mockFoundUserLogins, actualFoundUserLogins);
@@ -116,7 +116,7 @@ class AuthServiceTest {
 
       // Actual
       Executable actualExecutable =
-          () -> authService.findUserCredentialsByUserIds(SOME_NOT_FOUND_USER_IDS);
+          () -> authService.getUserCredentialsByUserIds(SOME_NOT_FOUND_USER_IDS);
 
       // Assert
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
@@ -131,7 +131,7 @@ class AuthServiceTest {
       when(userLoginRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserLogin));
 
       // Actual
-      var actualFoundUserLogin = authService.findUserCredentialByUserId(USER_ID_1);
+      var actualFoundUserLogin = authService.getUserCredentialByUserId(USER_ID_1);
 
       // Assert
       assertEquals(mockUserLogin, actualFoundUserLogin);
@@ -150,7 +150,7 @@ class AuthServiceTest {
 
       // Actual
       Executable actualExecutable =
-          () -> authService.findUserCredentialByUserId(NOT_FOUND_USER_ID_1);
+          () -> authService.getUserCredentialByUserId(NOT_FOUND_USER_ID_1);
 
       // Assert
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
@@ -256,7 +256,7 @@ class AuthServiceTest {
         // Arrange
         var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
         var mockUserLoginToUpdate = UserLogin.of(1, userRef, TARGET_EMAIL, ENCRYPTED_PASSWORD);
-        doReturn(Optional.of(mockUserLoginToUpdate)).when(authService).findUserCredentialByUserId(anyInt());
+        doReturn(mockUserLoginToUpdate).when(authService).getUserCredentialByUserId(anyInt());
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
         when(userLoginRepository.save(any(UserLogin.class))).thenReturn(mockUserLoginToUpdate);
@@ -298,7 +298,7 @@ class AuthServiceTest {
       // Arrange
       var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
       var mockCredentialToDelete = buildUserLogin(1, USER_ID_1);
-      doReturn(mockCredentialToDelete).when(authService).findUserCredentialByUserId(anyInt());
+      doReturn(mockCredentialToDelete).when(authService).getUserCredentialByUserId(anyInt());
       doNothing().when(userLoginRepository).delete(any(UserLogin.class));
 
       // Actual
@@ -326,7 +326,7 @@ class AuthServiceTest {
                         UserLogin.class.getSimpleName(), "userId", targetUserId));
               })
           .when(authService)
-          .findUserCredentialByUserId(anyInt());
+          .getUserCredentialByUserId(anyInt());
 
       // Actual
       Executable actualExecutable =
@@ -548,7 +548,7 @@ class AuthServiceTest {
       when(refreshTokenRepository.findOneByToken(anyString()))
           .thenReturn(Optional.of(mockCurrentRefreshToken));
       when(tokenService.isRefreshTokenExpired(any(RefreshToken.class))).thenReturn(false);
-      doReturn(mockUserLogin).when(authService).findUserCredentialByUserId(anyInt());
+      doReturn(mockUserLogin).when(authService).getUserCredentialByUserId(anyInt());
       when(tokenService.issueAccessToken(any(UserLogin.class), any(Instant.class)))
           .thenReturn(NEW_ACCESS_TOKEN);
       when(refreshTokenRepository.save(any(RefreshToken.class)))
@@ -577,7 +577,7 @@ class AuthServiceTest {
       when(refreshTokenRepository.findOneByToken(anyString()))
           .thenReturn(Optional.of(mockRefreshToken));
       when(tokenService.isRefreshTokenExpired(any(RefreshToken.class))).thenReturn(false);
-      doReturn(mockUserLogin).when(authService).findUserCredentialByUserId(anyInt());
+      doReturn(mockUserLogin).when(authService).getUserCredentialByUserId(anyInt());
       when(tokenService.issueAccessToken(any(UserLogin.class), any(Instant.class)))
           .thenReturn(NEW_ACCESS_TOKEN);
       when(tokenService.rotateRefreshTokenIfNeed(any(RefreshToken.class)))
