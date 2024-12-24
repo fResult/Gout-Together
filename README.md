@@ -14,15 +14,23 @@ Course Code Example: <https://github.com/marttp/20240629-GoutTogether>
 ./gradlew clean build
 ```
 
-### Generate RSA Keypair
+### Environment Variables
 
-```shell
-openssl genrsa -out private_key.pem 4096
-openssl rsa -pubout -in private_key.pem -out public_key.pem
-openssl pkcs8 -topk8 -in private_key.pem -inform pem -out private_key_pkcs8.pem -outform pem -nocrypt
+#### Add Environment File
+
+```bash
+cp .envTemplate .env
 ```
 
-### To Assign Public/Private Key for Spring Security Config
+#### Generate RSA Keypair
+
+```shell
+openssl genrsa -out src/main/resources/private_key.pem 4096
+openssl rsa -pubout -in src/main/resources/private_key.pem -out src/main/resources/public_key.pem
+openssl pkcs8 -topk8 -in src/main/resources/private_key.pem -inform pem -out src/main/resources/private_key_pkcs8.pem -outform pem -nocrypt
+```
+
+#### To Assign Public/Private Key for Spring Security Config
 
 ```shell
 base64 -i src/main/resources/private_key_pkcs8.pem # Then put the Base64 text to the `OAUTH_PRIVATE_KEY_BASE64` env var
