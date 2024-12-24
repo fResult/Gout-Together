@@ -5,10 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
-import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
-import dev.fResult.goutTogether.auths.dtos.LoginRequest;
-import dev.fResult.goutTogether.auths.dtos.LoginResponse;
-import dev.fResult.goutTogether.auths.dtos.RefreshTokenRequest;
+import dev.fResult.goutTogether.auths.dtos.*;
 import dev.fResult.goutTogether.auths.entities.RefreshToken;
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
@@ -18,6 +15,7 @@ import dev.fResult.goutTogether.auths.services.AuthServiceImpl;
 import dev.fResult.goutTogether.auths.services.TokenService;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
+import dev.fResult.goutTogether.common.exceptions.RefreshTokenExpiredException;
 import dev.fResult.goutTogether.common.utils.UUIDV7;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
@@ -510,6 +508,35 @@ class AuthServiceTest {
     when(refreshTokenRepository.save(any(RefreshToken.class))).thenReturn(mockRotatedRefreshToken);
     when(tokenService.rotateRefreshTokenIfNeed(any(RefreshToken.class)))
         .thenReturn(ROTATED_REFRESH_TOKEN);
+
+    // Actual
+    var actualRefreshedToken = authService.refreshToken(body);
+
+    // Assert
+    assertEquals(expectedLoggedInResp, actualRefreshedToken);
+  }
+
+  @Test
+  void whenRefreshConsumerTokenThenReturnCurrentRefreshToken() {
+    // Arrange
+    var ROLE = UserRoleName.CONSUMER;
+    var REFRESH_TOKEN = UUIDV7.randomUUID().toString();
+    var NEW_ACCESS_TOKEN = "new_access_token";
+    var body = RefreshTokenRequest.of(ROLE, USER_ID_1, REFRESH_TOKEN);
+    var mockRefreshToken =
+        RefreshToken.of(
+            1, REFRESH_TOKEN, Instant.now().minusSeconds(90), ROLE, body.resourceId(), false);
+    var mockUserLogin = UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, PASSWORD);
+    var expectedLoggedInResp =
+        LoginResponse.of(USER_ID_1, TOKEN_TYPE, NEW_ACCESS_TOKEN, REFRESH_TOKEN);
+
+    when(refreshTokenRepository.findOneByToken(anyString()))
+        .thenReturn(Optional.of(mockRefreshToken));
+    when(tokenService.isRefreshTokenExpired(any(RefreshToken.class))).thenReturn(false);
+    doReturn(mockUserLogin).when(authService).findUserCredentialByUserId(anyInt());
+    when(tokenService.issueAccessToken(any(UserLogin.class), any(Instant.class)))
+        .thenReturn(NEW_ACCESS_TOKEN);
+    when(tokenService.rotateRefreshTokenIfNeed(any(RefreshToken.class))).thenReturn(REFRESH_TOKEN);
 
     // Actual
     var actualRefreshedToken = authService.refreshToken(body);
