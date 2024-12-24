@@ -269,6 +269,26 @@ class AuthServiceTest {
         assertEquals(ENCRYPTED_PASSWORD, mockUserLoginToUpdate.password());
         assertEquals(mockUserLoginToUpdate, actualUpdatedUserLogin);
     }
+
+    @Test
+    void byUserIdButNotFoundThenThrowException() {
+        // Arrange
+        var expectedErrorMessage =
+            String.format(
+                "%s with %s [%d] not found",
+                UserLogin.class.getSimpleName(), "userId", NOT_FOUND_USER_ID_1);
+        AggregateReference<User, Integer> notFoundUserRef =
+            AggregateReference.to(NOT_FOUND_USER_ID_1);
+        when(userLoginRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
+
+        // Actual
+        Executable actualExecutable =
+            () -> authService.updateUserPasswordByUserId(NOT_FOUND_USER_ID_1, PASSWORD, NEW_PASSWORD);
+
+        // Assert
+        var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+        assertEquals(expectedErrorMessage, exception.getMessage());
+    }
   }
 
   @Nested
