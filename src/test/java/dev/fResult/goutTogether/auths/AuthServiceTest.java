@@ -40,7 +40,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
-
   @InjectMocks @Spy private AuthServiceImpl authService;
 
   @Mock private UserLoginRepository userLoginRepository;
@@ -245,6 +244,30 @@ class AuthServiceTest {
       // Assert
       assertEquals(ENCRYPTED_PASSWORD, mockUserLoginToCreate.password());
       assertEquals(mockUserLoginToCreate, actualCreatedUserLogin);
+    }
+  }
+
+  @Nested
+  class UpdateUserPasswordTest {
+    private final String NEW_PASSWORD = "N3wP@$$w0rd";
+
+    @Test
+    void byUserIdThenSuccess() {
+        // Arrange
+        var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
+        var mockUserLoginToUpdate = UserLogin.of(1, userRef, TARGET_EMAIL, ENCRYPTED_PASSWORD);
+        doReturn(Optional.of(mockUserLoginToUpdate)).when(authService).findUserCredentialByUserId(anyInt());
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+        when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
+        when(userLoginRepository.save(any(UserLogin.class))).thenReturn(mockUserLoginToUpdate);
+
+        // Actual
+        var actualUpdatedUserLogin =
+            authService.updateUserPasswordByUserId(USER_ID_1, PASSWORD, NEW_PASSWORD);
+
+        // Assert
+        assertEquals(ENCRYPTED_PASSWORD, mockUserLoginToUpdate.password());
+        assertEquals(mockUserLoginToUpdate, actualUpdatedUserLogin);
     }
   }
 
