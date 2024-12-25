@@ -60,5 +60,26 @@ class TokenServiceTest {
       // Assert
       assertEquals(mockIssuedAccessToken, actualIssuedAccessToken);
     }
+
+    @Test
+    void byUserLoginThenSuccess() {
+      // Arrange
+      var USER_ID = 1;
+      var userLogin =
+          UserLogin.of(1, AggregateReference.to(USER_ID), "email@example.com", "P@$$w0rd");
+      var authenticatedUser =
+          AuthenticatedUser.of(
+              USER_ID, userLogin.email(), userLogin.password(), UserRoleName.ADMIN);
+      var mockIssuedAccessToken = "token";
+
+      when(userDetailsService.loadUserByUsername(userLogin.email())).thenReturn(authenticatedUser);
+      doReturn(mockIssuedAccessToken).when(tokenService).encodeClaimToJwt(any(JwtClaimsSet.class));
+
+      // Actual
+      var actualIssuedAccessToken = tokenService.issueAccessToken(userLogin, Instant.now());
+
+      // Assert
+      assertEquals(mockIssuedAccessToken, actualIssuedAccessToken);
+    }
   }
 }
