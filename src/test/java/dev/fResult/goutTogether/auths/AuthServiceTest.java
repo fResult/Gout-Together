@@ -73,7 +73,8 @@ class AuthServiceTest {
   }
 
   private TourCompanyLogin buildTourCompanyLogin(int id, int companyId) {
-    return TourCompanyLogin.of(id, AggregateReference.to(companyId), TARGET_USERNAME, ENCRYPTED_PASSWORD);
+    return TourCompanyLogin.of(
+        id, AggregateReference.to(companyId), TARGET_USERNAME, ENCRYPTED_PASSWORD);
   }
 
   @Nested
@@ -253,41 +254,42 @@ class AuthServiceTest {
 
     @Test
     void byUserIdThenSuccess() {
-        // Arrange
-        var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
-        var mockUserLoginToUpdate = UserLogin.of(1, userRef, TARGET_EMAIL, ENCRYPTED_PASSWORD);
-        doReturn(mockUserLoginToUpdate).when(authService).getUserCredentialByUserId(anyInt());
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
-        when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
-        when(userLoginRepository.save(any(UserLogin.class))).thenReturn(mockUserLoginToUpdate);
+      // Arrange
+      var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
+      var mockUserLoginToUpdate = UserLogin.of(1, userRef, TARGET_EMAIL, ENCRYPTED_PASSWORD);
+      doReturn(mockUserLoginToUpdate).when(authService).getUserCredentialByUserId(anyInt());
+      when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+      when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
+      when(userLoginRepository.save(any(UserLogin.class))).thenReturn(mockUserLoginToUpdate);
 
-        // Actual
-        var actualUpdatedUserLogin =
-            authService.updateUserPasswordByUserId(USER_ID_1, PASSWORD, NEW_PASSWORD);
+      // Actual
+      var actualUpdatedUserLogin =
+          authService.updateUserPasswordByUserId(USER_ID_1, PASSWORD, NEW_PASSWORD);
 
-        // Assert
-        assertEquals(ENCRYPTED_PASSWORD, mockUserLoginToUpdate.password());
-        assertEquals(mockUserLoginToUpdate, actualUpdatedUserLogin);
+      // Assert
+      assertEquals(ENCRYPTED_PASSWORD, mockUserLoginToUpdate.password());
+      assertEquals(mockUserLoginToUpdate, actualUpdatedUserLogin);
     }
 
     @Test
     void byUserIdButNotFoundThenThrowException() {
-        // Arrange
-        var expectedErrorMessage =
-            String.format(
-                "%s with %s [%d] not found",
-                UserLogin.class.getSimpleName(), "userId", NOT_FOUND_USER_ID_1);
-        AggregateReference<User, Integer> notFoundUserRef =
-            AggregateReference.to(NOT_FOUND_USER_ID_1);
-        when(userLoginRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
+      // Arrange
+      var expectedErrorMessage =
+          String.format(
+              "%s with %s [%d] not found",
+              UserLogin.class.getSimpleName(), "userId", NOT_FOUND_USER_ID_1);
+      AggregateReference<User, Integer> notFoundUserRef =
+          AggregateReference.to(NOT_FOUND_USER_ID_1);
+      when(userLoginRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
 
-        // Actual
-        Executable actualExecutable =
-            () -> authService.updateUserPasswordByUserId(NOT_FOUND_USER_ID_1, PASSWORD, NEW_PASSWORD);
+      // Actual
+      Executable actualExecutable =
+          () -> authService.updateUserPasswordByUserId(NOT_FOUND_USER_ID_1, PASSWORD, NEW_PASSWORD);
 
-        // Assert
-        var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
-        assertEquals(expectedErrorMessage, exception.getMessage());
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      assertEquals(expectedErrorMessage, exception.getMessage());
+    }
     }
   }
 
