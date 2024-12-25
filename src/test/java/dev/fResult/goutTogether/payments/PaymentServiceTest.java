@@ -46,6 +46,15 @@ import org.springframework.data.jdbc.core.mapping.AggregateReference;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
+  private final int USER_ID = 1;
+  private final int TOUR_COMPANY_ID = 1;
+  private final int BOOKING_ID = 1;
+  private final int USER_WALLET_ID = 1;
+  private final int COMPANY_WALLET_ID = 1;
+
+  private final BigDecimal USER_WALLET_BALANCE = BigDecimal.valueOf(100);
+  private final BigDecimal COMPANY_WALLET_BALANCE = BigDecimal.valueOf(100);
+
   @Value("${booking.tour-price}")
   private double tourPrice;
 
@@ -60,6 +69,19 @@ class PaymentServiceTest {
   @Mock private WalletService walletService;
   @Mock private TourCountService tourCountService;
   @Mock private TransactionService transactionService;
+
+  private UserWallet buildUserWallet(int id, int userId, BigDecimal balance) {
+    return UserWallet.of(
+        id, AggregateReference.to(userId), Instant.now().minus(17, ChronoUnit.DAYS), balance);
+  }
+
+  private TourCompanyWallet buildTourCompanyWallet(int id, int tourCompanyId, BigDecimal balance) {
+    return new TourCompanyWallet(
+        id,
+        AggregateReference.to(tourCompanyId),
+        Instant.now().minus(12, ChronoUnit.MINUTES),
+        balance);
+  }
 
   @BeforeEach
   void setUp() {
@@ -96,8 +118,6 @@ class PaymentServiceTest {
   void whenPayByBookingIdThenSuccess() {
     // Arrange
     var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
-    var BOOKING_ID = 1;
-    var USER_ID = 1;
     var TOUR_ID = 1;
     var userRef = AggregateReference.<User, Integer>to(USER_ID);
     var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
@@ -114,22 +134,20 @@ class PaymentServiceTest {
             BOOKING_TIME,
             BOOKING_TIME,
             IDEMPOTENT_KEY);
-    var USER_WALLET_BALANCE = BigDecimal.valueOf(100);
-    var COMPANY_WALLET_BALANCE = BigDecimal.valueOf(100);
     var USER_WALLET_BALANCE_AFTER_TRANSFER = USER_WALLET_BALANCE.subtract(TOUR_PRICE);
     var COMPANY_WALLET_BALANCE_AFTER_TRANSFER = COMPANY_WALLET_BALANCE.add(TOUR_PRICE);
     var qrCodeContent = buildQrCodeContent(BOOKING_ID);
-    var mockUserWallet = new UserWallet(USER_ID, userRef, BOOKING_TIME, USER_WALLET_BALANCE);
+    var mockUserWallet = buildUserWallet(USER_WALLET_ID, USER_ID, USER_WALLET_BALANCE);
     var mockTourCompanyWallet =
-        new TourCompanyWallet(1, tourCompanyRef, BOOKING_TIME, COMPANY_WALLET_BALANCE);
-    var mockWalletPair = new Pair<>(mockUserWallet, mockTourCompanyWallet);
+        buildTourCompanyWallet(COMPANY_WALLET_ID, TOUR_COMPANY_ID, COMPANY_WALLET_BALANCE);
     var mockUserWalletAfterTransfer =
-        new UserWallet(USER_ID, userRef, BOOKING_TIME, USER_WALLET_BALANCE_AFTER_TRANSFER);
+        UserWallet.of(USER_ID, userRef, Instant.now(), USER_WALLET_BALANCE_AFTER_TRANSFER);
     var mockTourCompanyWalletAfterTransfer =
-        new TourCompanyWallet(
-            1, tourCompanyRef, BOOKING_TIME, COMPANY_WALLET_BALANCE_AFTER_TRANSFER);
-    var mockWalletPairAfterTransfer =
-        new Pair<>(mockUserWalletAfterTransfer, mockTourCompanyWalletAfterTransfer);
+        TourCompanyWallet.of(
+            COMPANY_WALLET_ID,
+            tourCompanyRef,
+            Instant.now(),
+            COMPANY_WALLET_BALANCE_AFTER_TRANSFER);
     var mockQrCodeRef =
         QrCodeReference.of(QR_CODE_REF_ID, BOOKING_ID, qrCodeContent, QrCodeStatus.EXPIRED);
     var mockTransaction =
@@ -157,10 +175,13 @@ class PaymentServiceTest {
 
     when(bookingService.findBookingById(anyInt())).thenReturn(Optional.of(mockBooking));
     when(walletService.getConsumerAndTourCompanyWallets(any(Booking.class)))
-        .thenReturn(mockWalletPair);
+        .thenReturn(new Pair<>(mockUserWallet, mockTourCompanyWallet));
     when(walletService.transferMoney(
-            any(UserWallet.class), any(TourCompanyWallet.class), any(), any()))
-        .thenReturn(mockWalletPairAfterTransfer);
+            any(UserWallet.class),
+            any(TourCompanyWallet.class),
+            any(BigDecimal.class),
+            eq(TransactionType.BOOKING)))
+        .thenReturn(new Pair<>(mockUserWalletAfterTransfer, mockTourCompanyWalletAfterTransfer));
     when(transactionService.createTransaction(any())).thenReturn(null);
     doNothing().when(tourCountService).incrementTourCount(anyInt());
     when(qrCodeService.updateQrCodeRefStatusByBookingId(anyInt(), any(QrCodeStatus.class)))
