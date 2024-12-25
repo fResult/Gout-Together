@@ -191,7 +191,7 @@ class WalletServiceTest {
     }
 
     @Test
-    void butTransactionAlreadyExistsThenReturnUserWalletWithoutUpdate() {
+    void butTransactionAlreadyExistsThenReturnUserWalletWithoutReTopUp() {
       // Arrange
       var body = WalletTopUpRequest.of(AMOUNT);
       var userRef = AggregateReference.<User, Integer>to(USER_ID);
