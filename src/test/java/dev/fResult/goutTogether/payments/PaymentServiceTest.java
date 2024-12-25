@@ -1,8 +1,7 @@
 package dev.fResult.goutTogether.payments;
 
 import static dev.fResult.goutTogether.common.Constants.API_PAYMENT_PATH;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -46,6 +45,7 @@ import org.springframework.data.jdbc.core.mapping.AggregateReference;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
+  private final String IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
   private final int USER_ID = 1;
   private final int TOUR_COMPANY_ID = 1;
   private final int BOOKING_ID = 1;
@@ -70,6 +70,19 @@ class PaymentServiceTest {
   @Mock private TourCountService tourCountService;
   @Mock private TransactionService transactionService;
 
+  @BeforeEach
+  void setUp() {
+    paymentService =
+        new PaymentServiceImpl(
+            tourPrice,
+            bookingRepository,
+            qrCodeService,
+            bookingService,
+            walletService,
+            tourCountService,
+            transactionService);
+  }
+
   private UserWallet buildUserWallet(int id, int userId, BigDecimal balance) {
     return UserWallet.of(
         id, AggregateReference.to(userId), Instant.now().minus(17, ChronoUnit.DAYS), balance);
@@ -83,17 +96,26 @@ class PaymentServiceTest {
         balance);
   }
 
-  @BeforeEach
-  void setUp() {
-    paymentService =
-        new PaymentServiceImpl(
-            tourPrice,
-            bookingRepository,
-            qrCodeService,
-            bookingService,
-            walletService,
-            tourCountService,
-            transactionService);
+  private Booking buildPendingBooking(int id, int userId, int tourId) {
+    return Booking.of(
+        id,
+        AggregateReference.to(userId),
+        AggregateReference.to(tourId),
+        BookingStatus.PENDING.name(),
+        Instant.now().minus(10, ChronoUnit.MINUTES),
+        Instant.now().minus(5, ChronoUnit.MINUTES),
+        IDEMPOTENT_KEY);
+  }
+
+  private Booking buildCompletedBooking(int id, int userId, int tourId) {
+    return Booking.of(
+        id,
+        AggregateReference.to(userId),
+        AggregateReference.to(tourId),
+        BookingStatus.COMPLETED.name(),
+        Instant.now().minus(10, ChronoUnit.MINUTES),
+        Instant.now().minus(5, ChronoUnit.MINUTES),
+        IDEMPOTENT_KEY);
   }
 
   private String buildQrCodeContent(int bookingId) {
@@ -117,23 +139,11 @@ class PaymentServiceTest {
   @Test
   void whenPayByBookingIdThenSuccess() {
     // Arrange
-    var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
     var TOUR_ID = 1;
     var userRef = AggregateReference.<User, Integer>to(USER_ID);
-    var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
     var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_ID);
     var bookingRef = AggregateReference.<Booking, Integer>to(BOOKING_ID);
-    var BOOKING_TIME = Instant.now().minus(10, ChronoUnit.MINUTES);
-
-    var mockBooking =
-        Booking.of(
-            BOOKING_ID,
-            userRef,
-            tourRef,
-            BookingStatus.PENDING.name(),
-            BOOKING_TIME,
-            BOOKING_TIME,
-            IDEMPOTENT_KEY);
+    var mockBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
     var USER_WALLET_BALANCE_AFTER_TRANSFER = USER_WALLET_BALANCE.subtract(TOUR_PRICE);
     var COMPANY_WALLET_BALANCE_AFTER_TRANSFER = COMPANY_WALLET_BALANCE.add(TOUR_PRICE);
     var qrCodeContent = buildQrCodeContent(BOOKING_ID);
@@ -160,16 +170,7 @@ class PaymentServiceTest {
             TOUR_PRICE,
             TransactionType.BOOKING,
             IDEMPOTENT_KEY);
-    var mockBookingToBeCompleted =
-        Booking.of(
-            BOOKING_ID,
-            userRef,
-            tourRef,
-            BookingStatus.COMPLETED.name(),
-            BOOKING_TIME,
-            Instant.now(),
-            IDEMPOTENT_KEY);
-
+    var mockBookingToBeCompleted = buildCompletedBooking(BOOKING_ID, USER_ID, TOUR_ID);
     var expectedBookingInfo =
         BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.COMPLETED, null);
 
@@ -217,7 +218,6 @@ class PaymentServiceTest {
   @Test
   void whenRefundBookingThenSuccess() {
     // Arrange
-
     var bookingRef = AggregateReference.<Booking, Integer>to(BOOKING_ID);
     var userRef = AggregateReference.<User, Integer>to(USER_ID);
     var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
