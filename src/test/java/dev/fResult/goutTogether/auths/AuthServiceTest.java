@@ -290,6 +290,27 @@ class AuthServiceTest {
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
+
+    @Test
+    void byUserIdButPasswordNotMatchedThenThrowException() {
+      // Arrange
+      var mockUserLogin = buildUserLogin(1, USER_ID_1);
+      var expectedErrorMessage =
+          String.format("%s password is in correct", User.class.getSimpleName());
+
+      when(userLoginRepository.findOneByUserId(AggregateReference.to(USER_ID_1)))
+          .thenReturn(Optional.of(mockUserLogin));
+      when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+
+      // Actual
+      Executable actualExecutable =
+          () ->
+              authService.updateUserPasswordByUserId(USER_ID_1, NOT_MATCHED_PASSWORD, NEW_PASSWORD);
+
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      assertEquals(expectedErrorMessage, exception.getMessage());
+    }
     }
   }
 
