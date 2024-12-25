@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
+import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.repositories.RefreshTokenRepository;
 import dev.fResult.goutTogether.auths.services.CustomUserDetailsService;
@@ -80,6 +81,33 @@ class TokenServiceTest {
 
       // Assert
       assertEquals(mockIssuedAccessToken, actualIssuedAccessToken);
+    }
+
+    @Test
+    void byTourCompanyLoginThenSuccess() {
+      // Arrange
+      var TOUR_COMPANY_ID = 1;
+      var tourCompanyLogin =
+          TourCompanyLogin.of(1, AggregateReference.to(TOUR_COMPANY_ID), "username", "P@$$w0rd");
+      var authenticatedUser =
+          AuthenticatedUser.of(
+              TOUR_COMPANY_ID,
+              tourCompanyLogin.username(),
+              tourCompanyLogin.password(),
+              UserRoleName.ADMIN);
+      var expectedIssuedAccessToken = "token";
+
+      when(userDetailsService.loadUserByUsername(tourCompanyLogin.username()))
+          .thenReturn(authenticatedUser);
+      doReturn(expectedIssuedAccessToken)
+          .when(tokenService)
+          .encodeClaimToJwt(any(JwtClaimsSet.class));
+
+      // Actual
+      var actualIssuedAccessToken = tokenService.issueAccessToken(tourCompanyLogin, Instant.now());
+
+      // Assert
+      assertEquals(expectedIssuedAccessToken, actualIssuedAccessToken);
     }
   }
 }
