@@ -46,14 +46,15 @@ public class RoleService {
     logger.debug(
         "[deleteRoleByUserId] {} userId [{}] is deleting", Role.class.getSimpleName(), userId);
 
-    var userRoleToDelete = userRoleRepository
-        .findOneByUserId(AggregateReference.to(userId));
+    var userRoleToDelete = userRoleRepository.findOneByUserId(AggregateReference.to(userId));
 
     if (userRoleToDelete.isEmpty()) {
-        logger.warn(
-            "[deleteRoleByUserId] {} userId [{}] is not found", Role.class.getSimpleName(), userId);
-        return false;
+      logger.warn(
+          "[deleteRoleByUserId] {} userId [{}] is not found", Role.class.getSimpleName(), userId);
+      return false;
     }
+
+    userRoleRepository.delete(userRoleToDelete.get());
 
     logger.info(
         "[deleteRoleByUserId] {} userId [{}] is deleted", Role.class.getSimpleName(), userId);

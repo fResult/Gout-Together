@@ -67,7 +67,7 @@ class RoleServiceTest {
     var mockUserRole = UserRole.of(1, userRef, AggregateReference.to(1));
 
     when(userRoleRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserRole));
-    doNothing().when(userRoleRepository).deleteByUserId(userRef);
+    doNothing().when(userRoleRepository).delete(mockUserRole);
 
     // Actual
     var actualDeleteResult = roleService.deleteUserRoleByUserId(USER_ID);
