@@ -319,8 +319,9 @@ class AuthServiceTest {
       var expectedUpdatedUserLogin =
           UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, "NewEncryptedPassword");
 
-      when(authService.findUserCredentialByEmailAndPassword(anyString(), anyString()))
-          .thenReturn(Optional.of(mockUserLogin));
+      doReturn(Optional.of(mockUserLogin))
+          .when(authService)
+          .findUserCredentialByEmailAndPassword(anyString(), anyString());
       when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
       when(userLoginRepository.save(any(UserLogin.class))).thenReturn(expectedUpdatedUserLogin);
 
@@ -339,8 +340,9 @@ class AuthServiceTest {
           String.format(
               "%s's %s password is incorrect",
               UserLogin.class.getSimpleName(), User.class.getSimpleName());
-      when(authService.findUserCredentialByEmailAndPassword(anyString(), anyString()))
-          .thenReturn(Optional.empty());
+      doReturn(Optional.empty())
+          .when(authService)
+          .findUserCredentialByEmailAndPassword(anyString(), anyString());
 
       // Actual
       Executable actualExecutable =
