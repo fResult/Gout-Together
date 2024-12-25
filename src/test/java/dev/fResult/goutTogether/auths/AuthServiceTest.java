@@ -331,6 +331,24 @@ class AuthServiceTest {
       // Assert
       assertEquals(expectedUpdatedUserLogin, actualUpdatedUserLogin);
     }
+
+    @Test
+    void byEmailButPasswordIsIncorrectThenThrowException() {
+      // Arrange
+      var expectedErrorMessage =
+          String.format(
+              "%s's %s password is incorrect",
+              UserLogin.class.getSimpleName(), User.class.getSimpleName());
+      when(authService.findUserCredentialByEmailAndPassword(anyString(), anyString()))
+          .thenReturn(Optional.empty());
+
+      // Actual
+      Executable actualExecutable =
+          () -> authService.updateUserPasswordByEmail(TARGET_EMAIL, PASSWORD, NEW_PASSWORD);
+
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
 
