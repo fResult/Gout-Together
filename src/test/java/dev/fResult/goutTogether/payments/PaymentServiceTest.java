@@ -259,8 +259,4 @@ class PaymentServiceTest {
     // Assert
     assertTrue(actualResult);
   }
-    // Actual
-
-    // Assert
-  }
 }
