@@ -64,28 +64,6 @@ public class TokenService {
     return UUIDV7.randomUUID().toString();
   }
 
-  private String generateToken(
-      AuthenticatedUser authenticatedUser, Instant issuedAt, long expiredInSeconds) {
-    var scope =
-        authenticatedUser.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.joining(" "));
-
-    var expiresAt = issuedAt.plusSeconds(expiredInSeconds);
-
-    var claims =
-        JwtClaimsSet.builder()
-            .issuer(ISSUER)
-            .issuedAt(issuedAt)
-            .subject(authenticatedUser.email())
-            .claim(ROLES_CLAIM, scope)
-            .claim(RESOURCE_ID_CLAIM, authenticatedUser.userId())
-            .expiresAt(expiresAt)
-            .build();
-
-    return encodeClaimToJwt(claims);
-  }
-
   public String encodeClaimToJwt(JwtClaimsSet claims) {
     return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
   }
@@ -115,5 +93,27 @@ public class TokenService {
     var thresholdDateTime = currentDateTime.minusSeconds(refreshTokenExpiredInSeconds);
 
     refreshTokenRepository.updateRefreshTokenThatExpired(true, thresholdDateTime);
+  }
+
+  private String generateToken(
+      AuthenticatedUser authenticatedUser, Instant issuedAt, long expiredInSeconds) {
+    var scope =
+        authenticatedUser.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .collect(Collectors.joining(" "));
+
+    var expiresAt = issuedAt.plusSeconds(expiredInSeconds);
+
+    var claims =
+        JwtClaimsSet.builder()
+            .issuer(ISSUER)
+            .issuedAt(issuedAt)
+            .subject(authenticatedUser.email())
+            .claim(ROLES_CLAIM, scope)
+            .claim(RESOURCE_ID_CLAIM, authenticatedUser.userId())
+            .expiresAt(expiresAt)
+            .build();
+
+    return encodeClaimToJwt(claims);
   }
 }
