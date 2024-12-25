@@ -200,11 +200,8 @@ class PaymentServiceTest {
   @Test
   void whenPayByBookingIdButBookingNotFoundThenThrowException() {
     // Arrange
-    var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
-    var BOOKING_ID = 1;
     var expectedErrorMessage =
         String.format("%s id [%d] not found", Booking.class.getSimpleName(), BOOKING_ID);
-
     when(bookingService.findBookingById(anyInt())).thenReturn(Optional.empty());
 
     // Actual
