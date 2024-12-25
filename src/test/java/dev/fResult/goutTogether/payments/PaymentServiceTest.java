@@ -221,6 +221,7 @@ class PaymentServiceTest {
     var bookingRef = AggregateReference.<Booking, Integer>to(BOOKING_ID);
     var userRef = AggregateReference.<User, Integer>to(USER_ID);
     var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
+    var completedBookingInput = buildCompletedBooking(BOOKING_ID, USER_ID, TOUR_COMPANY_ID);
     var mockUserWallet =
         new UserWallet(
             USER_WALLET_ID, userRef, Instant.now().minus(17, ChronoUnit.DAYS), USER_WALLET_BALANCE);
@@ -263,6 +264,12 @@ class PaymentServiceTest {
         .thenReturn(new Pair<>(mockUserWalletAfterTransfer, mockTourCompanyWalletAfterTransfer));
     when(transactionService.createTransaction(any(Transaction.class))).thenReturn(mockTransaction);
 
+    // Actual
+    var actualResult = paymentService.refundBooking(completedBookingInput, IDEMPOTENT_KEY);
+
+    // Assert
+    assertTrue(actualResult);
+  }
     // Actual
 
     // Assert
