@@ -1,5 +1,6 @@
 package dev.fResult.goutTogether.tourCompanies;
 
+import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -23,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -92,6 +95,28 @@ class TourCompanyControllerTest {
 
     // Assert
     resultActions.andExpect(status().isNotFound());
+  }
+
+  @Test
+  void whenGetMyTourCompanyThenSuccess() throws Exception {
+    // Arrange
+    var mockJwt =
+        Jwt.withTokenValue("token")
+            .header("alg", "none")
+            .claim(RESOURCE_ID_CLAIM, String.valueOf(TOUR_COMPANY_ID_1))
+            .build();
+    var mockAuthentication = new JwtAuthenticationToken(mockJwt);
+    var mockTourCompany =
+        TourCompanyResponse.of(TOUR_COMPANY_ID_1, "My Tour", TourCompanyStatus.APPROVED);
+
+    when(tourCompanyService.getTourCompanyById(anyInt())).thenReturn(mockTourCompany);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(get(TOUR_COMPANY_API + "/me").principal(mockAuthentication));
+
+    // Assert
+    resultActions.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(TOUR_COMPANY_ID_1));
   }
 
   @Test

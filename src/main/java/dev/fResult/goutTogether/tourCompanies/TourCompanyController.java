@@ -48,10 +48,15 @@ public class TourCompanyController {
   @GetMapping("/me")
   public ResponseEntity<TourCompanyResponse> getMyTourCompany(Authentication authentication) {
     var jwt = (Jwt) authentication.getPrincipal();
-    var claims = jwt.getClaims();
-    var tourCompanyId = (long) claims.get(RESOURCE_ID_CLAIM);
+    var tourCompanyId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
 
-    return ResponseEntity.ok(tourCompanyService.getTourCompanyById(Math.toIntExact(tourCompanyId)));
+    logger.debug(
+        "[getMyTourCompany] Getting {} auth of id [{}]",
+        TourCompany.class.getSimpleName(),
+        tourCompanyId);
+
+    return ResponseEntity.ok(
+        tourCompanyService.getTourCompanyById(Integer.parseInt(tourCompanyId)));
   }
 
   @PostMapping
