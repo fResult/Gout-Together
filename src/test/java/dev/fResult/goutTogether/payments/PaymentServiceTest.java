@@ -219,27 +219,19 @@ class PaymentServiceTest {
     var userRef = AggregateReference.<User, Integer>to(USER_ID);
     var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
     var completedBookingInput = buildCompletedBooking(BOOKING_ID, USER_ID, TOUR_COMPANY_ID);
-    var mockUserWallet =
-        new UserWallet(
-            USER_WALLET_ID, userRef, Instant.now().minus(17, ChronoUnit.DAYS), USER_WALLET_BALANCE);
+    var mockUserWallet = buildUserWallet(USER_WALLET_ID, USER_ID, USER_WALLET_BALANCE);
     var mockTourCompanyWallet =
-        new TourCompanyWallet(
-            COMPANY_WALLET_ID,
-            tourCompanyRef,
-            Instant.now().minus(17, ChronoUnit.DAYS),
-            COMPANY_WALLET_BALANCE);
+        buildTourCompanyWallet(COMPANY_WALLET_ID, TOUR_COMPANY_ID, COMPANY_WALLET_BALANCE);
+    var USER_WALLET_BALANCE_AFTER_TRANSFER = USER_WALLET_BALANCE.add(TOUR_PRICE);
+    var COMPANY_WALLET_BALANCE_AFTER_TRANSFER = COMPANY_WALLET_BALANCE.subtract(TOUR_PRICE);
     var mockUserWalletAfterTransfer =
-        new UserWallet(
-            USER_WALLET_ID,
-            userRef,
-            Instant.now().minus(17, ChronoUnit.DAYS),
-            USER_WALLET_BALANCE.add(TOUR_PRICE));
+        UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), USER_WALLET_BALANCE_AFTER_TRANSFER);
     var mockTourCompanyWalletAfterTransfer =
-        new TourCompanyWallet(
+        TourCompanyWallet.of(
             COMPANY_WALLET_ID,
             tourCompanyRef,
-            Instant.now().minus(17, ChronoUnit.DAYS),
-            COMPANY_WALLET_BALANCE.subtract(TOUR_PRICE));
+            Instant.now(),
+            COMPANY_WALLET_BALANCE_AFTER_TRANSFER);
     var mockTransaction =
         Transaction.of(
             1,
