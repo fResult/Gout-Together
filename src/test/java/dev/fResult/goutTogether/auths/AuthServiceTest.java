@@ -257,6 +257,7 @@ class AuthServiceTest {
       // Arrange
       var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
       var mockUserLoginToUpdate = UserLogin.of(1, userRef, TARGET_EMAIL, ENCRYPTED_PASSWORD);
+
       doReturn(mockUserLoginToUpdate).when(authService).getUserCredentialByUserId(anyInt());
       when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
       when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
@@ -729,6 +730,23 @@ class AuthServiceTest {
       // Assert
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
+    }
+  }
+
+  @Nested
+  class LogoutTest {
+    @Test
+    void byAuthenticatedUserThenSuccess() {
+      // Arrange
+      doNothing()
+          .when(refreshTokenRepository)
+          .updateRefreshTokenByResource(any(UserRoleName.class), anyInt(), eq(true));
+
+      // Actual
+      var actualLogoutResult = authService.logout(AuthenticatedUser.of(USER_ID_1, TARGET_EMAIL, PASSWORD, UserRoleName.ADMIN));
+
+      // Assert
+        assertTrue(actualLogoutResult);
     }
   }
 }
