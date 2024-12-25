@@ -3,8 +3,7 @@ package dev.fResult.goutTogether.payments;
 import static dev.fResult.goutTogether.common.Constants.API_PAYMENT_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -192,5 +191,59 @@ class PaymentServiceTest {
     // Assert
     var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
+  @Test
+  void whenRefundBookingThenSuccess() {
+    // Arrange
+
+    var bookingRef = AggregateReference.<Booking, Integer>to(BOOKING_ID);
+    var userRef = AggregateReference.<User, Integer>to(USER_ID);
+    var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
+    var mockUserWallet =
+        new UserWallet(
+            USER_WALLET_ID, userRef, Instant.now().minus(17, ChronoUnit.DAYS), USER_WALLET_BALANCE);
+    var mockTourCompanyWallet =
+        new TourCompanyWallet(
+            COMPANY_WALLET_ID,
+            tourCompanyRef,
+            Instant.now().minus(17, ChronoUnit.DAYS),
+            COMPANY_WALLET_BALANCE);
+    var mockUserWalletAfterTransfer =
+        new UserWallet(
+            USER_WALLET_ID,
+            userRef,
+            Instant.now().minus(17, ChronoUnit.DAYS),
+            USER_WALLET_BALANCE.add(TOUR_PRICE));
+    var mockTourCompanyWalletAfterTransfer =
+        new TourCompanyWallet(
+            COMPANY_WALLET_ID,
+            tourCompanyRef,
+            Instant.now().minus(17, ChronoUnit.DAYS),
+            COMPANY_WALLET_BALANCE.subtract(TOUR_PRICE));
+    var mockTransaction =
+        Transaction.of(
+            1,
+            userRef,
+            tourCompanyRef,
+            bookingRef,
+            Instant.now(),
+            TOUR_PRICE,
+            TransactionType.REFUND,
+            null);
+
+    when(walletService.getConsumerAndTourCompanyWallets(any(Booking.class)))
+        .thenReturn(new Pair<>(mockUserWallet, mockTourCompanyWallet));
+    when(walletService.transferMoney(
+            any(UserWallet.class),
+            any(TourCompanyWallet.class),
+            any(BigDecimal.class),
+            eq(TransactionType.REFUND)))
+        .thenReturn(new Pair<>(mockUserWalletAfterTransfer, mockTourCompanyWalletAfterTransfer));
+    when(transactionService.createTransaction(any(Transaction.class))).thenReturn(mockTransaction);
+
+    // Actual
+
+    // Assert
   }
 }
