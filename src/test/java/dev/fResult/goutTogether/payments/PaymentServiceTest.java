@@ -2,6 +2,7 @@ package dev.fResult.goutTogether.payments;
 
 import static dev.fResult.goutTogether.common.Constants.API_PAYMENT_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
@@ -15,6 +16,7 @@ import dev.fResult.goutTogether.bookings.services.BookingService;
 import dev.fResult.goutTogether.common.enumurations.BookingStatus;
 import dev.fResult.goutTogether.common.enumurations.QrCodeStatus;
 import dev.fResult.goutTogether.common.enumurations.TransactionType;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.utils.UUIDV7;
 import dev.fResult.goutTogether.payments.services.PaymentServiceImpl;
 import dev.fResult.goutTogether.qrcodes.QrCodeReference;
@@ -37,6 +39,7 @@ import kotlin.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
@@ -171,5 +174,23 @@ class PaymentServiceTest {
 
     // Assert
     assertEquals(expectedBookingInfo, actualPaidBookingInfo);
+  }
+
+  @Test
+  void whenPayByBookingIdButBookingNotFoundThenThrowException() {
+    // Arrange
+    var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
+    var BOOKING_ID = 1;
+    var expectedErrorMessage =
+        String.format("%s id [%d] not found", Booking.class.getSimpleName(), BOOKING_ID);
+
+    when(bookingService.findBookingById(anyInt())).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualExecutable = () -> paymentService.payByBookingId(BOOKING_ID, IDEMPOTENT_KEY);
+
+    // Assert
+    var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
   }
 }
