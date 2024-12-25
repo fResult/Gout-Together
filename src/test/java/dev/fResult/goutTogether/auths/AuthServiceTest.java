@@ -743,10 +743,28 @@ class AuthServiceTest {
           .updateRefreshTokenByResource(any(UserRoleName.class), anyInt(), eq(true));
 
       // Actual
-      var actualLogoutResult = authService.logout(AuthenticatedUser.of(USER_ID_1, TARGET_EMAIL, PASSWORD, UserRoleName.ADMIN));
+      var actualLogoutResult =
+          authService.logout(
+              AuthenticatedUser.of(USER_ID_1, TARGET_EMAIL, PASSWORD, UserRoleName.ADMIN));
 
       // Assert
-        assertTrue(actualLogoutResult);
+      assertTrue(actualLogoutResult);
+    }
+
+    @Test
+    void byLogoutInfoThenSuccess() {
+      // Arrange
+      var logoutInfoInput = LogoutInfo.of(USER_ID_1, UserRoleName.ADMIN.name());
+
+      doNothing()
+          .when(refreshTokenRepository)
+          .updateRefreshTokenByResource(any(UserRoleName.class), anyInt(), eq(true));
+
+      // Actual
+      var actualLogoutResult = authService.logout(logoutInfoInput);
+
+      // Assert
+      assertTrue(actualLogoutResult);
     }
   }
 }
