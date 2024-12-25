@@ -311,6 +311,26 @@ class AuthServiceTest {
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
+
+    @Test
+    void byEmailThenSuccess() {
+      // Arrange
+      var mockUserLogin = buildUserLogin(1, USER_ID_1);
+      var expectedUpdatedUserLogin =
+          UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, "NewEncryptedPassword");
+
+      when(authService.findUserCredentialByEmailAndPassword(anyString(), anyString()))
+          .thenReturn(Optional.of(mockUserLogin));
+      when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
+      when(userLoginRepository.save(any(UserLogin.class))).thenReturn(expectedUpdatedUserLogin);
+
+      // Actual
+      var actualUpdatedUserLogin =
+          authService.updateUserPasswordByEmail(TARGET_EMAIL, PASSWORD, NEW_PASSWORD);
+
+      // Assert
+      assertEquals(expectedUpdatedUserLogin, actualUpdatedUserLogin);
+    }
     }
   }
 

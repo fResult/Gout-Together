@@ -152,7 +152,9 @@ public class AuthServiceImpl implements AuthService {
             .orElseThrow(
                 () ->
                     new EntityNotFoundException(
-                        String.format("%s password is in correct", User.class.getSimpleName())));
+                        String.format(
+                            "%s's %s password is incorrect",
+                            UserLogin.class.getSimpleName(), User.class.getSimpleName())));
     var passwordToUpdate = passwordEncoder.encode(newPassword);
     var credentialToUpdate =
         UserLogin.of(userCredential.id(), userCredential.userId(), email, passwordToUpdate);
@@ -391,8 +393,7 @@ public class AuthServiceImpl implements AuthService {
       logger.warn("[refreshToken] {} is already expired, please re-login", refreshToken.token());
       throw new RefreshTokenExpiredException(
           String.format(
-              "%s is already expired, please re-login",
-              RefreshToken.class.getSimpleName()));
+              "%s is already expired, please re-login", RefreshToken.class.getSimpleName()));
     }
   }
 
