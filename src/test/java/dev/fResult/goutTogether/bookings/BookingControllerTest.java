@@ -8,7 +8,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
 import dev.fResult.goutTogether.bookings.services.BookingService;
+import dev.fResult.goutTogether.common.enumurations.BookingStatus;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.common.exceptions.BookingExistsException;
 import dev.fResult.goutTogether.common.utils.UUIDV7;
@@ -28,9 +30,10 @@ import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(BookingController.class)
 class BookingControllerTest {
-  private static final String BOOKING_API = "/api/v1/bookings";
-  private static final String EMAIL = "email@example.com";
-  private static final String IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
+  private final String BOOKING_API = "/api/v1/bookings";
+  private int USER_ID = 9;
+  private final String EMAIL = "email@example.com";
+  private final String IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
 
   @Autowired private WebApplicationContext webApplicationContext;
   @Autowired private ObjectMapper objectMapper;
@@ -57,9 +60,35 @@ class BookingControllerTest {
   }
 
   @Test
+  void whenBookTourByTourId_ThenReturn201() throws Exception {
+    // Arrange
+    var BOOKING_ID = 59;
+    var TOUR_ID = 101;
+    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    var mockCreatedTourBookingInfo =
+        BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.COMPLETED, 1);
+
+    when(bookingService.bookTour(any(Authentication.class), anyInt(), anyString()))
+        .thenReturn(mockCreatedTourBookingInfo);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            post(BOOKING_API + "/tours/{tourId}", TOUR_ID)
+                .principal(authentication)
+                .header("idempotent-key", IDEMPOTENT_KEY));
+
+    // Assert
+    resultActions
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.id").value(BOOKING_ID))
+        .andExpect(jsonPath("$.userId").value(USER_ID))
+        .andExpect(jsonPath("$.tourId").value(TOUR_ID));
+  }
+
+  @Test
   void whenBookingTourByTourId_ButUserTourAlreadyBooked_ThenReturn409() throws Exception {
     // Arrange
-    var USER_ID = 9;
     var TOUR_ID = 120;
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
     var expectedErrorMessage =
