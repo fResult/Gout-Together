@@ -83,7 +83,7 @@ class AuthServiceTest {
         List.of(NOT_FOUND_USER_ID_2, USER_ID_1, NOT_FOUND_USER_ID_1, USER_ID_3);
 
     @Test
-    void byUserIdsThenSuccess() {
+    void byUserIds_ThenSuccess() {
       // Arrange
       var mockUserLogin1 = buildUserLogin(1, USER_ID_1);
       var mockUserLogin2 = buildUserLogin(2, USER_ID_2);
@@ -100,7 +100,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byUserIdsButSomeAreNotFoundThenThrowEntityNotFoundException() {
+    void byUserIds_ButSomeAreNotFound_ThenThrowEntityNotFoundException() {
       // Arrange
       var expectedErrorMessage =
           String.format( // TODO: Refactor this part to a ErrorMessageHelper's method
@@ -125,7 +125,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byUserIdThenSuccess() {
+    void byUserId_ThenSuccess() {
       // Arrange
       var mockUserLogin = buildUserLogin(1, USER_ID_1);
       var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
@@ -139,7 +139,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byUserIdButNotFoundThenThrowException() {
+    void byUserId_ButNotFound_ThenThrowException() {
       // Arrange
       var expectedErrorMessage =
           String.format(
@@ -159,7 +159,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byEmailThenSuccess() {
+    void byEmail_ThenSuccess() {
       // Arrange
       var mockUserLogin = buildUserLogin(1, USER_ID_1);
       when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
@@ -173,7 +173,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byEmailButNotFoundThenReturnEmpty() {
+    void byEmail_ButNotFound_ThenReturnEmpty() {
       // Arrange
       when(userLoginRepository.findOneByEmail(NOT_FOUND_EMAIL)).thenReturn(Optional.empty());
 
@@ -185,7 +185,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byEmailAndPasswordThenSuccess() {
+    void byEmailAndPassword_ThenSuccess() {
       // Arrange
       var mockUserLogin = buildUserLogin(1, USER_ID_1);
       when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
@@ -200,7 +200,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byEmailAndPasswordButNotFoundThenReturnEmpty() {
+    void byEmailAndPassword_ButNotFound_ThenReturnEmpty() {
       // Arrange
       when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.empty());
 
@@ -213,7 +213,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byEmailAndPasswordButPasswordNotMatchedThenReturnEmpty() {
+    void byEmailAndPassword_ButPasswordNotMatched_ThenReturnEmpty() {
       // Arrange
       var mockUserLogin = buildUserLogin(1, USER_ID_1);
       when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
@@ -253,7 +253,7 @@ class AuthServiceTest {
     private final String NEW_PASSWORD = "N3wP@$$w0rd";
 
     @Test
-    void byUserIdThenSuccess() {
+    void byUserId_ThenSuccess() {
       // Arrange
       var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
       var mockUserLoginToUpdate = UserLogin.of(1, userRef, TARGET_EMAIL, ENCRYPTED_PASSWORD);
@@ -273,7 +273,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byUserIdButNotFoundThenThrowException() {
+    void byUserId_ButNotFound_ThenThrowException() {
       // Arrange
       var expectedErrorMessage =
           String.format(
@@ -293,7 +293,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byUserIdButPasswordNotMatchedThenThrowException() {
+    void byUserId_ButPasswordNotMatched_ThenThrowException() {
       // Arrange
       var mockUserLogin = buildUserLogin(1, USER_ID_1);
       var expectedErrorMessage =
@@ -314,7 +314,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byEmailThenSuccess() {
+    void byEmail_ThenSuccess() {
       // Arrange
       var mockUserLogin = buildUserLogin(1, USER_ID_1);
       var expectedUpdatedUserLogin =
@@ -335,7 +335,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byEmailButPasswordIsIncorrectThenThrowException() {
+    void byEmail_ButPasswordIsIncorrect_ThenThrowException() {
       // Arrange
       var expectedErrorMessage =
           String.format(
@@ -358,7 +358,7 @@ class AuthServiceTest {
   @Nested
   class DeleteUserCredentialTest {
     @Test
-    void byIdThenSuccess() {
+    void byId_ThenSuccess() {
       // Arrange
       var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
       var mockCredentialToDelete = buildUserLogin(1, USER_ID_1);
@@ -374,7 +374,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byIdButNotFoundThenThrowException() {
+    void byId_ButNotFound_ThenThrowException() {
       // Arrange
       var expectedErrorMessage =
           String.format(
@@ -405,7 +405,7 @@ class AuthServiceTest {
   @Nested
   class FindTourCompanyCredentialTest {
     @Test
-    void byUsernameThenSuccess() {
+    void byUsername_ThenSuccess() {
       // Arrange
       var mockTourCompanyLogin = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
       when(tourCompanyLoginRepository.findOneByUsername(TARGET_USERNAME))
@@ -421,7 +421,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byUsernameButNotFoundThenReturnEmpty() {
+    void byUsername_ButNotFound_ThenReturnEmpty() {
       // Arrange
       when(tourCompanyLoginRepository.findOneByUsername(NOT_FOUND_USERNAME))
           .thenReturn(Optional.empty());
@@ -435,7 +435,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byCompanyIdThenSuccess() {
+    void byCompanyId_ThenSuccess() {
       // Arrange
       AggregateReference<TourCompany, Integer> tourCompanyRef =
           AggregateReference.to(TOUR_COMPANY_ID);
@@ -453,7 +453,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byCompanyIdButNotFoundThenThrowException() {
+    void byCompanyId_ButNotFound_ThenThrowException() {
       // Arrange
       var expectedErrorMessage =
           String.format(
@@ -517,7 +517,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byIdButNotFoundThenThrowException() {
+    void byId_ButNotFound_ThenThrowException() {
       // Arrange
       var expectedErrorMessage =
           String.format(
@@ -549,7 +549,7 @@ class AuthServiceTest {
   }
 
   @Test
-  void whenLoginThenSuccess() {
+  void whenLogin_ThenSuccess() {
     // Arrange
     var ROLE = UserRoleName.CONSUMER;
     var body = LoginRequest.of(TARGET_EMAIL, PASSWORD);
@@ -596,7 +596,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void ofConsumerAndTokenIsRotatedThenSuccess() {
+    void ofConsumerAndTokenIsRotated_ThenSuccess() {
       // Arrange
       var ROLE = UserRoleName.CONSUMER;
       var ROTATED_REFRESH_TOKEN = UUIDV7.randomUUID().toString();
@@ -628,7 +628,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void ofConsumerThenReturnCurrentRefreshToken() {
+    void ofConsumer_ThenReturnCurrentRefreshToken() {
       // Arrange
       var ROLE = UserRoleName.CONSUMER;
       var NEW_ACCESS_TOKEN = "new_access_token";
@@ -655,7 +655,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void ofConsumerThenRefreshTokenAlreadyExpiredThenThrowException() {
+    void ofConsumer_ButRefreshTokenAlreadyExpired_ThenThrowException() {
       // Arrange
       var ROLE = UserRoleName.CONSUMER;
       var body = RefreshTokenRequest.of(ROLE, USER_ID_1, REFRESH_TOKEN);
@@ -678,7 +678,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void ofTourCompanyAndTokenIsRotatedThenSuccess() {
+    void ofTourCompanyAndTokenIsRotated_ThenSuccess() {
       // Arrange
       var ROLE = UserRoleName.COMPANY;
       var ROTATED_REFRESH_TOKEN = UUIDV7.randomUUID().toString();
@@ -712,7 +712,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void butNotFoundThenThrowException() {
+    void butNotFound_ThenThrowException() {
       // Arrange
       var ROLE = UserRoleName.CONSUMER;
       var NOT_FOUND_REFRESH_TOKEN = "NOT_FOUND_TOKEN";
@@ -736,7 +736,7 @@ class AuthServiceTest {
   @Nested
   class LogoutTest {
     @Test
-    void byAuthenticatedUserThenSuccess() {
+    void byAuthenticatedUser_ThenSuccess() {
       // Arrange
       doNothing()
           .when(refreshTokenRepository)
@@ -752,7 +752,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void byLogoutInfoThenSuccess() {
+    void byLogoutInfo_ThenSuccess() {
       // Arrange
       var logoutInfoInput = LogoutInfo.of(USER_ID_1, UserRoleName.ADMIN.name());
 

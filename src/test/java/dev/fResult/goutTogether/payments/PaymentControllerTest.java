@@ -39,7 +39,7 @@ class PaymentControllerTest {
   }
 
   @Test
-  void getQrCodeImageById() throws Exception {
+  void getQrCodeImageById_ThenSuccess() throws Exception {
     // Arrange
     var mockQrCodeImage = new BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB);
     when(paymentService.generatePaymentQr(anyInt())).thenReturn(mockQrCodeImage);
@@ -52,7 +52,7 @@ class PaymentControllerTest {
   }
 
   @Test
-  void payByBookingId() throws Exception {
+  void payByBookingId_ThenSuccess() throws Exception {
     // Arrange
     var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
     var BOOKING_ID = 1;

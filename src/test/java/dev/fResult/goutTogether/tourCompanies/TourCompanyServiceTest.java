@@ -43,7 +43,7 @@ class TourCompanyServiceTest {
   @Mock private WalletService walletService;
 
   @Test
-  void whenGetTourCompaniesThenSuccess() {
+  void whenGetTourCompanies_ThenSuccess() {
     // Arrange
     var mockTourCompany1 = TourCompany.of(1, "My Tour 1", TourCompanyStatus.WAITING.name());
     var mockTourCompany2 = TourCompany.of(2, "My Tour 2", TourCompanyStatus.APPROVED.name());
@@ -62,7 +62,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenRegisterCompanyThenSuccess() {
+  void whenRegisterCompany_ThenSuccess() {
     // Arrange
     var body = TourCompanyRegistrationRequest.of("My Tour", "MyTour", "mypassword", null);
 
@@ -92,7 +92,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenRegisterCompanyButUsernameAlreadyExistsThenThrowCredentialExistsException() {
+  void whenRegisterCompany_ButUsernameAlreadyExists_ThenThrowCredentialExistsException() {
     // Arrange
     var expectedErrorMessage =
         String.format(
@@ -121,7 +121,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenApproveTourCompanyThenSuccess() {
+  void whenApproveTourCompany_ThenSuccess() {
     // Arrange
     var mockTourCompany = TourCompany.of(1, "My Tour", TourCompanyStatus.WAITING.name());
     var mockApprovedTourCompany =
@@ -153,7 +153,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenApproveCompanyButCompanyIsAlreadyApprovedThenThrowValidationException() {
+  void whenApproveCompany_ButCompanyIsAlreadyApproved_ThenThrowValidationException() {
     // Arrange
     var expectedErrorMessage =
         String.format("Tour company id [%d] is already approved", TOUR_COMPANY_ID);
@@ -171,7 +171,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenApproveCompanyButCompanyNotFoundThrowEntityNotFoundException() {
+  void whenApproveCompany_ButCompanyNotFoundThrowEntityNotFoundException() {
     // Arrange
     var expectedErrorMessage =
         String.format(
@@ -188,7 +188,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenGetCompanyByIdThenSuccess() {
+  void whenGetCompanyById_ThenSuccess() {
     // Arrange
     var mockCompany = TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.WAITING.name());
     var expectedCompanyResponse =
@@ -204,7 +204,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenGetCompanyByIdButCompanyNotFoundThenThrowEntityNotFoundException() {
+  void whenGetCompanyById_ButCompanyNotFound_ThenThrowEntityNotFoundException() {
     // Arrange
     var expectedErrorMessage =
         String.format("%s id [%d] not found", TourCompany.class.getSimpleName(), TOUR_COMPANY_ID);
@@ -219,7 +219,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenUpdateCompanyByIdThenSuccess() {
+  void whenUpdateCompanyById_ThenSuccess() {
     // Arrange
     var TOUR_NAME_TO_UPDATE = "Your Tour";
     var body = TourCompanyUpdateRequest.of(TOUR_NAME_TO_UPDATE, null);
@@ -244,7 +244,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenUpdateCompanyByIdButNotFoundThenThrowException() {
+  void whenUpdateCompanyById_ButNotFound_ThenThrowException() {
     // Arrange
     var expectedErrorMessage =
         String.format(
@@ -262,7 +262,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenDeleteCompanyByIdThenSuccess() {
+  void whenDeleteCompanyById_ThenSuccess() {
     // Arrange
     var mockTourCompany =
         TourCompany.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.APPROVED.name());
@@ -277,7 +277,7 @@ class TourCompanyServiceTest {
   }
 
   @Test
-  void whenDeleteCompanyByIdButTourCompanyNotFoundThenThrowNotFoundException() {
+  void whenDeleteCompanyById_ButTourCompanyNotFound_ThenThrowNotFoundException() {
     // Arrange
     var expectedErrorMessage =
         String.format(
