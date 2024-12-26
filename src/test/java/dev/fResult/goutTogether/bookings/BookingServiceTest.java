@@ -244,5 +244,28 @@ class BookingServiceTest {
       verify(bookingRepository, times(1)).deleteById(BOOKING_ID);
       verify(tourCountService, times(1)).decrementTourCount(TOUR_ID);
     }
+
+    @Test
+    void butQrCodeRefAlreadyIsNotExpiredYet_ThenSuccessWithoutDecrementTourCount() {
+      // Arrange
+      var body = BookingCancellationRequest.of(TOUR_ID);
+      var authentication = buildAuthentication(USER_ID);
+      var existingBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
+      var mockActivatedQrCodeRef = buildActivatedQrCodeRef(1, BOOKING_ID);
+      var expectedRefundedBookingInfo =
+          BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.CANCELLED, null);
+
+      when(bookingRepository.findById(BOOKING_ID)).thenReturn(Optional.of(existingBooking));
+      when(qrCodeService.getQrCodeRefByBookingId(BOOKING_ID)).thenReturn(mockActivatedQrCodeRef);
+
+      // Actual
+      var actualRefundedBookingInfo =
+          bookingService.cancelTour(authentication, BOOKING_ID, body, IDEMPOTENT_KEY);
+
+      // Assert
+      assertEquals(expectedRefundedBookingInfo, actualRefundedBookingInfo);
+      verify(bookingRepository, never()).deleteById(anyInt());
+      verify(tourCountService, never()).decrementTourCount(anyInt());
+    }
   }
 }
