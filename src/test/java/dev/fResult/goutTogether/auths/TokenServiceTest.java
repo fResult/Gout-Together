@@ -1,10 +1,11 @@
 package dev.fResult.goutTogether.auths;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import dev.fResult.goutTogether.auths.dtos.AuthenticatedUser;
+import dev.fResult.goutTogether.auths.entities.RefreshToken;
 import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.repositories.RefreshTokenRepository;
@@ -21,8 +22,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 
 @ExtendWith(MockitoExtension.class)
 class TokenServiceTest {
@@ -128,5 +131,22 @@ class TokenServiceTest {
       // Assert
       assertEquals(expectedIssuedRefreshToken, actualIssuedRefreshToken);
     }
+  }
+
+  @Test
+  void whenEncodeClaimToJwt_ThenSuccess() {
+    // Arrange
+    var claims = JwtClaimsSet.builder().claim("key", "value").build();
+    var expectedEncodedJwt = "encoded_jwt";
+    var mockJwt = mock(Jwt.class);
+
+    when(jwtEncoder.encode(any(JwtEncoderParameters.class))).thenReturn(mockJwt);
+    when(mockJwt.getTokenValue()).thenReturn(expectedEncodedJwt);
+
+    // Actual
+    var actualEncodedJwt = tokenService.encodeClaimToJwt(claims);
+
+    // Assert
+    assertEquals(expectedEncodedJwt, actualEncodedJwt);
   }
 }
