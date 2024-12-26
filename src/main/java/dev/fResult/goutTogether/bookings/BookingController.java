@@ -117,7 +117,11 @@ public class BookingController {
           tourCountRepository
               .findOneByTourId(booking.tourId())
               .orElseThrow(
-                  errorHelper.entityWithSubResourceNotFound("updateTourCountById", TourCount.class, "tourId", String.valueOf(booking.tourId().getId())));
+                  errorHelper.entityWithSubResourceNotFound(
+                      "updateTourCountById",
+                      TourCount.class,
+                      "tourId",
+                      String.valueOf(booking.tourId().getId())));
 
       var tourCountToUpdate = tourCount.increaseAmount(value);
 
