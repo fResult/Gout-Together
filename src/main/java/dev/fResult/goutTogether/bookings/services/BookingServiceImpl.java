@@ -68,7 +68,7 @@ public class BookingServiceImpl implements BookingService {
 
     var existingBookingOpt =
         bookingRepository.findOneByUserIdAndTourId(
-            AggregateReference.to(userId), AggregateReference.to(tourId));
+            AggregateReference.to(Integer.valueOf(userId)), AggregateReference.to(tourId));
 
     Predicate<Booking> isCompletedBooking =
         booking -> Objects.equals(booking.status(), BookingStatus.COMPLETED.name());
