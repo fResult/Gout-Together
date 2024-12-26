@@ -219,4 +219,14 @@ class TokenServiceTest {
       assertEquals(OLD_TOKEN, actualNewToken);
     }
   }
+
+  @Test
+  void cleanupExpiredRefreshToken() {
+    // Actual
+    tokenService.cleanupExpiredRefreshToken();
+
+    // Assert
+    verify(refreshTokenRepository, times(1))
+        .updateRefreshTokenThatExpired(eq(true), any(Instant.class));
+  }
 }
