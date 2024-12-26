@@ -1,7 +1,7 @@
 package dev.fResult.goutTogether.bookings;
 
-import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
 import dev.fResult.goutTogether.bookings.dtos.BookingCancellationRequest;
+import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
 import dev.fResult.goutTogether.bookings.services.BookingService;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tours.entities.Tour;
@@ -55,7 +55,7 @@ public class BookingController {
     return ResponseEntity.created(createdUri).body(createdTourBooking);
   }
 
-  @DeleteMapping("/{id}/cancel")
+  @PutMapping("/{id}/cancel")
   public ResponseEntity<BookingInfoResponse> cancelTourById(
       @UUID(message = "wrong format for headers `idempotent-key`") @RequestHeader("idempotent-key")
           String idempotentKey,

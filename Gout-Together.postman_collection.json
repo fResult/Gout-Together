@@ -1899,7 +1899,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"firstName\": \"User\",\n    \"lastName\": \"User\",\n    \"email\": \"user2@test.com\",\n    \"password\": \"12345678\",\n    \"phoneNumber\": \"0999999990\"\n}",
+							"raw": "{\n    \"firstName\": \"User\",\n    \"lastName\": \"User\",\n    \"email\": \"user1@test.com\",\n    \"password\": \"12345678\",\n    \"phoneNumber\": \"0999999990\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1933,35 +1933,6 @@
 								"{{apiVersion}}",
 								"users",
 								"6"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "My User",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{accessToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/{{apiVersion}}/users/me",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"{{apiVersion}}",
-								"users",
-								"me"
 							]
 						}
 					},
@@ -2279,7 +2250,7 @@
 								}
 							]
 						},
-						"method": "DELETE",
+						"method": "PUT",
 						"header": [
 							{
 								"key": "idempotent-key",
@@ -2297,14 +2268,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/{{apiVersion}}/bookings/17/cancel",
+							"raw": "{{baseUrl}}/{{apiVersion}}/bookings/27/cancel",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"{{apiVersion}}",
 								"bookings",
-								"17",
+								"27",
 								"cancel"
 							]
 						}
@@ -2477,7 +2448,7 @@
 							"variable": [
 								{
 									"key": "booking-id",
-									"value": "9"
+									"value": "27"
 								}
 							]
 						}
