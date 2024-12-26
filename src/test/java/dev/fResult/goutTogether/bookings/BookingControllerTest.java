@@ -227,6 +227,7 @@ class SimpleServiceTest {
   private final int USER_ID = 9;
   private final int BOOKING_ID = 59;
   private final int TOUR_ID = 101;
+  private final int NOT_FOUND_TOUR_ID = 99999;
   private final String IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
 
   @InjectMocks private BookingController bookingController;
@@ -303,14 +304,14 @@ class SimpleServiceTest {
   @Test
   void whenIncreaseTourCountByBookingId_ButTourCountNotFound_ThenVerifyActions() {
     // Arrange
-    var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-    var mockCompletedBooking = buildCompletedBooking(BOOKING_ID, USER_ID, TOUR_ID);
+    var notFoundTourRef = AggregateReference.<Tour, Integer>to(NOT_FOUND_TOUR_ID);
+    var mockCompletedBooking = buildCompletedBooking(BOOKING_ID, USER_ID, NOT_FOUND_TOUR_ID);
     var expectedErrorMessage =
         String.format(
-            "%s with %s [%d] not found", TourCount.class.getSimpleName(), "tourId", TOUR_ID);
+            "%s with %s [%d] not found", TourCount.class.getSimpleName(), "tourId", NOT_FOUND_TOUR_ID);
 
     when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(mockCompletedBooking));
-    when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.empty());
+    when(tourCountRepository.findOneByTourId(notFoundTourRef)).thenReturn(Optional.empty());
 
     // Actual
     Executable actualExecutable = () -> simpleService.updateTourCountById(BOOKING_ID, 5);
@@ -319,7 +320,7 @@ class SimpleServiceTest {
     var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
     verify(bookingRepository, times(1)).findById(BOOKING_ID);
-    verify(tourCountRepository, times(1)).findOneByTourId(tourRef);
+    verify(tourCountRepository, times(1)).findOneByTourId(notFoundTourRef);
     verify(tourCountRepository, never()).save(any(TourCount.class));
   }
 
