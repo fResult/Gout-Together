@@ -5,8 +5,9 @@ import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+import dev.fResult.goutTogether.bookings.dtos.BookingCancellationRequest;
 import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
 import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.bookings.repositories.BookingRepository;
@@ -84,6 +85,11 @@ class BookingServiceTest {
   private QrCodeReference buildActivatedQrCodeRef(int id, int bookingId) {
     return QrCodeReference.of(
         id, bookingId, String.format("%s/%d", API_PAYMENT_PATH, bookingId), QrCodeStatus.ACTIVATED);
+  }
+
+  private QrCodeReference buildExpiredQrCodeRef(int id, int bookingId) {
+    return QrCodeReference.of(
+        id, bookingId, String.format("%s/%d", API_PAYMENT_PATH, bookingId), QrCodeStatus.EXPIRED);
   }
 
   @Test
@@ -211,6 +217,32 @@ class BookingServiceTest {
       // Assert
       var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecution);
       assertEquals(expectedErrorMessage, exception.getMessage());
+    }
+  }
+
+  @Nested
+  class CancelTourTest {
+    @Test
+    void thenSuccessWithDecrementTourCount() {
+      // Arrange
+      var body = BookingCancellationRequest.of(TOUR_ID);
+      var authentication = buildAuthentication(USER_ID);
+      var existingBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
+      var mockExpiredQrCodeRef = buildExpiredQrCodeRef(1, BOOKING_ID);
+      var expectedRefundedBookingInfo =
+          BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.CANCELLED, null);
+
+      when(bookingRepository.findById(BOOKING_ID)).thenReturn(Optional.of(existingBooking));
+      when(qrCodeService.getQrCodeRefByBookingId(BOOKING_ID)).thenReturn(mockExpiredQrCodeRef);
+
+      // Actual
+      var actualRefundedBookingInfo =
+          bookingService.cancelTour(authentication, BOOKING_ID, body, IDEMPOTENT_KEY);
+
+      // Assert
+      assertEquals(expectedRefundedBookingInfo, actualRefundedBookingInfo);
+      verify(bookingRepository, times(1)).deleteById(BOOKING_ID);
+      verify(tourCountService, times(1)).decrementTourCount(TOUR_ID);
     }
   }
 }
