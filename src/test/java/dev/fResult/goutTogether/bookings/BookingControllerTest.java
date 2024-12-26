@@ -3,7 +3,7 @@ package dev.fResult.goutTogether.bookings;
 import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
 import static dev.fResult.goutTogether.common.Constants.ROLES_CLAIM;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -11,18 +11,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.fResult.goutTogether.bookings.dtos.BookingCancellationRequest;
 import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
 import dev.fResult.goutTogether.bookings.entities.Booking;
+import dev.fResult.goutTogether.bookings.repositories.BookingRepository;
 import dev.fResult.goutTogether.bookings.services.BookingService;
 import dev.fResult.goutTogether.common.enumurations.BookingStatus;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.common.exceptions.BookingExistsException;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.utils.UUIDV7;
+import dev.fResult.goutTogether.tours.entities.Tour;
+import dev.fResult.goutTogether.tours.entities.TourCount;
 import dev.fResult.goutTogether.tours.repositories.TourCountRepository;
+import dev.fResult.goutTogether.users.entities.User;
+import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -33,6 +44,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(BookingController.class)
+@ExtendWith(MockitoExtension.class)
 class BookingControllerTest {
   private final String BOOKING_API = "/api/v1/bookings";
   private final int USER_ID = 9;
@@ -44,14 +56,17 @@ class BookingControllerTest {
   @Autowired private WebApplicationContext webApplicationContext;
   @Autowired private ObjectMapper objectMapper;
 
-  @MockitoBean private BookingService bookingService;
-  @MockitoBean private TourCountRepository tourCountRepository;
+  @MockitoBean @Mock private BookingService bookingService;
+  @MockitoBean @Mock private TourCountRepository tourCountRepository;
+  @MockitoBean @Mock private BookingRepository bookingRepository;
 
   private MockMvc mockMvc;
+  private BookingController.SimpleService simpleService;
 
   @BeforeEach
   public void setup() {
     mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    simpleService = new BookingController(bookingService, tourCountRepository, bookingRepository).new SimpleService();
   }
 
   private Authentication buildAuthentication(int resourceId, UserRoleName roleName, String email) {
@@ -170,5 +185,35 @@ class BookingControllerTest {
     resultActions
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.detail").value(expectedErrorMessage));
+  }
+
+  @Nested
+  class SimpleServiceTest {
+    @Test
+    void whenUpdateTourCountByBookingId_ThenVerifyActions() {
+      // Arrange
+      var TOUR_COUNT_ID = 99;
+      var AMOUNT_TO_ADD = 5;
+      var TOUR_COUNT_AMOUNT = 10;
+      var TOUR_COUNT_AMOUNT_AFTER_ADDED = TOUR_COUNT_AMOUNT + AMOUNT_TO_ADD;
+      var userRef = AggregateReference.<User, Integer>to(USER_ID);
+      var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+      var mockBooking = Booking.of(BOOKING_ID, userRef, tourRef, BookingStatus.COMPLETED.name(), Instant.now(), Instant.now().minusSeconds(12), IDEMPOTENT_KEY);
+      var mockTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT);
+      var mockIncresedTourCount =
+          TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT_AFTER_ADDED);
+
+      when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(mockBooking));
+      when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.of(mockTourCount));
+      when(tourCountRepository.save(any(TourCount.class))).thenReturn(mockIncresedTourCount);
+
+      // Actual
+      simpleService.updateTourCountById(BOOKING_ID, 5);
+
+      // Assert
+      verify(bookingRepository, times(1)).findById(BOOKING_ID);
+      verify(tourCountRepository, times(1)).findOneByTourId(tourRef);
+      verify(tourCountRepository, times(1)).save(mockIncresedTourCount);
+    }
   }
 }

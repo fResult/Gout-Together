@@ -2,6 +2,8 @@ package dev.fResult.goutTogether.bookings;
 
 import dev.fResult.goutTogether.bookings.dtos.BookingCancellationRequest;
 import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
+import dev.fResult.goutTogether.bookings.entities.Booking;
+import dev.fResult.goutTogether.bookings.repositories.BookingRepository;
 import dev.fResult.goutTogether.bookings.services.BookingService;
 import dev.fResult.goutTogether.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tours.entities.Tour;
@@ -34,10 +36,16 @@ public class BookingController {
 
   // Note: For Pessimistic Lock Testing Purpose
   private final TourCountRepository tourCountRepository;
+  private final BookingRepository bookingRepository;
 
-  public BookingController(BookingService bookingService, TourCountRepository tourCountRepository) {
+  public BookingController(
+      BookingService bookingService,
+      TourCountRepository tourCountRepository,
+      BookingRepository bookingRepository) {
+
     this.bookingService = bookingService;
     this.tourCountRepository = tourCountRepository;
+    this.bookingRepository = bookingRepository;
   }
 
   @PostMapping("/tours/{tourId}")
@@ -100,14 +108,18 @@ public class BookingController {
     // Simulate Race Condition
     @Transactional
     public void updateTourCountById(Integer bookingId, int value) {
-      var tourCount =
-          tourCountRepository
+      var booking =
+          bookingRepository
               .findById(bookingId)
               .orElseThrow(
-                  errorHelper.entityNotFound("updateTourCountById", TourCount.class, bookingId));
+                  errorHelper.entityNotFound("updateTourCountById", Booking.class, bookingId));
+      var tourCount =
+          tourCountRepository
+              .findOneByTourId(booking.tourId())
+              .orElseThrow(
+                  errorHelper.entityWithSubResourceNotFound("updateTourCountById", TourCount.class, "tourId", String.valueOf(booking.tourId().getId())));
 
-      var amountToUpdate = tourCount.amount() + value;
-      var tourCountToUpdate = TourCount.of(tourCount.id(), tourCount.tourId(), amountToUpdate);
+      var tourCountToUpdate = tourCount.increaseAmount(value);
 
       var updatedTourCount = tourCountRepository.save(tourCountToUpdate);
       System.out.println("[updateTourCountById] TourCount is Updated: " + updatedTourCount);
@@ -127,8 +139,7 @@ public class BookingController {
                       "tourId",
                       String.valueOf(tourId)));
 
-      var amountToUpdate = tourCount.amount() + value;
-      var tourCountToUpdate = TourCount.of(tourCount.id(), tourCount.tourId(), amountToUpdate);
+      var tourCountToUpdate = tourCount.increaseAmount(value);
 
       var updatedTourCount = tourCountRepository.save(tourCountToUpdate);
       System.out.println("[updateTourCountByTourId] TourCount is Updated: " + updatedTourCount);
