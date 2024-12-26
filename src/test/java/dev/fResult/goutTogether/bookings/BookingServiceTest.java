@@ -232,8 +232,8 @@ class BookingServiceTest {
       var expectedRefundedBookingInfo =
           BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.CANCELLED, null);
 
-      when(bookingRepository.findById(BOOKING_ID)).thenReturn(Optional.of(existingBooking));
-      when(qrCodeService.getQrCodeRefByBookingId(BOOKING_ID)).thenReturn(mockExpiredQrCodeRef);
+      when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(existingBooking));
+      when(qrCodeService.getQrCodeRefByBookingId(anyInt())).thenReturn(mockExpiredQrCodeRef);
 
       // Actual
       var actualRefundedBookingInfo =
@@ -255,8 +255,8 @@ class BookingServiceTest {
       var expectedRefundedBookingInfo =
           BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.CANCELLED, null);
 
-      when(bookingRepository.findById(BOOKING_ID)).thenReturn(Optional.of(existingBooking));
-      when(qrCodeService.getQrCodeRefByBookingId(BOOKING_ID)).thenReturn(mockActivatedQrCodeRef);
+      when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(existingBooking));
+      when(qrCodeService.getQrCodeRefByBookingId(anyInt())).thenReturn(mockActivatedQrCodeRef);
 
       // Actual
       var actualRefundedBookingInfo =
