@@ -74,6 +74,13 @@ class BookingServiceTest {
         IDEMPOTENT_KEY);
   }
 
+  private Authentication buildAuthentication(int userId) {
+    var jwt =
+        Jwt.withTokenValue("token").header("alg", "none").claim(RESOURCE_ID_CLAIM, userId).build();
+
+    return new JwtAuthenticationToken(jwt);
+  }
+
   private QrCodeReference buildActivatedQrCodeRef(int id, int bookingId) {
     return QrCodeReference.of(
         id, bookingId, String.format("%s/%d", API_PAYMENT_PATH, bookingId), QrCodeStatus.ACTIVATED);
@@ -107,13 +114,6 @@ class BookingServiceTest {
 
     // Assert
     assertEquals(expectedBooking, actualBooking);
-  }
-
-  private Authentication buildAuthentication(int userId) {
-    var jwt =
-        Jwt.withTokenValue("token").header("alg", "none").claim(RESOURCE_ID_CLAIM, userId).build();
-
-    return new JwtAuthenticationToken(jwt);
   }
 
   @Nested
