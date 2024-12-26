@@ -2,6 +2,7 @@ package dev.fResult.goutTogether.bookings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import dev.fResult.goutTogether.bookings.entities.Booking;
@@ -49,7 +50,7 @@ class BookingServiceTest {
             BOOKED_TIME,
             IDEMPOTENT_KEY);
 
-    when(bookingRepository.findById(BOOKING_ID)).thenReturn(Optional.of(booking));
+    when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(booking));
 
     // Actual
     var actualBooking = bookingService.findBookingById(BOOKING_ID);
@@ -57,5 +58,20 @@ class BookingServiceTest {
     // Assert
     assertTrue(actualBooking.isPresent());
     assertEquals(booking, actualBooking.get());
+  }
+
+  @Test
+  void whenFindBookingById_ButNotFound_thenReturnOptionalEmpty() {
+    // Arrange
+    final var NOT_FOUND_BOOKING_ID = 99999;
+    final var expectedBooking = Optional.<Booking>empty();
+
+    when(bookingRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+    // Actual
+    var actualBooking = bookingService.findBookingById(NOT_FOUND_BOOKING_ID);
+
+    // Assert
+    assertEquals(expectedBooking, actualBooking);
   }
 }
