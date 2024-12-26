@@ -132,5 +132,41 @@ class BookingServiceTest {
       // Assert
       assertEquals(expectedBookingInfo, actualBooking);
     }
+
+    @Test
+    void whenBookTour_ButBookingExists_thenReturnExistingBooking() {
+      // Arrange
+      final var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
+      final var BOOKING_ID = 1;
+      final var USER_ID = 1;
+      final var TOUR_ID = 1;
+      final var BOOKED_TIME = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+      var authentication = buildAuthentication(USER_ID);
+      var userRef = AggregateReference.<User, Integer>to(USER_ID);
+      var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+      var mockQrCodeRef =
+              QrCodeReference.of(1, BOOKING_ID, API_PAYMENT_PATH, QrCodeStatus.ACTIVATED);
+      var exitingBooking =
+          Booking.of(
+              BOOKING_ID,
+              userRef,
+              tourRef,
+              BookingStatus.PENDING.name(),
+              BOOKED_TIME,
+              BOOKED_TIME,
+              IDEMPOTENT_KEY);
+      var expectedExistingBookingInfo =
+          BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.PENDING, 1);
+
+      when(bookingRepository.findOneByUserIdAndTourId(userRef, tourRef))
+          .thenReturn(Optional.of(exitingBooking));
+      when(qrCodeService.getQrCodeRefByBookingId(anyInt())).thenReturn(mockQrCodeRef);
+
+      // Actual
+      var actualBooking = bookingService.bookTour(authentication, TOUR_ID, IDEMPOTENT_KEY);
+
+      // Assert
+      assertEquals(expectedExistingBookingInfo, actualBooking);
+    }
   }
 }
