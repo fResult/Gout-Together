@@ -105,7 +105,24 @@ class BookingControllerTest {
   }
 
   @Test
-  void whenBookingTourByTourId_ButUserTourAlreadyBooked_ThenReturn409() throws Exception {
+  void whenBookTourByTourId_ButInvalidIdempotentKey_ThenReturn400() throws Exception {
+    // Arrange
+    var INVALID_IDEMPOTENT_KEY = "invalid-idempotent-key";
+    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            post(BOOKING_API + "/tours/{tourId}", TOUR_ID)
+                .principal(authentication)
+                .header("idempotent-key", INVALID_IDEMPOTENT_KEY));
+
+    // Assert
+    resultActions.andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void whenBookTourByTourId_ButUserTourAlreadyBooked_ThenReturn409() throws Exception {
     // Arrange
     var TOUR_ID = 120;
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
