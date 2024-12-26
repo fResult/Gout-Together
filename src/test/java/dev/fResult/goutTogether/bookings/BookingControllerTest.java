@@ -31,7 +31,7 @@ import org.springframework.web.context.WebApplicationContext;
 @WebMvcTest(BookingController.class)
 class BookingControllerTest {
   private final String BOOKING_API = "/api/v1/bookings";
-  private int USER_ID = 9;
+  private final int USER_ID = 9;
   private final String EMAIL = "email@example.com";
   private final String IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
 
@@ -83,7 +83,8 @@ class BookingControllerTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").value(BOOKING_ID))
         .andExpect(jsonPath("$.userId").value(USER_ID))
-        .andExpect(jsonPath("$.tourId").value(TOUR_ID));
+        .andExpect(jsonPath("$.tourId").value(TOUR_ID))
+        .andExpect(jsonPath("$.status").value(BookingStatus.COMPLETED.name()));
   }
 
   @Test
