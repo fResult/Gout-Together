@@ -26,9 +26,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(BookingController.class)
-@ExtendWith(MockitoExtension.class)
 class BookingControllerTest {
   private final String BOOKING_API = "/api/v1/bookings";
   private final int USER_ID = 9;
@@ -56,9 +55,9 @@ class BookingControllerTest {
   @Autowired private WebApplicationContext webApplicationContext;
   @Autowired private ObjectMapper objectMapper;
 
-  @MockitoBean @Mock private BookingService bookingService;
-  @MockitoBean @Mock private TourCountRepository tourCountRepository;
-  @MockitoBean @Mock private BookingRepository bookingRepository;
+  @MockitoBean private BookingService bookingService;
+  @MockitoBean private TourCountRepository tourCountRepository;
+  @MockitoBean private BookingRepository bookingRepository;
 
   private MockMvc mockMvc;
   private BookingController.SimpleService simpleService;
@@ -66,10 +65,6 @@ class BookingControllerTest {
   @BeforeEach
   public void setup() {
     mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-
-    var bookingController =
-        new BookingController(bookingService, tourCountRepository, bookingRepository);
-    simpleService = bookingController.new SimpleService();
   }
 
   private Authentication buildAuthentication(int resourceId, UserRoleName roleName, String email) {
@@ -189,65 +184,82 @@ class BookingControllerTest {
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.detail").value(expectedErrorMessage));
   }
+}
 
-  @Nested
-  class SimpleServiceTest {
-    @Test
-    void whenIncreaseTourCountByBookingId_ThenVerifyActions() {
-      // Arrange
-      var TOUR_COUNT_ID = 99;
-      var AMOUNT_TO_ADD = 5;
-      var TOUR_COUNT_AMOUNT = 10;
-      var TOUR_COUNT_AMOUNT_AFTER_ADDED = TOUR_COUNT_AMOUNT + AMOUNT_TO_ADD;
-      var userRef = AggregateReference.<User, Integer>to(USER_ID);
-      var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-      var mockBooking =
-          Booking.of(
-              BOOKING_ID,
-              userRef,
-              tourRef,
-              BookingStatus.COMPLETED.name(),
-              Instant.now(),
-              Instant.now().minusSeconds(12),
-              IDEMPOTENT_KEY);
-      var mockTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT);
-      var mockIncresedTourCount =
-          TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT_AFTER_ADDED);
+@ExtendWith(MockitoExtension.class)
+class SimpleServiceTest {
+  private final int USER_ID = 9;
+  private final int BOOKING_ID = 59;
+  private final int TOUR_ID = 101;
+  private final String IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
 
-      when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(mockBooking));
-      when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.of(mockTourCount));
-      when(tourCountRepository.save(any(TourCount.class))).thenReturn(mockIncresedTourCount);
+  @InjectMocks private BookingController bookingController;
 
-      // Actual
-      simpleService.updateTourCountById(BOOKING_ID, 5);
+  @Mock private BookingService bookingService;
+  @Mock private TourCountRepository tourCountRepository;
+  @Mock private BookingRepository bookingRepository;
 
-      // Assert
-      verify(bookingRepository, times(1)).findById(BOOKING_ID);
-      verify(tourCountRepository, times(1)).findOneByTourId(tourRef);
-      verify(tourCountRepository, times(1)).save(mockIncresedTourCount);
-    }
+  private BookingController.SimpleService simpleService;
 
-    @Test
-    void whenIncreaseTourCountByTourId_ThenVerifyActions() {
-      // Arrange
-      var TOUR_COUNT_ID = 99;
-      var AMOUNT_TO_ADD = 5;
-      var TOUR_COUNT_AMOUNT = 10;
-      var TOUR_COUNT_AMOUNT_AFTER_ADDED = TOUR_COUNT_AMOUNT + AMOUNT_TO_ADD;
-      var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-      var mockTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT);
-      var mockIncresedTourCount =
-          TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT_AFTER_ADDED);
+  @BeforeEach
+  public void setup() {
+    simpleService = bookingController.new SimpleService();
+  }
 
-      when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.of(mockTourCount));
-      when(tourCountRepository.save(any(TourCount.class))).thenReturn(mockIncresedTourCount);
+  @Test
+  void whenIncreaseTourCountByBookingId_ThenVerifyActions() {
+    // Arrange
+    var TOUR_COUNT_ID = 99;
+    var AMOUNT_TO_ADD = 5;
+    var TOUR_COUNT_AMOUNT = 10;
+    var TOUR_COUNT_AMOUNT_AFTER_ADDED = TOUR_COUNT_AMOUNT + AMOUNT_TO_ADD;
+    var userRef = AggregateReference.<User, Integer>to(USER_ID);
+    var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+    var mockBooking =
+        Booking.of(
+            BOOKING_ID,
+            userRef,
+            tourRef,
+            BookingStatus.COMPLETED.name(),
+            Instant.now(),
+            Instant.now().minusSeconds(12),
+            IDEMPOTENT_KEY);
+    var mockTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT);
+    var mockIncresedTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT_AFTER_ADDED);
 
-      // Actual
-      simpleService.updateTourCountByTourId(TOUR_ID, 5);
+    when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(mockBooking));
+    when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.of(mockTourCount));
+    when(tourCountRepository.save(any(TourCount.class))).thenReturn(mockIncresedTourCount);
 
-      // Assert
-      verify(tourCountRepository, times(1)).findOneByTourId(tourRef);
-      verify(tourCountRepository, times(1)).save(mockIncresedTourCount);
-    }
+    // Actual
+    simpleService.updateTourCountById(BOOKING_ID, 5);
+
+    // Assert
+    verify(bookingRepository, times(1)).findById(BOOKING_ID);
+    verify(tourCountRepository, times(1)).findOneByTourId(tourRef);
+    verify(tourCountRepository, times(1)).save(mockIncresedTourCount);
+  }
+
+
+  @Test
+  void whenIncreaseTourCountByTourId_ThenVerifyActions() {
+    // Arrange
+    var TOUR_COUNT_ID = 99;
+    var AMOUNT_TO_ADD = 5;
+    var TOUR_COUNT_AMOUNT = 10;
+    var TOUR_COUNT_AMOUNT_AFTER_ADDED = TOUR_COUNT_AMOUNT + AMOUNT_TO_ADD;
+    var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+    var mockTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT);
+    var mockIncresedTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT_AFTER_ADDED);
+
+    when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.of(mockTourCount));
+    when(tourCountRepository.save(any(TourCount.class))).thenReturn(mockIncresedTourCount);
+
+    // Actual
+    simpleService.updateTourCountByTourId(TOUR_ID, 5);
+
+    // Assert
+    verify(tourCountRepository, times(1)).findOneByTourId(tourRef);
+    verify(tourCountRepository, times(1)).save(mockIncresedTourCount);
   }
 }
