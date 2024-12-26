@@ -164,4 +164,20 @@ class TokenServiceTest {
     // Assert
     assertTrue(actualIsRefreshTokenExpired);
   }
+
+  @Test
+  void whenRefreshTokenNotExpired_ThenReturnFalse() {
+    // Arrange
+    var USER_ID = 1;
+    var ISSUED_AT_599_SECS_AGO =
+        Instant.now().minusSeconds(REFRESH_TOKEN_EXPIRED_IN_600_SECONDS - 1);
+    var refreshTokenInput =
+        RefreshToken.of(1, "token", ISSUED_AT_599_SECS_AGO, UserRoleName.CONSUMER, USER_ID, false);
+
+    // Actual
+    var actualIsRefreshTokenExpired = tokenService.isRefreshTokenExpired(refreshTokenInput);
+
+    // Assert
+    assertFalse(actualIsRefreshTokenExpired);
+  }
 }
