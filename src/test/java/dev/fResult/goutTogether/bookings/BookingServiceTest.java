@@ -267,5 +267,51 @@ class BookingServiceTest {
       verify(tourCountService, never()).decrementTourCount(anyInt());
       verify(paymentService, never()).refundBooking(any(Booking.class), anyString());
     }
+
+    @Test
+    void butBookingNotFound_ThenThrowException() {
+      // Arrange
+      var NOT_FOUND_BOOKING_ID = 99999;
+      var body = BookingCancellationRequest.of(TOUR_ID);
+      var authentication = buildAuthentication(USER_ID);
+      var expectedErrorMessage =
+          String.format(
+              "%s id [%d] not found", Booking.class.getSimpleName(), NOT_FOUND_BOOKING_ID);
+
+      when(bookingRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+      // Actual
+      Executable actualExecution =
+          () ->
+              bookingService.cancelTour(authentication, NOT_FOUND_BOOKING_ID, body, IDEMPOTENT_KEY);
+
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecution);
+      assertEquals(expectedErrorMessage, exception.getMessage());
+    }
+
+    @Test
+    void butQrCodeRefNotFound_ThenThrowException() {
+      // Arrange
+      var body = BookingCancellationRequest.of(TOUR_ID);
+      var authentication = buildAuthentication(USER_ID);
+      var existingBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
+      var expectedErrorMessage =
+          String.format(
+              "%s with bookingId [%d] not found",
+              QrCodeReference.class.getSimpleName(), BOOKING_ID);
+
+      when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(existingBooking));
+      when(qrCodeService.getQrCodeRefByBookingId(anyInt()))
+          .thenThrow(new EntityNotFoundException(expectedErrorMessage));
+
+      // Actual
+      Executable actualExecution =
+          () -> bookingService.cancelTour(authentication, BOOKING_ID, body, IDEMPOTENT_KEY);
+
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecution);
+      assertEquals(expectedErrorMessage, exception.getMessage());
+    }
   }
 }
