@@ -142,7 +142,7 @@ public class BookingServiceImpl implements BookingService {
       booking -> {
         throw new BookingExistsException(
             String.format(
-                "UserId: [%d] already booked tourId [%d]",
+                "UserId [%d] already booked tourId [%d]",
                 booking.userId().getId(), booking.tourId().getId()));
       };
 }

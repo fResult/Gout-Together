@@ -78,6 +78,14 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
     return ResponseEntity.of(detail).build();
   }
 
+  @ExceptionHandler(BookingExistsException.class)
+  protected ResponseEntity<?> handleBookingExistsException(BookingExistsException ex) {
+    var detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    logger.warn("Booking exists: {}", ex.getMessage());
+
+    return ResponseEntity.of(detail).build();
+  }
+
   @ExceptionHandler(RefreshTokenExpiredException.class)
   protected ResponseEntity<?> handleRefreshTokenExpiredException(RefreshTokenExpiredException ex) {
     var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
