@@ -41,7 +41,7 @@ class TourServiceTest {
   @Mock private TourCountService tourCountService;
 
   @Test
-  void whenGetToursThenSuccess() {
+  void whenGetTours_ThenSuccess() {
     // Arrange
     var tours =
         List.of(
@@ -65,7 +65,7 @@ class TourServiceTest {
   }
 
   @Test
-  void whenGetTourByIdThenSuccess() {
+  void whenGetTourById_ThenSuccess() {
     // Arrange
     var TOUR_ID = 1;
     var mockTour =
@@ -88,7 +88,7 @@ class TourServiceTest {
   }
 
   @Test
-  void whenGetTourByIdButTourNotFoundThenThrowEntityNotfoundException() {
+  void whenGetTourById_ButTourNotFound_ThenThrowEntityNotfoundException() {
     // Arrange
     var TOUR_ID = 99999;
     var expectedErrorMessage =
@@ -104,7 +104,7 @@ class TourServiceTest {
   }
 
   @Test
-  void whenCreateTourThenSuccess() {
+  void whenCreateTour_ThenSuccess() {
     // Arrange
     var TOUR_COMPANY_ID = 1;
     var body =
@@ -143,7 +143,7 @@ class TourServiceTest {
   }
 
   @Test
-  void whenCreateTourButTourCompanyNotFoundThenSuccess() {
+  void whenCreateTour_ButTourCompanyNotFound_ThenSuccess() {
     // Arrange
     var TOUR_COMPANY_ID = 99999;
     var body =

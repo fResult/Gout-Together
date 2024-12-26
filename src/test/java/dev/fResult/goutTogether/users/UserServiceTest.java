@@ -55,7 +55,7 @@ class UserServiceTest {
   }
 
   @Test
-  void whenGetUsersThenSuccess() {
+  void whenGetUsers_ThenSuccess() {
     // Arrange
     var ANOTHER_USER_ID = 2;
     var mockUser1 = User.of(USER_ID, "John", "Wick", "0999999999");
@@ -103,7 +103,7 @@ class UserServiceTest {
   }
 
   @Test
-  void whenGetUserByIdThenSuccess() {
+  void whenGetUserById_ThenSuccess() {
     // Arrange
     var mockUser = User.of(USER_ID, "John", "Wick", "0999999999");
     var mockUserCredential =
@@ -126,7 +126,7 @@ class UserServiceTest {
   }
 
   @Test
-  void whenGetUserByIdButNotFoundThenThrowException() {
+  void whenGetUserById_ButNotFound_ThenThrowException() {
     // Arrange
     var expectedErrorMessage =
         String.format("%s id [%d] not found", User.class.getSimpleName(), NOT_FOUND_USER_ID);
@@ -141,7 +141,7 @@ class UserServiceTest {
   }
 
   @Test
-  void whenRegisterUserThenSuccess() {
+  void whenRegisterUser_ThenSuccess() {
     // Arrange
     var mockUserRef = AggregateReference.<User, Integer>to(USER_ID);
     var mockRoleRef = AggregateReference.<Role, Integer>to(UserRoleName.CONSUMER.getId());
@@ -177,7 +177,7 @@ class UserServiceTest {
   }
 
   @Test
-  void whenRegisterUserButUserEmailExistsThenThrowException() {
+  void whenRegisterUser_ButUserEmailExists_ThenThrowException() {
     // Arrange
     var expectedErrorMessage =
         String.format("%s email [%s] already exists", User.class.getSimpleName(), EXISTING_EMAIL);
@@ -196,7 +196,7 @@ class UserServiceTest {
   }
 
   @Test
-  void whenUpdateUserByIdThenSuccess() {
+  void whenUpdateUserById_ThenSuccess() {
     // Arrange
     var LAST_NAME_TO_UPDATE = "Constantine";
     var PHONE_NUMBER_TO_UPDATE = "0888888888";
@@ -226,7 +226,7 @@ class UserServiceTest {
   }
 
   @Test
-  void whenUpdateUserByIdButNotFoundThenThrowException() {
+  void whenUpdateUserById_ButNotFound_ThenThrowException() {
     // Arrange
     var expectedErrorMessage =
         String.format("%s id [%d] not found", User.class.getSimpleName(), NOT_FOUND_USER_ID);
@@ -242,7 +242,7 @@ class UserServiceTest {
   }
 
   @Test()
-  void whenChangePasswordByUserIdThenSuccess() {
+  void whenChangePasswordByUserId_ThenSuccess() {
     // Arrange
     var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
     var mockUserCredential = buildUserCredential(USER_ID, EXISTING_EMAIL);
@@ -259,7 +259,7 @@ class UserServiceTest {
   }
 
   @Test()
-  void whenChangePasswordByUserIdButUserNotFoundThenReturn404() {
+  void whenChangePasswordByUserId_ButUserNotFound_ThenReturn404() {
     // Arrange
     var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
     var expectedErrorMessage =
@@ -277,7 +277,7 @@ class UserServiceTest {
   }
 
   @Test()
-  void whenChangePasswordByEmailThenSuccess() {
+  void whenChangePasswordByEmail_ThenSuccess() {
     // Arrange
     var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
     var mockUserCredential = buildUserCredential(USER_ID, EXISTING_EMAIL);
@@ -293,7 +293,7 @@ class UserServiceTest {
   }
 
   @Test()
-  void whenChangePasswordByEmailButUserNotFoundThenReturn404() {
+  void whenChangePasswordByEmail_ButUserNotFound_ThenReturn404() {
     // Arrange
     var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
     var expectedErrorMessage =
@@ -311,7 +311,7 @@ class UserServiceTest {
   }
 
   @Test
-  void whenDeleteUserByIdThenSuccess() {
+  void whenDeleteUserById_ThenSuccess() {
     // Arrange
     var mockUserToDelete = User.of(USER_ID, "John", "Wick", "0999999999");
     var mockDeleteCredentialSuccess = true;
@@ -333,7 +333,7 @@ class UserServiceTest {
   }
 
   @Test
-  void whenDeleteUserByIdButNotFoundThenThrowException() {
+  void whenDeleteUserById_ButNotFound_ThenThrowException() {
     // Arrange
     var expectedErrorMessage =
         String.format("%s id [%d] not found", User.class.getSimpleName(), NOT_FOUND_USER_ID);

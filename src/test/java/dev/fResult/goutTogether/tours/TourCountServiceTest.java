@@ -36,7 +36,7 @@ class TourCountServiceTest {
   @Mock private TourService tourService;
 
   @Test
-  void whenCreateTourCountThenSuccess() {
+  void whenCreateTourCount_ThenSuccess() {
     // Arrange
     var mockCreatedTourCount = TourCount.of(null, AggregateReference.to(TOUR_ID), 0);
     when(tourCountRepository.save(mockCreatedTourCount)).thenReturn(mockCreatedTourCount);
@@ -49,7 +49,7 @@ class TourCountServiceTest {
   }
 
   @Test
-  void whenIncrementTourCountThenSuccess() {
+  void whenIncrementTourCount_ThenSuccess() {
     // Arrange
     var TOUR_COUNT_ID = 3;
     var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
@@ -76,7 +76,7 @@ class TourCountServiceTest {
   }
 
   @Test
-  void whenIncrementTourCountButTourNotFoundThenThrowException() {
+  void whenIncrementTourCount_ButTourNotFound_ThenThrowException() {
     // Arrange
     var expectedErrorMessage =
         String.format("%s with id [%d] not found", Tour.class.getSimpleName(), NOT_FOUND_TOUR_ID);
@@ -92,7 +92,7 @@ class TourCountServiceTest {
   }
 
   @Test
-  void whenIncrementTourCountButTourCountNotFoundThenThrowException() {
+  void whenIncrementTourCount_ButTourCountNotFound_ThenThrowException() {
     // Arrange
     var expectedErrorMessage =
         String.format(
@@ -110,7 +110,7 @@ class TourCountServiceTest {
   }
 
   @Test
-  void whenIncrementTourCountButTourAmountExceededLimitThenThrowException() {
+  void whenIncrementTourCount_ButTourAmountExceededLimit_ThenThrowException() {
     // Arrange
     var TOUR_AMOUNT_LIMIT = 5;
     var expectedErrorMessage =
@@ -140,7 +140,7 @@ class TourCountServiceTest {
   }
 
   @Test
-  void whenDecrementTourCountThenSuccess() {
+  void whenDecrementTourCount_ThenSuccess() {
     // Arrange
     var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
     var tourCount = TourCount.of(1, tourRef, 5);
@@ -156,7 +156,7 @@ class TourCountServiceTest {
   }
 
   @Test
-  void whenDecrementTourCountButTourCountNotFoundThenThrowException() {
+  void whenDecrementTourCount_ButTourCountNotFound_ThenThrowException() {
     // Arrange
     var expectedErrorMessage =
         String.format(

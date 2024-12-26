@@ -51,7 +51,7 @@ class TourControllerTest {
   }
 
   @Test
-  void whenGetToursThenSuccess() throws Exception {
+  void whenGetTours_ThenSuccess() throws Exception {
     // Arrange
     var params = new LinkedMultiValueMap<>(Map.of("page", List.of("0"), "size", List.of("10")));
     var tours =
@@ -79,7 +79,7 @@ class TourControllerTest {
   }
 
   @Test
-  void whenGetToursButForgotRequiredQueryParamsThenReturn400() throws Exception {
+  void whenGetTours_ButForgotRequiredQueryParams_ThenReturn400() throws Exception {
     // Arrange
     var params = new LinkedMultiValueMap<String, String>();
 
@@ -91,7 +91,7 @@ class TourControllerTest {
   }
 
   @Test
-  void whenGetTourByIdThenSuccess() throws Exception {
+  void whenGetTourById_ThenSuccess() throws Exception {
     // Arrange
     var mockTour =
         Tour.of(
@@ -113,7 +113,7 @@ class TourControllerTest {
   }
 
   @Test
-  void whenGetTourByIdButTourNotFoundThen404() throws Exception {
+  void whenGetTourById_ButTourNotFound_Then404() throws Exception {
     // Arrange
     when(tourService.getTourById(anyInt())).thenThrow(new EntityNotFoundException());
 
@@ -125,7 +125,7 @@ class TourControllerTest {
   }
 
   @Test
-  void whenGetTourByIdButServerErrorThenReturn500() throws Exception {
+  void whenGetTourById_ButServerError_ThenReturn500() throws Exception {
     // Arrange
     when(tourService.getTourById(anyInt()))
         .thenThrow(new InternalServerErrorException("Mock Error"));
@@ -138,7 +138,7 @@ class TourControllerTest {
   }
 
   @Test
-  void whenCreateTourThenSuccess() throws Exception {
+  void whenCreateTour_ThenSuccess() throws Exception {
     // Arrange
     var TOUR_COMPANY_ID = 1;
     var body =
@@ -174,7 +174,7 @@ class TourControllerTest {
   }
 
   @Test
-  void whenCreateTourButMissingSomeFieldsThenReturn400() throws Exception {
+  void whenCreateTour_ButMissingSomeFields_ThenReturn400() throws Exception {
     // Arrange
     var TOUR_COMPANY_ID = 1;
     var body =
