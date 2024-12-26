@@ -51,7 +51,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenGetCompaniesThenSuccess() throws Exception {
+  void whenGetCompanies_ThenSuccess() throws Exception {
     // Arrange
     var mockTourCompany1 =
         TourCompanyResponse.of(TOUR_COMPANY_ID_1, "My Tour 1", TourCompanyStatus.WAITING);
@@ -72,7 +72,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenGetCompanyByIdThenSuccess() throws Exception {
+  void whenGetCompanyById_ThenSuccess() throws Exception {
     // Arrange
     var mockTourCompany =
         TourCompanyResponse.of(TOUR_COMPANY_ID_1, "My Tour", TourCompanyStatus.APPROVED);
@@ -86,7 +86,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenGetCompanyByIdButCompanyNotFoundThenReturn404() throws Exception {
+  void whenGetCompanyById_ButCompanyNotFound_ThenReturn404() throws Exception {
     // Arrange
     when(tourCompanyService.getTourCompanyById(anyInt())).thenThrow(EntityNotFoundException.class);
 
@@ -98,7 +98,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenGetMyTourCompanyThenSuccess() throws Exception {
+  void whenGetMyTourCompany_ThenSuccess() throws Exception {
     // Arrange
     var mockJwt =
         Jwt.withTokenValue("token")
@@ -120,7 +120,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenRegisterCompanyThenSuccess() throws Exception {
+  void whenRegisterCompany_ThenSuccess() throws Exception {
     // Arrange
     var body = TourCompanyRegistrationRequest.of("My Tour", "MyTour123", "mypassword", null);
     var mockTourCompany =
@@ -142,7 +142,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenRegisterCompanyButUsernameIsInvalidThenReturn400() throws Exception {
+  void whenRegisterCompany_ButUsernameIsInvalid_ThenReturn400() throws Exception {
     // Arrange
     var INVALID_USERNAME = "MyTour";
     var body = TourCompanyRegistrationRequest.of("My Tour", INVALID_USERNAME, "mypassword", null);
@@ -161,7 +161,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenRegisterCompanyButCompanyUsernameIsAlreadyExistsThenReturn409() throws Exception {
+  void whenRegisterCompany_ButCompanyUsernameIsAlreadyExists_ThenReturn409() throws Exception {
     // Arrange
     var body = TourCompanyRegistrationRequest.of("My Tour", "MyTour123", "mypassword", null);
     when(tourCompanyService.registerTourCompany(any(TourCompanyRegistrationRequest.class)))
@@ -179,7 +179,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenApproveCompanyThenSuccess() throws Exception {
+  void whenApproveCompany_ThenSuccess() throws Exception {
     // Arrange
     var mockTourCompany =
         TourCompanyResponse.of(TOUR_COMPANY_ID_1, "My Tour", TourCompanyStatus.APPROVED);
@@ -197,7 +197,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenApproveCompanyButCompanyIsAlreadyApprovedThenReturn422() throws Exception {
+  void whenApproveCompany_ButCompanyIsAlreadyApproved_ThenReturn422() throws Exception {
     // Arrange
     when(tourCompanyService.approveTourCompany(TOUR_COMPANY_ID_1))
         .thenThrow(ValidationException.class);
@@ -211,7 +211,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenApproveCompanyButCompanyNotFoundThenReturn404() throws Exception {
+  void whenApproveCompany_ButCompanyNotFound_ThenReturn404() throws Exception {
     // Arrange
     when(tourCompanyService.approveTourCompany(anyInt())).thenThrow(EntityNotFoundException.class);
 
@@ -224,7 +224,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenUpdateCompanyThenSuccess() throws Exception {
+  void whenUpdateCompany_ThenSuccess() throws Exception {
     // Arrange
     var STATUS_TO_UPDATE = TourCompanyStatus.BANNED;
     var body = TourCompanyUpdateRequest.of(null, STATUS_TO_UPDATE);
@@ -247,7 +247,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenUpdateCompanyByIdButCompanyNotFoundThenReturn404() throws Exception {
+  void whenUpdateCompanyById_ButCompanyNotFound_ThenReturn404() throws Exception {
     // Arrange
     var body = TourCompanyUpdateRequest.of("My Tour", TourCompanyStatus.APPROVED);
     when(tourCompanyService.updateTourCompanyById(anyInt(), any(TourCompanyUpdateRequest.class)))
@@ -265,7 +265,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenDeleteCompanyByIdThenSuccess() throws Exception {
+  void whenDeleteCompanyById_ThenSuccess() throws Exception {
     // Arrange
     var expectedResponseMessage =
         String.format("Delete %s by id [%d] successfully", "TourCompany", TOUR_COMPANY_ID_1);
@@ -281,7 +281,7 @@ class TourCompanyControllerTest {
   }
 
   @Test
-  void whenDeleteCompanyByIdButCompanyNotFoundThenReturn404() throws Exception {
+  void whenDeleteCompanyById_ButCompanyNotFound_ThenReturn404() throws Exception {
     // Arrange
     when(tourCompanyService.deleteTourCompanyById(anyInt()))
         .thenThrow(new EntityNotFoundException());

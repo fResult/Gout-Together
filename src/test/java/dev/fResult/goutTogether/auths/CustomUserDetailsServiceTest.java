@@ -37,7 +37,7 @@ class CustomUserDetailsServiceTest {
   @Mock private TourCompanyLoginRepository tourCompanyLoginRepository;
 
   @Test
-  void whenLoadUserAdminDetailsByEmailSuccess() {
+  void whenLoadUserAdminDetailsByEmail_ThenSuccess() {
     // Arrange
     var USER_ID = 1;
     var ROLE = UserRoleName.ADMIN;
@@ -83,7 +83,7 @@ class CustomUserDetailsServiceTest {
   }
 
   @Test
-  void whenLoadUserDetailsByUsernameButUserNotFoundThenThrowException() {
+  void whenLoadUserDetailsByUsername_ButUserNotFound_ThenThrowException() {
     // Arrange
     var NOT_FOUND_EMAIL = "in_existing@email.com";
     var expectedErrorMessage =
@@ -101,7 +101,7 @@ class CustomUserDetailsServiceTest {
   }
 
   @Test
-  void whenLoadUserDetailsByUsernameButUserRoleNotFoundThenThrowException() {
+  void whenLoadUserDetailsByUsername_ButUserRoleNotFound_ThenThrowException() {
     // Arrange
     var NOT_FOUND_USER_ID = 99999;
     var expectedErrorMessage =
@@ -145,7 +145,7 @@ class CustomUserDetailsServiceTest {
   }
 
   @Test
-  void whenLoadCompanyDetailsByUsernameButCompanyNotFoundThenThrowException() {
+  void whenLoadCompanyDetailsByUsername_ButCompanyNotFound_ThenThrowException() {
     // Arrange
     var NOT_FOUND_USERNAME = "NonExistentCompany";
     var expectedErrorMessage =

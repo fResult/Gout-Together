@@ -123,7 +123,7 @@ class PaymentServiceTest {
   }
 
   @Test
-  void whenGenerateQrCodeThenSuccess() throws WriterException {
+  void whenGenerateQrCode_ThenSuccess() throws WriterException {
     // Arrange
     var mockQrCodeImage = new BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB);
 
@@ -137,7 +137,7 @@ class PaymentServiceTest {
   }
 
   @Test
-  void whenPayByBookingIdThenSuccess() {
+  void whenPayByBookingId_ThenSuccess() {
     // Arrange
     var TOUR_ID = 1;
     var userRef = AggregateReference.<User, Integer>to(USER_ID);
@@ -198,7 +198,7 @@ class PaymentServiceTest {
   }
 
   @Test
-  void whenPayByBookingIdButBookingNotFoundThenThrowException() {
+  void whenPayByBookingId_ButBookingNotFound_ThenThrowException() {
     // Arrange
     var expectedErrorMessage =
         String.format("%s id [%d] not found", Booking.class.getSimpleName(), BOOKING_ID);
@@ -213,7 +213,7 @@ class PaymentServiceTest {
   }
 
   @Test
-  void whenRefundBookingThenSuccess() {
+  void whenRefundBooking_ThenSuccess() {
     // Arrange
     var bookingRef = AggregateReference.<Booking, Integer>to(BOOKING_ID);
     var userRef = AggregateReference.<User, Integer>to(USER_ID);

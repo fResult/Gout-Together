@@ -50,7 +50,7 @@ class TokenServiceTest {
   @Nested
   class IssueAccessToken {
     @Test
-    void byAuthenticatedUserThenSuccess() {
+    void byAuthenticatedUser_ThenSuccess() {
       // Arrange
       var authenticatedUser =
           AuthenticatedUser.of(1, "email@example.com", "P@$$w0rd", UserRoleName.ADMIN);
@@ -65,7 +65,7 @@ class TokenServiceTest {
     }
 
     @Test
-    void byUserLoginThenSuccess() {
+    void byUserLogin_ThenSuccess() {
       // Arrange
       var USER_ID = 1;
       var userLogin =
@@ -86,7 +86,7 @@ class TokenServiceTest {
     }
 
     @Test
-    void byTourCompanyLoginThenSuccess() {
+    void byTourCompanyLogin_ThenSuccess() {
       // Arrange
       var TOUR_COMPANY_ID = 1;
       var tourCompanyLogin =
@@ -114,13 +114,13 @@ class TokenServiceTest {
   }
 
   @Test
-  void issueRefreshTokenThenSuccess() {
-    try (var mockedUUID = mockStatic(UUIDV7.class)) {
+  void issueRefreshToken_ThenSuccess() {
+    try (var mockedUUIDV7 = mockStatic(UUIDV7.class)) {
       // Arrange
       var mockRefreshToken = UUID.fromString("cc468bab-17c5-4ded-b94a-7a7d85993bcb");
       var expectedIssuedRefreshToken = mockRefreshToken.toString();
 
-      mockedUUID.when(UUIDV7::randomUUID).thenReturn(mockRefreshToken);
+      mockedUUIDV7.when(UUIDV7::randomUUID).thenReturn(mockRefreshToken);
 
       // Actual
       var actualIssuedRefreshToken = tokenService.issueRefreshToken();

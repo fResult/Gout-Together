@@ -58,7 +58,7 @@ class AuthControllerTest {
   }
 
   @Test
-  void whenLoginThenSuccess() throws Exception {
+  void whenLogin_ThenSuccess() throws Exception {
     // Arrange
     var body = new LoginRequest("username", "password");
     var expectedLoggedInUser =
@@ -82,7 +82,7 @@ class AuthControllerTest {
   }
 
   @Test
-  void whenRefreshTokenThenSuccess() throws Exception {
+  void whenRefreshToken_ThenSuccess() throws Exception {
     // Arrange
     var refreshToken = UUIDV7.randomUUID().toString();
     var body = new RefreshTokenRequest(UserRoleName.CONSUMER, USER_ID, refreshToken);
@@ -107,7 +107,7 @@ class AuthControllerTest {
   }
 
   @Test
-  void whenLogoutThenSuccess() throws Exception {
+  void whenLogout_ThenSuccess() throws Exception {
     // Arrange
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
     var mockLogoutInfoInput = LogoutInfo.of(USER_ID, UserRoleName.CONSUMER.name());
