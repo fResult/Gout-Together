@@ -44,6 +44,19 @@ class BookingServiceTest {
   @Mock private TourCountService tourCountService;
   @Mock private PaymentService paymentService;
 
+  private Booking buildPendingBooking(int bookingId, int userId, int tourId) {
+    final var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
+    final var BOOKED_TIME = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+    return Booking.of(
+        bookingId,
+        AggregateReference.to(userId),
+        AggregateReference.to(tourId),
+        BookingStatus.PENDING.name(),
+        BOOKED_TIME,
+        BOOKED_TIME,
+        IDEMPOTENT_KEY);
+  }
+
   @Test
   void whenFindBookingById_thenSuccess() {
     // Arrange
@@ -52,15 +65,7 @@ class BookingServiceTest {
     final var USER_ID = 1;
     final var TOUR_ID = 1;
     final var BOOKED_TIME = Instant.now().truncatedTo(ChronoUnit.SECONDS);
-    var booking =
-        Booking.of(
-            BOOKING_ID,
-            AggregateReference.to(USER_ID),
-            AggregateReference.to(TOUR_ID),
-            BookingStatus.PENDING.name(),
-            BOOKED_TIME,
-            BOOKED_TIME,
-            IDEMPOTENT_KEY);
+    var booking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
 
     when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(booking));
 
@@ -97,7 +102,7 @@ class BookingServiceTest {
   @Nested
   class BookTourTest {
     @Test
-    void whenBookTour_thenSuccess() {
+    void thenSuccess() {
       // Arrange
       final var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
       final var BOOKING_ID = 1;
@@ -106,18 +111,9 @@ class BookingServiceTest {
       var authentication = buildAuthentication(USER_ID);
       var userRef = AggregateReference.<User, Integer>to(USER_ID);
       var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-      var createdBooking =
-          Booking.of(
-              BOOKING_ID,
-              userRef,
-              tourRef,
-              BookingStatus.PENDING.name(),
-              Instant.now(),
-              Instant.now(),
-              IDEMPOTENT_KEY);
+      var createdBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
       var mockQrCodeRef =
           QrCodeReference.of(1, BOOKING_ID, API_PAYMENT_PATH, QrCodeStatus.ACTIVATED);
-
       var expectedBookingInfo =
           BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.PENDING, 1);
 
@@ -134,7 +130,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void whenBookTour_ButBookingExists_thenReturnExistingBooking() {
+    void butBookingExists_thenReturnExistingBooking() {
       // Arrange
       final var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
       final var BOOKING_ID = 1;
@@ -145,7 +141,21 @@ class BookingServiceTest {
       var userRef = AggregateReference.<User, Integer>to(USER_ID);
       var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
       var mockQrCodeRef =
-              QrCodeReference.of(1, BOOKING_ID, API_PAYMENT_PATH, QrCodeStatus.ACTIVATED);
+          QrCodeReference.of(1, BOOKING_ID, API_PAYMENT_PATH, QrCodeStatus.ACTIVATED);
+      var exitingBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
+      var expectedExistingBookingInfo =
+          BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.PENDING, 1);
+
+      when(bookingRepository.findOneByUserIdAndTourId(userRef, tourRef))
+          .thenReturn(Optional.of(exitingBooking));
+      when(qrCodeService.getQrCodeRefByBookingId(anyInt())).thenReturn(mockQrCodeRef);
+
+      // Actual
+      var actualBooking = bookingService.bookTour(authentication, TOUR_ID, IDEMPOTENT_KEY);
+
+      // Assert
+      assertEquals(expectedExistingBookingInfo, actualBooking);
+    }
       var exitingBooking =
           Booking.of(
               BOOKING_ID,
