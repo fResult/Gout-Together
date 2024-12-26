@@ -15,6 +15,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class QrCodeHelperTest {
   @Test
+  void whenGenerateQrCodeImageIsCalled_thenNoExceptionIsThrown() {
+    // Arrange
+    var barcodeText = "Hello, World!";
+
+    // Actual
+    try {
+      QrCodeHelper.generateQrCodeImage(barcodeText);
+    } catch (Exception ex) {
+      // Assert
+      throw new AssertionError("An exception was thrown when it shouldn't have been.", ex);
+    }
+  }
+
+  @Test
   void whenGenerateQrCode_ThenSuccess() throws WriterException {
     try (var mockedMatrixToImageWriter = mockStatic(MatrixToImageWriter.class)) {
       // Arrange
