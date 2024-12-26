@@ -29,8 +29,8 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 
 @ExtendWith(MockitoExtension.class)
 class TokenServiceTest {
-  private final long accessTokenExpiredInSeconds = 120;
-  private final long refreshTokenExpiredInSeconds = 180;
+  private final long ACCESS_TOKEN_EXPIRED_IN_120_SECONDS = 120;
+  private final long REFRESH_TOKEN_EXPIRED_IN_600_SECONDS = 600;
 
   @Mock private RefreshTokenRepository refreshTokenRepository;
   @Mock private CustomUserDetailsService userDetailsService;
@@ -45,8 +45,8 @@ class TokenServiceTest {
             new TokenService(
                 refreshTokenRepository,
                 userDetailsService,
-                accessTokenExpiredInSeconds,
-                refreshTokenExpiredInSeconds,
+                ACCESS_TOKEN_EXPIRED_IN_120_SECONDS,
+                REFRESH_TOKEN_EXPIRED_IN_600_SECONDS,
                 jwtEncoder));
   }
 
@@ -148,5 +148,20 @@ class TokenServiceTest {
 
     // Assert
     assertEquals(expectedEncodedJwt, actualEncodedJwt);
+  }
+
+  @Test
+  void whenRefreshTokenExpired_ThenReturnTrue() {
+    // Arrange
+    var USER_ID = 1;
+    var ISSUED_AT_600_SECS_AGO = Instant.now().minusSeconds(REFRESH_TOKEN_EXPIRED_IN_600_SECONDS);
+    var refreshTokenInput =
+        RefreshToken.of(1, "token", ISSUED_AT_600_SECS_AGO, UserRoleName.CONSUMER, USER_ID, false);
+
+    // Actual
+    var actualIsRefreshTokenExpired = tokenService.isRefreshTokenExpired(refreshTokenInput);
+
+    // Assert
+    assertTrue(actualIsRefreshTokenExpired);
   }
 }
