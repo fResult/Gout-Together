@@ -226,5 +226,28 @@ class BookingControllerTest {
       verify(tourCountRepository, times(1)).findOneByTourId(tourRef);
       verify(tourCountRepository, times(1)).save(mockIncresedTourCount);
     }
+
+    @Test
+    void whenIncreaseTourCountByTourId_ThenVerifyActions() {
+      // Arrange
+      var TOUR_COUNT_ID = 99;
+      var AMOUNT_TO_ADD = 5;
+      var TOUR_COUNT_AMOUNT = 10;
+      var TOUR_COUNT_AMOUNT_AFTER_ADDED = TOUR_COUNT_AMOUNT + AMOUNT_TO_ADD;
+      var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+      var mockTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT);
+      var mockIncresedTourCount =
+          TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT_AFTER_ADDED);
+
+      when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.of(mockTourCount));
+      when(tourCountRepository.save(any(TourCount.class))).thenReturn(mockIncresedTourCount);
+
+      // Actual
+      simpleService.updateTourCountByTourId(TOUR_ID, 5);
+
+      // Assert
+      verify(tourCountRepository, times(1)).findOneByTourId(tourRef);
+      verify(tourCountRepository, times(1)).save(mockIncresedTourCount);
+    }
   }
 }
