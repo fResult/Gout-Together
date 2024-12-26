@@ -39,6 +39,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 @ExtendWith(MockitoExtension.class)
 class BookingServiceTest {
   final String IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
+  final int BOOKING_ID = 1;
+  final int USER_ID = 1;
+  final int TOUR_ID = 1;
   final Instant BOOKED_TIME = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 
   @InjectMocks private BookingServiceImpl bookingService;
@@ -73,11 +76,6 @@ class BookingServiceTest {
   @Test
   void whenFindBookingById_thenSuccess() {
     // Arrange
-    final var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
-    final var BOOKING_ID = 1;
-    final var USER_ID = 1;
-    final var TOUR_ID = 1;
-    final var BOOKED_TIME = Instant.now().truncatedTo(ChronoUnit.SECONDS);
     var booking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
 
     when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(booking));
@@ -117,10 +115,6 @@ class BookingServiceTest {
     @Test
     void thenSuccess() {
       // Arrange
-      final var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
-      final var BOOKING_ID = 1;
-      final var USER_ID = 1;
-      final var TOUR_ID = 1;
       var authentication = buildAuthentication(USER_ID);
       var userRef = AggregateReference.<User, Integer>to(USER_ID);
       var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
@@ -145,11 +139,6 @@ class BookingServiceTest {
     @Test
     void butBookingExists_thenReturnExistingBooking() {
       // Arrange
-      final var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
-      final var BOOKING_ID = 1;
-      final var USER_ID = 1;
-      final var TOUR_ID = 1;
-      final var BOOKED_TIME = Instant.now().truncatedTo(ChronoUnit.SECONDS);
       var authentication = buildAuthentication(USER_ID);
       var userRef = AggregateReference.<User, Integer>to(USER_ID);
       var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
@@ -174,10 +163,6 @@ class BookingServiceTest {
     void butBookingAlreadyCompleted_ThenThrowException() {
       // Arrange
       final var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
-      final var BOOKING_ID = 1;
-      final var USER_ID = 1;
-      final var TOUR_ID = 1;
-      final var BOOKED_TIME = Instant.now().truncatedTo(ChronoUnit.SECONDS);
       var authentication = buildAuthentication(USER_ID);
       var userRef = AggregateReference.<User, Integer>to(USER_ID);
       var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
