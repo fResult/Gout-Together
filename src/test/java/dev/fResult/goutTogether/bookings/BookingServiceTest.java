@@ -14,6 +14,7 @@ import dev.fResult.goutTogether.bookings.services.BookingServiceImpl;
 import dev.fResult.goutTogether.common.enumurations.BookingStatus;
 import dev.fResult.goutTogether.common.enumurations.QrCodeStatus;
 import dev.fResult.goutTogether.common.exceptions.BookingExistsException;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.utils.UUIDV7;
 import dev.fResult.goutTogether.payments.services.PaymentService;
 import dev.fResult.goutTogether.qrcodes.QrCodeReference;
@@ -73,6 +74,11 @@ class BookingServiceTest {
         IDEMPOTENT_KEY);
   }
 
+  private QrCodeReference buildActivatedQrCodeRef(int id, int bookingId) {
+    return QrCodeReference.of(
+        id, bookingId, String.format("%s/%d", API_PAYMENT_PATH, bookingId), QrCodeStatus.ACTIVATED);
+  }
+
   @Test
   void whenFindBookingById_thenSuccess() {
     // Arrange
@@ -119,8 +125,7 @@ class BookingServiceTest {
       var userRef = AggregateReference.<User, Integer>to(USER_ID);
       var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
       var createdBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
-      var mockQrCodeRef =
-          QrCodeReference.of(1, BOOKING_ID, API_PAYMENT_PATH, QrCodeStatus.ACTIVATED);
+      var mockQrCodeRef = buildActivatedQrCodeRef(1, BOOKING_ID);
       var expectedBookingInfo =
           BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.PENDING, 1);
 
@@ -142,8 +147,7 @@ class BookingServiceTest {
       var authentication = buildAuthentication(USER_ID);
       var userRef = AggregateReference.<User, Integer>to(USER_ID);
       var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-      var mockQrCodeRef =
-          QrCodeReference.of(1, BOOKING_ID, API_PAYMENT_PATH, QrCodeStatus.ACTIVATED);
+      var mockQrCodeRef = buildActivatedQrCodeRef(1, BOOKING_ID);
       var exitingBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
       var expectedExistingBookingInfo =
           BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.PENDING, 1);
@@ -166,8 +170,6 @@ class BookingServiceTest {
       var authentication = buildAuthentication(USER_ID);
       var userRef = AggregateReference.<User, Integer>to(USER_ID);
       var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-      var mockQrCodeRef =
-          QrCodeReference.of(1, BOOKING_ID, API_PAYMENT_PATH, QrCodeStatus.ACTIVATED);
       var exitingBooking = buildCompletedBooking(BOOKING_ID, USER_ID, TOUR_ID);
       var expectedErrorMessage =
           String.format("UserId [%d] already booked tourId [%d]", USER_ID, TOUR_ID);
@@ -181,6 +183,33 @@ class BookingServiceTest {
 
       // Assert
       var exception = assertThrowsExactly(BookingExistsException.class, actualExecution);
+      assertEquals(expectedErrorMessage, exception.getMessage());
+    }
+
+    @Test
+    void butBookingExistedAndQrCodeRefNotFound_ThenThrowException() {
+      // Arrange
+      var NOT_FOUND_BOOKING_ID = 99999;
+      var authentication = buildAuthentication(USER_ID);
+      var userRef = AggregateReference.<User, Integer>to(USER_ID);
+      var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+      var exitingBooking = buildPendingBooking(NOT_FOUND_BOOKING_ID, USER_ID, TOUR_ID);
+      var expectedErrorMessage =
+          String.format(
+              "%s with bookingId [%d] not found",
+              QrCodeReference.class.getSimpleName(), NOT_FOUND_BOOKING_ID);
+
+      when(bookingRepository.findOneByUserIdAndTourId(userRef, tourRef))
+          .thenReturn(Optional.of(exitingBooking));
+      when(qrCodeService.getQrCodeRefByBookingId(anyInt()))
+          .thenThrow(new EntityNotFoundException(expectedErrorMessage));
+
+      // Actual
+      Executable actualExecution =
+          () -> bookingService.bookTour(authentication, TOUR_ID, IDEMPOTENT_KEY);
+
+      // Assert
+      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecution);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
