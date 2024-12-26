@@ -66,7 +66,10 @@ class BookingControllerTest {
   @BeforeEach
   public void setup() {
     mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-    simpleService = new BookingController(bookingService, tourCountRepository, bookingRepository).new SimpleService();
+
+    var bookingController =
+        new BookingController(bookingService, tourCountRepository, bookingRepository);
+    simpleService = bookingController.new SimpleService();
   }
 
   private Authentication buildAuthentication(int resourceId, UserRoleName roleName, String email) {
@@ -190,7 +193,7 @@ class BookingControllerTest {
   @Nested
   class SimpleServiceTest {
     @Test
-    void whenUpdateTourCountByBookingId_ThenVerifyActions() {
+    void whenIncreaseTourCountByBookingId_ThenVerifyActions() {
       // Arrange
       var TOUR_COUNT_ID = 99;
       var AMOUNT_TO_ADD = 5;
@@ -198,7 +201,15 @@ class BookingControllerTest {
       var TOUR_COUNT_AMOUNT_AFTER_ADDED = TOUR_COUNT_AMOUNT + AMOUNT_TO_ADD;
       var userRef = AggregateReference.<User, Integer>to(USER_ID);
       var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-      var mockBooking = Booking.of(BOOKING_ID, userRef, tourRef, BookingStatus.COMPLETED.name(), Instant.now(), Instant.now().minusSeconds(12), IDEMPOTENT_KEY);
+      var mockBooking =
+          Booking.of(
+              BOOKING_ID,
+              userRef,
+              tourRef,
+              BookingStatus.COMPLETED.name(),
+              Instant.now(),
+              Instant.now().minusSeconds(12),
+              IDEMPOTENT_KEY);
       var mockTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT);
       var mockIncresedTourCount =
           TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT_AFTER_ADDED);
