@@ -67,7 +67,7 @@ class WalletServiceTest {
   }
 
   @Test
-  void whenCreateConsumerWalletThenSuccess() {
+  void whenCreateConsumerWallet_ThenSuccess() {
     // Arrange
     var USER_ID = 1;
     var mockCreatedUserWallet =
@@ -83,7 +83,7 @@ class WalletServiceTest {
   }
 
   @Test
-  void whenGetConsumerWalletThenSuccess() {
+  void whenGetConsumerWallet_ThenSuccess() {
     // Arrange
     var USER_ID = 1;
     var userRef = AggregateReference.<User, Integer>to(USER_ID);
@@ -101,7 +101,7 @@ class WalletServiceTest {
   }
 
   @Test
-  void whenGetConsumerWalletButNotFoundThenThrowEntityNotFoundException() {
+  void whenGetConsumerWallet_ButNotFound_ThenThrowEntityNotFoundException() {
     // Arrange
     var NOT_FOUND_USER_ID = 99999;
     var expectedErrorMessage =
@@ -120,7 +120,7 @@ class WalletServiceTest {
   }
 
   @Test
-  void whenCreateCompanyWalletThenSuccess() {
+  void whenCreateCompanyWallet_ThenSuccess() {
     // Arrange
     var COMPANY_ID = 1;
     var mockCreatedCompanyWallet =
@@ -191,7 +191,7 @@ class WalletServiceTest {
     }
 
     @Test
-    void butTransactionAlreadyExistsThenReturnUserWalletWithoutReTopUp() {
+    void butTransactionAlreadyExists_ThenReturnUserWalletWithoutReTopUp() {
       // Arrange
       var body = WalletTopUpRequest.of(AMOUNT);
       var userRef = AggregateReference.<User, Integer>to(USER_ID);
@@ -213,7 +213,7 @@ class WalletServiceTest {
     }
 
     @Test
-    void butWalletNotFoundThenThrowException() {
+    void butWalletNotFound_ThenThrowException() {
       // Arrange
       var expectedErrorMessage =
           String.format(
@@ -233,7 +233,7 @@ class WalletServiceTest {
   }
 
   @Test
-  void whenDeleteConsumerWalletThenSuccess() {
+  void whenDeleteConsumerWallet_ThenSuccess() {
     // Arrange
     var USER_ID = 1;
     var userRef = AggregateReference.<User, Integer>to(USER_ID);
@@ -250,7 +250,7 @@ class WalletServiceTest {
   }
 
   @Test
-  void whenGetCompanyWalletThenSuccess() {
+  void whenGetCompanyWallet_ThenSuccess() {
     // Arrange
     var TOUR_COMPANY_ID = 1;
     var companyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
@@ -269,7 +269,7 @@ class WalletServiceTest {
   }
 
   @Test
-  void whenGetCompanyWalletButNotFoundThenThrowEntityNotFoundException() {
+  void whenGetCompanyWallet_ButNotFound_ThenThrowEntityNotFoundException() {
     // Arrange
     var NOT_FOUND_USER_ID = 99999;
     var expectedErrorMessage =
@@ -345,7 +345,7 @@ class WalletServiceTest {
     }
 
     @Test
-    void butUserIdIsNullThenThrowException() {
+    void butUserIdIsNull_ThenThrowException() {
       // Arrange
       var TOUR_ID = 1;
       AggregateReference<User, Integer> userIdRef = null;
@@ -374,7 +374,7 @@ class WalletServiceTest {
     }
 
     @Test
-    void butTourCompanyIdIsNullThenThrowException() {
+    void butTourCompanyIdIsNull_ThenThrowException() {
       // Arrange
       var USER_ID = 1;
       AggregateReference<Tour, Integer> userIdRef = null;
@@ -402,7 +402,7 @@ class WalletServiceTest {
     }
 
     @Test
-    void butTourNotFoundThenThrowException() {
+    void butTourNotFound_ThenThrowException() {
       // Arrange
       var USER_ID = 1;
       var TOUR_ID = 1;
@@ -461,7 +461,7 @@ class WalletServiceTest {
     }
 
     @Test
-    void butWalletNotFoundThenThrowException() {
+    void butWalletNotFound_ThenThrowException() {
       // Arrange
       var NOT_FOUND_TOUR_COMPANY_ID = 99999;
       var body = WalletWithdrawRequest.of(BigDecimal.TEN);
@@ -528,7 +528,7 @@ class WalletServiceTest {
       }
 
       @Test
-      void butInsufficientBalanceThenThrowException() {
+      void butInsufficientBalance_ThenThrowException() {
         // Arrange
         var expectedErrorMessage =
             String.format(
@@ -591,7 +591,7 @@ class WalletServiceTest {
     }
 
     @Test
-    void forTopUpButUnsupportedThenThrowError() {
+    void forTopUp_ButUnsupported_ThenThrowError() {
       // Arrange
       var AMOUNT_TO_TRANSFER = BigDecimal.valueOf(200);
       var expectedErrorMessage =
@@ -614,7 +614,7 @@ class WalletServiceTest {
     }
 
     @Test
-    void forWithdrawButUnsupportedThenThrowError() {
+    void forWithdraw_ButUnsupported_ThenThrowError() {
       // Arrange
       var AMOUNT_TO_TRANSFER = BigDecimal.valueOf(200);
       var expectedErrorMessage =

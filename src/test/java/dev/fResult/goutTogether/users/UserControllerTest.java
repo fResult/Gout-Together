@@ -52,7 +52,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenGetUsersThenSuccess() throws Exception {
+  void whenGetUsers_ThenSuccess() throws Exception {
     // Arrange
     var TARGET_FIRST_NAME = "John";
     var params =
@@ -83,7 +83,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenGetUserByIdThenSuccess() throws Exception {
+  void whenGetUserById_ThenSuccess() throws Exception {
     // Arrange
     var mockUserResp =
         UserInfoResponse.of(USER_ID, "John", "Wick", "john.wick@example.com", "0999999999");
@@ -97,7 +97,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenGetUserByIdButUserNotFoundThenReturn404() throws Exception {
+  void whenGetUserById_ButUserNotFound_ThenReturn404() throws Exception {
     // Arrange
     when(userService.getUserById(anyInt())).thenThrow(EntityNotFoundException.class);
 
@@ -109,7 +109,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenRegisterUserThenSuccess() throws Exception {
+  void whenRegisterUser_ThenSuccess() throws Exception {
     // Arrange
     var body =
         UserRegistrationRequest.of(
@@ -131,7 +131,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenRegisterUserButEmailIsInvalidThenReturn400() throws Exception {
+  void whenRegisterUser_ButEmailIsInvalid_ThenReturn400() throws Exception {
     // Arrange
     var body = UserRegistrationRequest.of("John", "Wick", INVALID_EMAIL, "password", "0999999999");
     when(userService.registerUser(any(UserRegistrationRequest.class)))
@@ -149,7 +149,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenUpdateUserThenSuccess() throws Exception {
+  void whenUpdateUser_ThenSuccess() throws Exception {
     // Arrange
     var LAST_NAME_TO_UPDATE = "Constantine";
     var PHONE_NUMBER_TO_UPDATE = "0777777777";
@@ -176,7 +176,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenUpdateUserByIdButUserNotFoundThenReturn404() throws Exception {
+  void whenUpdateUserById_ButUserNotFound_ThenReturn404() throws Exception {
     // Arrange
     var body = UserUpdateRequest.of(null, "Constantine", "0777777777");
     when(userService.updateUserById(anyInt(), any(UserUpdateRequest.class)))
@@ -194,7 +194,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenRegisterUserButEmailIsAlreadyExistsThenReturn409() throws Exception {
+  void whenRegisterUser_ButEmailIsAlreadyExists_ThenReturn409() throws Exception {
     // Arrange
     var body =
         UserRegistrationRequest.of(
@@ -214,7 +214,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenChangePasswordThenSuccess() throws Exception {
+  void whenChangePassword_ThenSuccess() throws Exception {
     // Arrange
     var body = Map.of("oldPassword", "old-password", "newPassword", "new-password");
     var expectedUpdatePasswordResult = UpdatePasswordResult.SUCCESS;
@@ -235,7 +235,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenChangePasswordButCredentialNotFoundThenReturn404() throws Exception {
+  void whenChangePassword_ButCredentialNotFound_ThenReturn404() throws Exception {
     // Arrange
     var body = UserChangePasswordRequest.of("0ldP@$$w@rd", "N3wP@$$w0rd");
     when(userService.changePasswordByUserId(anyInt(), any(UserChangePasswordRequest.class)))
@@ -253,7 +253,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenDeleteUserByIdThenSuccess() throws Exception {
+  void whenDeleteUserById_ThenSuccess() throws Exception {
     // Arrange
     var responseMessage =
         String.format("Delete %s by id [%d] successfully", User.class.getSimpleName(), USER_ID);
@@ -267,7 +267,7 @@ public class UserControllerTest {
   }
 
   @Test
-  void whenDeleteUserByIdButUserNotFoundThenReturn404() throws Exception {
+  void whenDeleteUserById_ButUserNotFound_ThenReturn404() throws Exception {
     // Arrange
     when(userService.deleteUserById(anyInt())).thenThrow(EntityNotFoundException.class);
 

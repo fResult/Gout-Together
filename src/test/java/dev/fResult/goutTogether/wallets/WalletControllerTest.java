@@ -64,7 +64,7 @@ class WalletControllerTest {
   }
 
   @Test
-  void whenGetMyUserWalletThenSuccess() throws Exception {
+  void whenGetMyUserWallet_ThenSuccess() throws Exception {
     // Arrange
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
     var userWallet =
@@ -81,7 +81,7 @@ class WalletControllerTest {
   }
 
   @Test
-  void whenTopUpUserWalletThenSuccess() throws Exception {
+  void whenTopUpUserWallet_ThenSuccess() throws Exception {
     // Arrange
     var AMOUNT_TO_TOP_UP = BigDecimal.valueOf(300);
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
@@ -109,7 +109,7 @@ class WalletControllerTest {
   }
 
   @Test
-  void whenGetMyTourCompanyWalletThenSuccess() throws Exception {
+  void whenGetMyTourCompanyWallet_ThenSuccess() throws Exception {
     // Arrange
     var BALANCE = BigDecimal.valueOf(1_000_000);
     var authentication = buildAuthentication(TOUR_COMPANY_ID, UserRoleName.COMPANY);
@@ -129,7 +129,7 @@ class WalletControllerTest {
   }
 
   @Test
-  void whenWithdrawMoneyThenSuccess() throws Exception {
+  void whenWithdrawMoney_ThenSuccess() throws Exception {
     // Arrange
     var AMOUNT_TO_WITHDRAW = BigDecimal.valueOf(80_000);
     var BALANCE_AFTER_WITHDRAW = BigDecimal.valueOf(920_000);

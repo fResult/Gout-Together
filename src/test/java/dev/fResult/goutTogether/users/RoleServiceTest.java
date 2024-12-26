@@ -43,7 +43,7 @@ class RoleServiceTest {
   }
 
   @Test
-  void whenBindNewUserRoleThenSuccess() {
+  void whenBindNewUserRole_ThenSuccess() {
     // Arrange
     var USER_ID = 1;
     var ROLE = UserRoleName.CONSUMER;
@@ -60,7 +60,7 @@ class RoleServiceTest {
   }
 
   @Test
-  void whenDeleteUserRoleByUserIdThenSuccess() {
+  void whenDeleteUserRoleByUserId_ThenSuccess() {
     // Arrange
     var USER_ID = 1;
     var userRef = AggregateReference.<User, Integer>to(USER_ID);
@@ -77,7 +77,7 @@ class RoleServiceTest {
   }
 
   @Test
-  void whenDeleteUserRoleByUserIdButNotFoundThenThrowException() {
+  void whenDeleteUserRoleByUserId_ButNotFound_ThenThrowException() {
     // Arrange
     var USER_ID = 1;
     var userRef = AggregateReference.<User, Integer>to(USER_ID);

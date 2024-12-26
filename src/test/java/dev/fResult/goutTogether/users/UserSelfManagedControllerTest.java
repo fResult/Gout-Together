@@ -62,7 +62,7 @@ public class UserSelfManagedControllerTest {
   }
 
   @Test
-  void whenGetMyUserThenSuccess() throws Exception {
+  void whenGetMyUser_ThenSuccess() throws Exception {
     // Arrange
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
     when(userService.getUserById(USER_ID))
@@ -76,7 +76,7 @@ public class UserSelfManagedControllerTest {
   }
 
   @Test
-  void whenUpdateMyUserThenSuccess() throws Exception {
+  void whenUpdateMyUser_ThenSuccess() throws Exception {
     // Arrange
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
     var LAST_NAME_TO_UPDATE = "Utah";
@@ -101,7 +101,7 @@ public class UserSelfManagedControllerTest {
   }
 
   @Test
-  void whenUpdateMyUserButNotFoundThenReturn404() throws Exception {
+  void whenUpdateMyUser_ButNotFound_ThenReturn404() throws Exception {
     // Arrange
     var authentication = buildAuthentication(NOT_FOUND_USER_ID, UserRoleName.CONSUMER, EMAIL);
     var body = UserUpdateRequest.of(null, "Utah", null);
@@ -121,7 +121,7 @@ public class UserSelfManagedControllerTest {
   }
 
   @Test
-  void whenChangeMyPasswordThenSuccess() throws Exception {
+  void whenChangeMyPassword_ThenSuccess() throws Exception {
     // Arrange
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
     var body = UserChangePasswordRequest.of("0ldP@ssw0rd", "NewP@ssw0rd");
@@ -143,7 +143,7 @@ public class UserSelfManagedControllerTest {
   }
 
   @Test
-  void whenChangeMyPasswordButCredentialNotFoundThenReturn404() throws Exception {
+  void whenChangeMyPassword_ButCredentialNotFound_ThenReturn404() throws Exception {
     // Arrange
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
     var body = UserChangePasswordRequest.of("0ldP@ssw0rd", "NewP@ssw0rd");
@@ -163,7 +163,7 @@ public class UserSelfManagedControllerTest {
   }
 
   @Test
-  void whenDeleteMyUserThenSuccess() throws Exception {
+  void whenDeleteMyUser_ThenSuccess() throws Exception {
     // Arrange
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
     var expectedDeleteResult =
@@ -179,7 +179,7 @@ public class UserSelfManagedControllerTest {
   }
 
   @Test
-  void whenDeleteMyUserButUserNotFoundThenReturn404() throws Exception {
+  void whenDeleteMyUser_ButUserNotFound_ThenReturn404() throws Exception {
     // Arrange
     var authentication = buildAuthentication(NOT_FOUND_USER_ID, UserRoleName.CONSUMER, EMAIL);
     var expectedDeleteResult =
