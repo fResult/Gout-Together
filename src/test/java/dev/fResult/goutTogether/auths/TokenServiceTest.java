@@ -201,5 +201,22 @@ class TokenServiceTest {
       // Assert
       assertEquals(expectedNewToken, actualNewToken);
     }
+
+    @Test
+    void andNotReachTimeToRotateYet_ThenReturnOldToken() {
+      // Arrange
+      var USER_ID = 1;
+      var ISSUED_AT_479_SECS_AGO = Instant.now().minusSeconds(479);
+      var OLD_TOKEN = "old_token";
+      var refreshTokenInput =
+          RefreshToken.of(
+              1, OLD_TOKEN, ISSUED_AT_479_SECS_AGO, UserRoleName.CONSUMER, USER_ID, false);
+
+      // Actual
+      var actualNewToken = tokenService.rotateRefreshTokenIfNeed(refreshTokenInput);
+
+      // Assert
+      assertEquals(OLD_TOKEN, actualNewToken);
+    }
   }
 }
