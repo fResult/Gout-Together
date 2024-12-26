@@ -345,4 +345,25 @@ class SimpleServiceTest {
     verify(tourCountRepository, times(1)).findOneByTourId(tourRef);
     verify(tourCountRepository, times(1)).save(mockIncresedTourCount);
   }
+
+  @Test
+  void whenIncreaseTourCountByTourId_ButTourCountNotFound_ThenVerifyActions() {
+    // Arrange
+    var tourRef = AggregateReference.<Tour, Integer>to(NOT_FOUND_TOUR_ID);
+    var expectedErrorMessage =
+        String.format(
+            "%s with %s [%s] not found",
+            TourCount.class.getSimpleName(), "tourId", NOT_FOUND_TOUR_ID);
+
+    when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualExecutable = () -> simpleService.updateTourCountByTourId(NOT_FOUND_TOUR_ID, 5);
+
+    // Assert
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
+    verify(tourCountRepository, times(1)).findOneByTourId(tourRef);
+    verify(tourCountRepository, never()).save(any(TourCount.class));
+  }
 }
