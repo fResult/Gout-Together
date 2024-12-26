@@ -122,6 +122,23 @@ class BookingControllerTest {
   }
 
   @Test
+  void whenBookTourByTourId_ButTourIdIsInvalid_ThenReturn400() throws Exception {
+    // Arrange
+    var INVALID_TOUR_ID = 0;
+    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            post(BOOKING_API + "/tours/{tourId}", INVALID_TOUR_ID)
+                .principal(authentication)
+                .header("idempotent-key", IDEMPOTENT_KEY));
+
+    // Assert
+    resultActions.andExpect(status().isBadRequest());
+  }
+
+  @Test
   void whenBookTourByTourId_ButUserTourAlreadyBooked_ThenReturn409() throws Exception {
     // Arrange
     var TOUR_ID = 120;
