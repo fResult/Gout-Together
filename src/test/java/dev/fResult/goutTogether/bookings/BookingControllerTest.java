@@ -10,10 +10,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.fResult.goutTogether.bookings.dtos.BookingCancellationRequest;
 import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
+import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.bookings.services.BookingService;
 import dev.fResult.goutTogether.common.enumurations.BookingStatus;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import dev.fResult.goutTogether.common.exceptions.BookingExistsException;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.utils.UUIDV7;
 import dev.fResult.goutTogether.tours.repositories.TourCountRepository;
 import java.util.List;
@@ -140,5 +142,33 @@ class BookingControllerTest {
         .andExpect(jsonPath("$.userId").value(USER_ID))
         .andExpect(jsonPath("$.tourId").value(TOUR_ID))
         .andExpect(jsonPath("$.status").value(BookingStatus.CANCELLED.name()));
+  }
+
+  @Test
+  void whenCancelTourBookingById_ButNotFound_ThenReturn404() throws Exception {
+    // Arrange
+    var NOT_FOUND_BOOKING_ID = 99999;
+    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    var body = BookingCancellationRequest.of(TOUR_ID);
+    var expectedErrorMessage =
+        String.format(
+            "%s with id [%d] not found", Booking.class.getSimpleName(), NOT_FOUND_BOOKING_ID);
+
+    when(bookingService.cancelTour(any(Authentication.class), anyInt(), any(), anyString()))
+        .thenThrow(new EntityNotFoundException(expectedErrorMessage));
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            put(BOOKING_API + "/{id}/cancel", NOT_FOUND_BOOKING_ID)
+                .header("idempotent-key", IDEMPOTENT_KEY)
+                .principal(authentication)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    resultActions
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.detail").value(expectedErrorMessage));
   }
 }
