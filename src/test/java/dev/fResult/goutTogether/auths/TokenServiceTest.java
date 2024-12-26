@@ -180,4 +180,26 @@ class TokenServiceTest {
     // Assert
     assertFalse(actualIsRefreshTokenExpired);
   }
+
+  @Nested
+  class RotateRefreshTokenTest {
+    @Test
+    void andReachedTimeToRotate_ThenReturnNewToken() {
+      // Arrange
+      var USER_ID = 1;
+      var ISSUED_AT_480_SECS_AGO = Instant.now().minusSeconds(480);
+      var refreshTokenInput =
+          RefreshToken.of(
+              1, "old_token", ISSUED_AT_480_SECS_AGO, UserRoleName.CONSUMER, USER_ID, false);
+      var expectedNewToken = "new_token";
+
+      when(tokenService.issueRefreshToken()).thenReturn(expectedNewToken);
+
+      // Actual
+      var actualNewToken = tokenService.rotateRefreshTokenIfNeed(refreshTokenInput);
+
+      // Assert
+      assertEquals(expectedNewToken, actualNewToken);
+    }
+  }
 }
