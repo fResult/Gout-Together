@@ -150,5 +150,5 @@ public class BookingController {
     }
   }
 
-  public static record Payload(Instant time, Integer bookingId, Integer tourId) {}
+  public record Payload(Instant time, Integer bookingId, Integer tourId) {}
 }

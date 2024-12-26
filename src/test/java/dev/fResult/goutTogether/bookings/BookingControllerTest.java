@@ -2,6 +2,7 @@ package dev.fResult.goutTogether.bookings;
 
 import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
 import static dev.fResult.goutTogether.common.Constants.ROLES_CLAIM;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -240,28 +241,31 @@ class SimpleServiceTest {
     simpleService = bookingController.new SimpleService();
   }
 
+  private Booking buildCompletedBooking(int bookingId, int userId, int tourId) {
+    return Booking.of(
+        bookingId,
+        AggregateReference.to(userId),
+        AggregateReference.to(tourId),
+        BookingStatus.COMPLETED.name(),
+        Instant.now(),
+        Instant.now().minusSeconds(12),
+        IDEMPOTENT_KEY);
+  }
+
   @Test
   void whenIncreaseTourCountByBookingId_ThenVerifyActions() {
     // Arrange
     var TOUR_COUNT_ID = 99;
-    var AMOUNT_TO_ADD = 5;
     var TOUR_COUNT_AMOUNT = 10;
+    var AMOUNT_TO_ADD = 5;
     var TOUR_COUNT_AMOUNT_AFTER_ADDED = TOUR_COUNT_AMOUNT + AMOUNT_TO_ADD;
     var userRef = AggregateReference.<User, Integer>to(USER_ID);
     var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-    var mockBooking =
-        Booking.of(
-            BOOKING_ID,
-            userRef,
-            tourRef,
-            BookingStatus.COMPLETED.name(),
-            Instant.now(),
-            Instant.now().minusSeconds(12),
-            IDEMPOTENT_KEY);
+    var mockCompletedBooking = buildCompletedBooking(BOOKING_ID, USER_ID, TOUR_ID);
     var mockTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT);
     var mockIncresedTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT_AFTER_ADDED);
 
-    when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(mockBooking));
+    when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(mockCompletedBooking));
     when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.of(mockTourCount));
     when(tourCountRepository.save(any(TourCount.class))).thenReturn(mockIncresedTourCount);
 
