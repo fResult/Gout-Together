@@ -11,7 +11,9 @@ import dev.fResult.goutTogether.auths.repositories.RefreshTokenRepository;
 import dev.fResult.goutTogether.auths.services.CustomUserDetailsService;
 import dev.fResult.goutTogether.auths.services.TokenService;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
+import dev.fResult.goutTogether.common.utils.UUIDV7;
 import java.time.Instant;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -108,6 +110,23 @@ class TokenServiceTest {
 
       // Assert
       assertEquals(expectedIssuedAccessToken, actualIssuedAccessToken);
+    }
+  }
+
+  @Test
+  void issueRefreshTokenThenSuccess() {
+    try (var mockedUUID = mockStatic(UUIDV7.class)) {
+      // Arrange
+      var mockRefreshToken = UUID.fromString("cc468bab-17c5-4ded-b94a-7a7d85993bcb");
+      var expectedIssuedRefreshToken = mockRefreshToken.toString();
+
+      mockedUUID.when(UUIDV7::randomUUID).thenReturn(mockRefreshToken);
+
+      // Actual
+      var actualIssuedRefreshToken = tokenService.issueRefreshToken();
+
+      // Assert
+      assertEquals(expectedIssuedRefreshToken, actualIssuedRefreshToken);
     }
   }
 }
