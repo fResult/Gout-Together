@@ -9,5 +9,5 @@ import org.springframework.data.repository.ListCrudRepository;
 
 public interface BookingRepository extends ListCrudRepository<Booking, Integer> {
   Optional<Booking> findOneByUserIdAndTourId(
-      AggregateReference<User, String> userId, AggregateReference<Tour, Integer> tourId);
+      AggregateReference<User, Integer> userId, AggregateReference<Tour, Integer> tourId);
 }
