@@ -4,10 +4,11 @@ import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
 import static dev.fResult.goutTogether.common.Constants.ROLES_CLAIM;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.fResult.goutTogether.bookings.dtos.BookingCancellationRequest;
 import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
 import dev.fResult.goutTogether.bookings.services.BookingService;
 import dev.fResult.goutTogether.common.enumurations.BookingStatus;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -32,6 +34,8 @@ import org.springframework.web.context.WebApplicationContext;
 class BookingControllerTest {
   private final String BOOKING_API = "/api/v1/bookings";
   private final int USER_ID = 9;
+  private final int BOOKING_ID = 59;
+  private final int TOUR_ID = 101;
   private final String EMAIL = "email@example.com";
   private final String IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
 
@@ -62,8 +66,6 @@ class BookingControllerTest {
   @Test
   void whenBookTourByTourId_ThenReturn201() throws Exception {
     // Arrange
-    var BOOKING_ID = 59;
-    var TOUR_ID = 101;
     var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
     var mockCreatedTourBookingInfo =
         BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.COMPLETED, 1);
@@ -109,5 +111,34 @@ class BookingControllerTest {
     resultActions
         .andExpect(status().isConflict())
         .andExpect(jsonPath("$.detail").value(expectedErrorMessage));
+  }
+
+  @Test
+  void whenCancelTourBookingById_ThenReturn200() throws Exception {
+    // Arrange
+    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    var body = BookingCancellationRequest.of(TOUR_ID);
+    var mockCancelledTourBookingInfo =
+        BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.CANCELLED, 1);
+
+    when(bookingService.cancelTour(any(Authentication.class), anyInt(), any(), anyString()))
+        .thenReturn(mockCancelledTourBookingInfo);
+
+    // Actual
+    var resultActions =
+        mockMvc.perform(
+            put(BOOKING_API + "/{id}/cancel", BOOKING_ID)
+                .principal(authentication)
+                .header("idempotent-key", IDEMPOTENT_KEY)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)));
+
+    // Assert
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(BOOKING_ID))
+        .andExpect(jsonPath("$.userId").value(USER_ID))
+        .andExpect(jsonPath("$.tourId").value(TOUR_ID))
+        .andExpect(jsonPath("$.status").value(BookingStatus.CANCELLED.name()));
   }
 }
