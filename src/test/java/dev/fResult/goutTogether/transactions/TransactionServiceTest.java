@@ -21,38 +21,31 @@ class TransactionServiceTest {
 
   @Mock private TransactionRepository transactionRepository;
 
+  private Transaction buildTransaction(Integer id) {
+    final var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
+
+    return Transaction.of(
+        id,
+        AggregateReference.to(1),
+        AggregateReference.to(1),
+        AggregateReference.to(1),
+        Instant.now(),
+        BigDecimal.valueOf(1200),
+        TransactionType.TOP_UP,
+        IDEMPOTENT_KEY);
+  }
+
   @Test
   void whenCreateTransaction_thenSuccess() {
     // Arrange
-    final var USER_ID = 1;
-    final var TOUR_COMPANY_ID = 1;
-    final var BOOKING_ID = 1;
-    final var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
-    var transactionInput =
-        Transaction.of(
-            null,
-            AggregateReference.to(USER_ID),
-            AggregateReference.to(TOUR_COMPANY_ID),
-            AggregateReference.to(BOOKING_ID),
-            Instant.now(),
-            BigDecimal.valueOf(1200),
-            TransactionType.TOP_UP,
-            IDEMPOTENT_KEY);
-    var createdTransaction =
-        Transaction.of(
-            1,
-            AggregateReference.to(USER_ID),
-            AggregateReference.to(TOUR_COMPANY_ID),
-            AggregateReference.to(BOOKING_ID),
-            Instant.now(),
-            BigDecimal.valueOf(1200),
-            TransactionType.TOP_UP,
-            IDEMPOTENT_KEY);
+    var TRANSACTION_ID = 1;
+    var transactionToCreate = buildTransaction(null);
+    var createdTransaction = buildTransaction(TRANSACTION_ID);
 
     when(transactionRepository.save(any(Transaction.class))).thenReturn(createdTransaction);
 
     // Actual
-    var actualCreatedTransaction = transactionService.createTransaction(transactionInput);
+    var actualCreatedTransaction = transactionService.createTransaction(transactionToCreate);
 
     // Assert
     assertEquals(createdTransaction, actualCreatedTransaction);
