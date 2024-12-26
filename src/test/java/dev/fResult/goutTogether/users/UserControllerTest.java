@@ -34,10 +34,10 @@ import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(UserController.class)
 public class UserControllerTest {
-  private static final String USER_API = "/api/v1/users";
-  private static final int USER_ID = 1;
-  private static final int NOT_FOUND_USER_ID = 99999;
-  private static final String INVALID_EMAIL = "invalid-email";
+  private final String USER_API = "/api/v1/users";
+  private final int USER_ID = 1;
+  private final int NOT_FOUND_USER_ID = 99999;
+  private final String INVALID_EMAIL = "invalid-email";
 
   @Autowired private WebApplicationContext webApplicationContext;
   @Autowired private ObjectMapper objectMapper;
