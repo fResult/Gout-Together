@@ -2,8 +2,7 @@ package dev.fResult.goutTogether.bookings;
 
 import static dev.fResult.goutTogether.common.Constants.API_PAYMENT_PATH;
 import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -14,6 +13,7 @@ import dev.fResult.goutTogether.bookings.repositories.BookingRepository;
 import dev.fResult.goutTogether.bookings.services.BookingServiceImpl;
 import dev.fResult.goutTogether.common.enumurations.BookingStatus;
 import dev.fResult.goutTogether.common.enumurations.QrCodeStatus;
+import dev.fResult.goutTogether.common.exceptions.BookingExistsException;
 import dev.fResult.goutTogether.common.utils.UUIDV7;
 import dev.fResult.goutTogether.payments.services.PaymentService;
 import dev.fResult.goutTogether.qrcodes.QrCodeReference;
@@ -27,6 +27,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,6 +38,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 @ExtendWith(MockitoExtension.class)
 class BookingServiceTest {
+  final String IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
+  final Instant BOOKED_TIME = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+
   @InjectMocks private BookingServiceImpl bookingService;
 
   @Mock private BookingRepository bookingRepository;
@@ -45,8 +49,6 @@ class BookingServiceTest {
   @Mock private PaymentService paymentService;
 
   private Booking buildPendingBooking(int bookingId, int userId, int tourId) {
-    final var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
-    final var BOOKED_TIME = Instant.now().truncatedTo(ChronoUnit.SECONDS);
     return Booking.of(
         bookingId,
         AggregateReference.to(userId),
@@ -54,6 +56,17 @@ class BookingServiceTest {
         BookingStatus.PENDING.name(),
         BOOKED_TIME,
         BOOKED_TIME,
+        IDEMPOTENT_KEY);
+  }
+
+  private Booking buildCompletedBooking(int bookingId, int userId, int tourId) {
+    return Booking.of(
+        bookingId,
+        AggregateReference.to(userId),
+        AggregateReference.to(tourId),
+        BookingStatus.COMPLETED.name(),
+        BOOKED_TIME,
+        BOOKED_TIME.plus(13, ChronoUnit.MINUTES),
         IDEMPOTENT_KEY);
   }
 
@@ -156,27 +169,34 @@ class BookingServiceTest {
       // Assert
       assertEquals(expectedExistingBookingInfo, actualBooking);
     }
-      var exitingBooking =
-          Booking.of(
-              BOOKING_ID,
-              userRef,
-              tourRef,
-              BookingStatus.PENDING.name(),
-              BOOKED_TIME,
-              BOOKED_TIME,
-              IDEMPOTENT_KEY);
-      var expectedExistingBookingInfo =
-          BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.PENDING, 1);
+
+    @Test
+    void butBookingAlreadyCompleted_ThenThrowException() {
+      // Arrange
+      final var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
+      final var BOOKING_ID = 1;
+      final var USER_ID = 1;
+      final var TOUR_ID = 1;
+      final var BOOKED_TIME = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+      var authentication = buildAuthentication(USER_ID);
+      var userRef = AggregateReference.<User, Integer>to(USER_ID);
+      var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+      var mockQrCodeRef =
+          QrCodeReference.of(1, BOOKING_ID, API_PAYMENT_PATH, QrCodeStatus.ACTIVATED);
+      var exitingBooking = buildCompletedBooking(BOOKING_ID, USER_ID, TOUR_ID);
+      var expectedErrorMessage =
+          String.format("UserId [%d] already booked tourId [%d]", USER_ID, TOUR_ID);
 
       when(bookingRepository.findOneByUserIdAndTourId(userRef, tourRef))
           .thenReturn(Optional.of(exitingBooking));
-      when(qrCodeService.getQrCodeRefByBookingId(anyInt())).thenReturn(mockQrCodeRef);
 
       // Actual
-      var actualBooking = bookingService.bookTour(authentication, TOUR_ID, IDEMPOTENT_KEY);
+      Executable actualExecution =
+          () -> bookingService.bookTour(authentication, TOUR_ID, IDEMPOTENT_KEY);
 
       // Assert
-      assertEquals(expectedExistingBookingInfo, actualBooking);
+      var exception = assertThrowsExactly(BookingExistsException.class, actualExecution);
+      assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
 }
