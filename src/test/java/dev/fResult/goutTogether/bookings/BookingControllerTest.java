@@ -29,6 +29,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -278,6 +279,26 @@ class SimpleServiceTest {
     verify(tourCountRepository, times(1)).save(mockIncresedTourCount);
   }
 
+  @Test
+  void whenIncreaseTourCountByBookingId_ButBookingNotFound_ThenVerifyActions() {
+    // Arrange
+    var NOT_FOUND_BOOKING_ID = 99999;
+    var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+    var expectedErrorMessage =
+        String.format("%s id [%d] not found", Booking.class.getSimpleName(), NOT_FOUND_BOOKING_ID);
+
+    when(bookingRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualExecutable = () -> simpleService.updateTourCountById(NOT_FOUND_BOOKING_ID, 5);
+
+    // Assert
+    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
+    verify(bookingRepository, times(1)).findById(NOT_FOUND_BOOKING_ID);
+    verify(tourCountRepository, never()).findOneByTourId(tourRef);
+    verify(tourCountRepository, never()).save(any(TourCount.class));
+  }
 
   @Test
   void whenIncreaseTourCountByTourId_ThenVerifyActions() {
