@@ -241,8 +241,8 @@ class BookingServiceTest {
 
       // Assert
       assertEquals(expectedRefundedBookingInfo, actualRefundedBookingInfo);
-      verify(bookingRepository, times(1)).deleteById(BOOKING_ID);
       verify(tourCountService, times(1)).decrementTourCount(TOUR_ID);
+      verify(paymentService, times(1)).refundBooking(any(Booking.class), anyString());
     }
 
     @Test
@@ -264,8 +264,8 @@ class BookingServiceTest {
 
       // Assert
       assertEquals(expectedRefundedBookingInfo, actualRefundedBookingInfo);
-      verify(bookingRepository, never()).deleteById(anyInt());
       verify(tourCountService, never()).decrementTourCount(anyInt());
+      verify(paymentService, never()).refundBooking(any(Booking.class), anyString());
     }
   }
 }
