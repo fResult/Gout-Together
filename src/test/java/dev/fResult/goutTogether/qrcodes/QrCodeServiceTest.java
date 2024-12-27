@@ -3,8 +3,7 @@ package dev.fResult.goutTogether.qrcodes;
 import static dev.fResult.goutTogether.common.Constants.API_PAYMENT_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
@@ -91,5 +90,22 @@ class QrCodeServiceTest {
     // Assert
     var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
+  @Test
+  void whenCreateQrCodeForBooking_ThenSuccess() {
+    // Arrange
+    var mockCreatedQrCodeReference =
+        buildQrCodeReference(QR_CODE_REF_ID, BOOKING_ID, QrCodeStatus.ACTIVATED);
+
+    when(qrCodeReferenceRepository.findOneByBookingId(anyInt())).thenReturn(Optional.empty());
+    when(qrCodeReferenceRepository.save(any(QrCodeReference.class)))
+        .thenReturn(mockCreatedQrCodeReference);
+
+    // Actual
+    var actualQrCodeReference = qrCodeService.createQrCodeRefForBooking(BOOKING_ID);
+
+    // Assert
+    assertEquals(mockCreatedQrCodeReference, actualQrCodeReference);
   }
 }
