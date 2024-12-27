@@ -166,4 +166,21 @@ class QrCodeServiceTest {
     assertEquals(expectedErrorMessage, exception.getMessage());
     verify(qrCodeReferenceRepository, never()).save(any(QrCodeReference.class));
   }
+
+  @Test
+  void whenDeleteQrCodeRefByBookingId_ThenSuccess() {
+    // Arrange
+    var mockExistingQrCodeReference =
+        buildQrCodeReference(QR_CODE_REF_ID, BOOKING_ID, QrCodeStatus.ACTIVATED);
+
+    when(qrCodeReferenceRepository.findOneByBookingId(anyInt()))
+        .thenReturn(Optional.of(mockExistingQrCodeReference));
+    doNothing().when(qrCodeReferenceRepository).delete(any(QrCodeReference.class));
+
+    // Actual
+    var actualIsDeleted = qrCodeService.deleteQrCodeRefByBookingId(BOOKING_ID);
+
+    // Assert
+    assertTrue(actualIsDeleted);
+  }
 }
