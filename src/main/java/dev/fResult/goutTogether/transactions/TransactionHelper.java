@@ -8,6 +8,7 @@ import org.springframework.data.jdbc.core.mapping.AggregateReference;
 public class TransactionHelper {
   public static Transaction buildTopUpTransaction(
       Integer userId, Integer bookingId, BigDecimal amount, String idempotentKey) {
+
     return Transaction.of(
         null,
         AggregateReference.to(userId),
