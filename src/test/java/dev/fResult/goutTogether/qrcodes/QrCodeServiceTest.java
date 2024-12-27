@@ -108,4 +108,20 @@ class QrCodeServiceTest {
     // Assert
     assertEquals(mockCreatedQrCodeReference, actualQrCodeReference);
   }
+
+  @Test
+  void whenCreateQrCodeForBooking_ButAlreadyExists_ThenReturnExisting() {
+    // Arrange
+    var mockExistingQrCodeReference =
+        buildQrCodeReference(QR_CODE_REF_ID, BOOKING_ID, QrCodeStatus.EXPIRED);
+
+    when(qrCodeReferenceRepository.findOneByBookingId(anyInt()))
+        .thenReturn(Optional.of(mockExistingQrCodeReference));
+
+    // Actual
+    var actualQrCodeReference = qrCodeService.createQrCodeRefForBooking(BOOKING_ID);
+
+    // Assert
+    assertEquals(mockExistingQrCodeReference, actualQrCodeReference);
+  }
 }
