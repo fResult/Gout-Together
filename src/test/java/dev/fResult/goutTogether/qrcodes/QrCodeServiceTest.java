@@ -20,23 +20,32 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class QrCodeServiceTest {
+  final int QR_CODE_REF_ID = 1;
+  final int BOOKING_ID = 1;
+
   @InjectMocks private QrCodeService qrCodeService;
 
   @Mock private QrCodeReferenceRepository qrCodeReferenceRepository;
+
+  private QrCodeReference buildQrCodeReference(int id, int bookingId, QrCodeStatus status) {
+    var qrCodeContent = String.format("%s/%d", API_PAYMENT_PATH, bookingId);
+
+    return QrCodeReference.of(id, bookingId, qrCodeContent, status);
+  }
 
   @Test
   void whenGenerateQrCodeImage_thenSuccess() throws WriterException {
     // Arrange
     try (var mockedQrCodeHelper = mockStatic(QrCodeHelper.class)) {
-      final var QR_CODE_REF_ID = 1;
-      final var BOOKING_ID = 1;
       var mockQrCodeReference =
-          QrCodeReference.of(QR_CODE_REF_ID, BOOKING_ID, API_PAYMENT_PATH, QrCodeStatus.ACTIVATED);
+          buildQrCodeReference(QR_CODE_REF_ID, BOOKING_ID, QrCodeStatus.ACTIVATED);
       var expectedQrCodeImage = new BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB);
 
       when(qrCodeReferenceRepository.findById(anyInt()))
           .thenReturn(Optional.of(mockQrCodeReference));
-      mockedQrCodeHelper.when(() -> QrCodeHelper.generateQrCodeImage(anyString())).thenReturn(expectedQrCodeImage);
+      mockedQrCodeHelper
+          .when(() -> QrCodeHelper.generateQrCodeImage(anyString()))
+          .thenReturn(expectedQrCodeImage);
 
       // Actual
       var actualGeneratedQrCodeImage = qrCodeService.generateQrCodeImageById(QR_CODE_REF_ID);
