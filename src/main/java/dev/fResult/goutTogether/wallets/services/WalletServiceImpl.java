@@ -364,6 +364,7 @@ public class WalletServiceImpl implements WalletService {
         "[createTopUpTransaction] New {} is created: {}",
         Transaction.class.getSimpleName(),
         createdTransaction);
+
     return createdTransaction;
   }
 
