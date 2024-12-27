@@ -183,4 +183,24 @@ class QrCodeServiceTest {
     // Assert
     assertTrue(actualIsDeleted);
   }
+
+  @Test
+  void whenDeleteQrCodeRefByBookingId_ButNotFound_ThenThrowException() {
+    // Arrange
+    var expectedErrorMessage =
+        String.format(
+            "%s with bookingId [%d] not found",
+            QrCodeReference.class.getSimpleName(), NOT_FOUND_BOOKING_ID);
+
+    when(qrCodeReferenceRepository.findOneByBookingId(anyInt())).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualExecutable =
+        () -> qrCodeService.deleteQrCodeRefByBookingId(NOT_FOUND_BOOKING_ID);
+
+    // Assert
+    var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
+    verify(qrCodeReferenceRepository, never()).delete(any(QrCodeReference.class));
+  }
 }
