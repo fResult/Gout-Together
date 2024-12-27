@@ -4,8 +4,7 @@ import static dev.fResult.goutTogether.common.Constants.API_PAYMENT_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.google.zxing.WriterException;
 import dev.fResult.goutTogether.common.enumurations.QrCodeStatus;
@@ -123,5 +122,6 @@ class QrCodeServiceTest {
 
     // Assert
     assertEquals(mockExistingQrCodeReference, actualQrCodeReference);
+    verify(qrCodeReferenceRepository, never()).save(any(QrCodeReference.class));
   }
 }
