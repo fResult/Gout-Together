@@ -90,3 +90,8 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
 - PasswordEncoder, using Argon2PasswordEncoder instead of BCryptPasswordEncoder
 - Add more assertion, assert the error message
 - Use [Virtual Thread](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html) and Future for concurrency fetching independent data from database
+
+### Test Coverage
+
+![Image to display percentage of code coverage](https://github.com/user-attachments/assets/6b61ed42-e3f1-4e0e-a2a9-2163ee961f2a)
+
