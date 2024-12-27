@@ -2,6 +2,7 @@ package dev.fResult.goutTogether.qrcodes;
 
 import static dev.fResult.goutTogether.common.Constants.API_PAYMENT_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
@@ -9,11 +10,13 @@ import static org.mockito.Mockito.when;
 
 import com.google.zxing.WriterException;
 import dev.fResult.goutTogether.common.enumurations.QrCodeStatus;
+import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
 import dev.fResult.goutTogether.common.helpers.QrCodeHelper;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -69,5 +72,24 @@ class QrCodeServiceTest {
 
     // Assert
     assertEquals(mockQrCodeReference, actualQrCodeReference);
+  }
+
+  @Test
+  void whenGetQrCodeRefByBookingId_ButNotFound_thenThrowException() {
+    // Arrange
+    final var NOT_FOUND_BOOKING_ID = 99999;
+    var expectedErrorMessage =
+        String.format(
+            "%s with bookingId [%d] not found",
+            QrCodeReference.class.getSimpleName(), NOT_FOUND_BOOKING_ID);
+
+    when(qrCodeReferenceRepository.findOneByBookingId(anyInt())).thenReturn(Optional.empty());
+
+    // Actual
+    Executable actualExecutable = () -> qrCodeService.getQrCodeRefByBookingId(NOT_FOUND_BOOKING_ID);
+
+    // Assert
+    var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
+    assertEquals(expectedErrorMessage, exception.getMessage());
   }
 }
