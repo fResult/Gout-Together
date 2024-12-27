@@ -54,4 +54,20 @@ class QrCodeServiceTest {
       assertEquals(expectedQrCodeImage, actualGeneratedQrCodeImage);
     }
   }
+
+  @Test
+  void whenGetQrCodeRefByBookingId_thenSuccess() {
+    // Arrange
+    var mockQrCodeReference =
+        buildQrCodeReference(QR_CODE_REF_ID, BOOKING_ID, QrCodeStatus.EXPIRED);
+
+    when(qrCodeReferenceRepository.findOneByBookingId(anyInt()))
+        .thenReturn(Optional.of(mockQrCodeReference));
+
+    // Actual
+    var actualQrCodeReference = qrCodeService.getQrCodeRefByBookingId(BOOKING_ID);
+
+    // Assert
+    assertEquals(mockQrCodeReference, actualQrCodeReference);
+  }
 }
