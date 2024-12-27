@@ -1,8 +1,7 @@
 package dev.fResult.goutTogether.qrcodes;
 
 import static dev.fResult.goutTogether.common.Constants.API_PAYMENT_PATH;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -23,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class QrCodeServiceTest {
   final int QR_CODE_REF_ID = 1;
   final int BOOKING_ID = 1;
+  final int NOT_FOUND_BOOKING_ID = 99999;
 
   @InjectMocks private QrCodeService qrCodeService;
 
@@ -75,7 +75,6 @@ class QrCodeServiceTest {
   @Test
   void whenGetQrCodeRefByBookingId_ButNotFound_thenThrowException() {
     // Arrange
-    final var NOT_FOUND_BOOKING_ID = 99999;
     var expectedErrorMessage =
         String.format(
             "%s with bookingId [%d] not found",
@@ -123,5 +122,26 @@ class QrCodeServiceTest {
     // Assert
     assertEquals(mockExistingQrCodeReference, actualQrCodeReference);
     verify(qrCodeReferenceRepository, never()).save(any(QrCodeReference.class));
+  }
+
+  @Test
+  void whenUpdateQrCodeRefByBookingId_ThenSuccess() {
+    // Arrange
+    var mockExistingQrCodeReference =
+        buildQrCodeReference(QR_CODE_REF_ID, BOOKING_ID, QrCodeStatus.ACTIVATED);
+    var mockUpdatedQrCodeReference =
+        buildQrCodeReference(QR_CODE_REF_ID, BOOKING_ID, QrCodeStatus.EXPIRED);
+
+    when(qrCodeReferenceRepository.findOneByBookingId(anyInt()))
+        .thenReturn(Optional.of(mockExistingQrCodeReference));
+    when(qrCodeReferenceRepository.save(any(QrCodeReference.class)))
+        .thenReturn(mockUpdatedQrCodeReference);
+
+    // Actual
+    var actualUpdatedQrCodeReference =
+        qrCodeService.updateQrCodeRefStatusByBookingId(BOOKING_ID, QrCodeStatus.EXPIRED);
+
+    // Assert
+    assertEquals(mockUpdatedQrCodeReference, actualUpdatedQrCodeReference);
   }
 }
