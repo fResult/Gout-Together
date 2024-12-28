@@ -1,4 +1,4 @@
-package dev.fResult.goutTogether.helpers;
+package dev.fResult.goutTogether.common.helpers;
 
 import dev.fResult.goutTogether.common.ResponseAdviceHandler;
 import dev.fResult.goutTogether.common.enumurations.TransactionType;

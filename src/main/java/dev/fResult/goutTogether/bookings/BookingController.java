@@ -5,7 +5,7 @@ import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
 import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.bookings.repositories.BookingRepository;
 import dev.fResult.goutTogether.bookings.services.BookingService;
-import dev.fResult.goutTogether.helpers.ErrorHelper;
+import dev.fResult.goutTogether.common.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tours.entities.Tour;
 import dev.fResult.goutTogether.tours.entities.TourCount;
 import dev.fResult.goutTogether.tours.repositories.TourCountRepository;

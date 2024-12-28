@@ -5,7 +5,7 @@ import static dev.fResult.goutTogether.common.Constants.API_PAYMENT_PATH;
 import com.google.zxing.WriterException;
 import dev.fResult.goutTogether.common.enumurations.QrCodeStatus;
 import dev.fResult.goutTogether.common.helpers.QrCodeHelper;
-import dev.fResult.goutTogether.helpers.ErrorHelper;
+import dev.fResult.goutTogether.common.helpers.ErrorHelper;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 import org.slf4j.Logger;

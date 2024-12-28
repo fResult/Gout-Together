@@ -9,7 +9,7 @@ import dev.fResult.goutTogether.bookings.repositories.BookingRepository;
 import dev.fResult.goutTogether.common.enumurations.BookingStatus;
 import dev.fResult.goutTogether.common.enumurations.QrCodeStatus;
 import dev.fResult.goutTogether.common.exceptions.BookingExistsException;
-import dev.fResult.goutTogether.helpers.ErrorHelper;
+import dev.fResult.goutTogether.common.helpers.ErrorHelper;
 import dev.fResult.goutTogether.payments.services.PaymentService;
 import dev.fResult.goutTogether.qrcodes.QrCodeService;
 import java.time.Instant;

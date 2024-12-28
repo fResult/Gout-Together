@@ -3,7 +3,7 @@ package dev.fResult.goutTogether.wallets.services;
 import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.common.enumurations.TransactionType;
 import dev.fResult.goutTogether.common.exceptions.EntityNotFoundException;
-import dev.fResult.goutTogether.helpers.ErrorHelper;
+import dev.fResult.goutTogether.common.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tours.services.TourService;
 import dev.fResult.goutTogether.transactions.Transaction;
 import dev.fResult.goutTogether.transactions.TransactionHelper;

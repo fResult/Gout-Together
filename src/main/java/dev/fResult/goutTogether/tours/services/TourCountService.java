@@ -1,6 +1,6 @@
 package dev.fResult.goutTogether.tours.services;
 
-import dev.fResult.goutTogether.helpers.ErrorHelper;
+import dev.fResult.goutTogether.common.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tours.entities.TourCount;
 import dev.fResult.goutTogether.tours.repositories.TourCountRepository;
 import org.slf4j.Logger;

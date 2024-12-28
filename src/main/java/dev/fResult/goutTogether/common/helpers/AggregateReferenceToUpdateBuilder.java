@@ -1,4 +1,4 @@
-package dev.fResult.goutTogether.helpers;
+package dev.fResult.goutTogether.common.helpers;
 
 import static org.springframework.util.StringUtils.capitalize;
 

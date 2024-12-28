@@ -8,7 +8,7 @@ import dev.fResult.goutTogether.bookings.services.BookingService;
 import dev.fResult.goutTogether.common.enumurations.BookingStatus;
 import dev.fResult.goutTogether.common.enumurations.QrCodeStatus;
 import dev.fResult.goutTogether.common.enumurations.TransactionType;
-import dev.fResult.goutTogether.helpers.ErrorHelper;
+import dev.fResult.goutTogether.common.helpers.ErrorHelper;
 import dev.fResult.goutTogether.qrcodes.QrCodeService;
 import dev.fResult.goutTogether.tours.services.TourCountService;
 import dev.fResult.goutTogether.transactions.Transaction;
