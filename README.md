@@ -97,8 +97,7 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
     - [Utilized in the service](https://github.com/fResult/Gout-Together/blob/5a70c5e884b0ed8575fadb9c5280662966581a0d/src/main/java/dev/fResult/goutTogether/wallets/services/WalletServiceImpl.java#L225-L227)
 
 ### Test Coverage
-
-![Image to display percentage of code coverage](https://github.com/user-attachments/assets/6b61ed42-e3f1-4e0e-a2a9-2163ee961f2a)
+![Image to display percentage of code coverage](https://github.com/user-attachments/assets/ef5c0b2d-3fd4-4af7-804d-7819b5c4b1b8)
 
 <footer>
   <div align=center>
