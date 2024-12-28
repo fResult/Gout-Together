@@ -6,7 +6,7 @@ import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
 import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
 import dev.fResult.goutTogether.common.utils.StringUtil;
-import dev.fResult.goutTogether.helpers.ErrorHelper;
+import dev.fResult.goutTogether.common.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyUpdateRequest;

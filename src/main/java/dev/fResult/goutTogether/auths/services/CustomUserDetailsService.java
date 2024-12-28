@@ -5,7 +5,7 @@ import dev.fResult.goutTogether.auths.entities.TourCompanyLogin;
 import dev.fResult.goutTogether.auths.entities.UserLogin;
 import dev.fResult.goutTogether.auths.repositories.UserLoginRepository;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
-import dev.fResult.goutTogether.helpers.ErrorHelper;
+import dev.fResult.goutTogether.common.helpers.ErrorHelper;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
 import dev.fResult.goutTogether.tourCompanies.repositories.TourCompanyLoginRepository;
 import dev.fResult.goutTogether.users.entities.User;
