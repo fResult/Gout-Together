@@ -92,7 +92,9 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
 - Adding more assertion, assert the error message
 - Using [Virtual Thread](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html) and Future for concurrency fetching independent data from database
 - Rethrowing exception cause by multiple threads could be tricky, need to be careful
-  - See: [ErrorHelper.throwMatchedException()](/blob/5a70c5e884b0ed8575fadb9c5280662966581a0d/src/main/java/dev/fResult/goutTogether/common/helpers/ErrorHelper.java#L20-L34)
+  - See:
+    - [ErrorHelper.throwMatchedException()](https://github.com/fResult/Gout-Together/blob/5a70c5e884b0ed8575fadb9c5280662966581a0d/src/main/java/dev/fResult/goutTogether/common/helpers/ErrorHelper.java#L20-L34)
+    - [Utilized in the service](https://github.com/fResult/Gout-Together/blob/5a70c5e884b0ed8575fadb9c5280662966581a0d/src/main/java/dev/fResult/goutTogether/wallets/services/WalletServiceImpl.java#L225-L227)
 
 ### Test Coverage
 
