@@ -95,35 +95,10 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
 
 ![Image to display percentage of code coverage](https://github.com/user-attachments/assets/6b61ed42-e3f1-4e0e-a2a9-2163ee961f2a)
 
-<div style="color: #ADB5BD;" align="center">
-
-  .
-
-  .
-
-  .
-
-  .
-
-  .
-
-  .
-
-  .
-
-  .
-
-  .
-
-  .
-
-  .
-
-  .
-
-  .
-
-  .
+<footer>
+  <div align=center>
+    <br><br>.<br><br>.<br><br>.<br><br>.<br><br>.<br><br>.<br><br>.<br><br>.<br><br>.<br><br>.<br><br>.<br><br>.<br><br>.<br><br>.<br><br>
+  </div>
 
   <p align=center>
     [This Space Intentionally Left Blank]
@@ -132,4 +107,4 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
   <p align=center>
     The bottom of every page is padded so readers can maintain a consistent eyeline.
   </p>
-</div>
+</footer>
