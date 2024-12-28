@@ -95,35 +95,36 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
 
 ![Image to display percentage of code coverage](https://github.com/user-attachments/assets/6b61ed42-e3f1-4e0e-a2a9-2163ee961f2a)
 
-.
+<div style="color: #ADB5BD;" align="center">
 
-.
+  .
 
-.
+  .
 
-.
+  .
 
-.
+  .
 
-.
+  .
 
-.
+  .
 
-.
+  .
 
-.
+  .
 
-.
+  .
 
-.
+  .
 
-.
+  .
 
-.
+  .
 
-.
+  .
 
-<div style="color: #ADB5BD;">
+  .
+
   <p align=center>
     [This Space Intentionally Left Blank]
   </p>
