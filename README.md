@@ -83,13 +83,16 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
 - Unit Testing with JUnit 5 and Mockito
 - Config Authorization with OAuth2ResourceServer
 - Integration Testing
+- Pessimistic Locking to handle data consistency
 
-### Things I did different
+### Things I did different and learned further
 
 - Using the Gradle Kotlin instead of the Gradle Groovy
 - PasswordEncoder, using Argon2PasswordEncoder instead of BCryptPasswordEncoder
-- Add more assertion, assert the error message
-- Use [Virtual Thread](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html) and Future for concurrency fetching independent data from database
+- Adding more assertion, assert the error message
+- Using [Virtual Thread](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html) and Future for concurrency fetching independent data from database
+- Rethrowing exception cause by multiple threads could be tricky, need to be careful
+  - See: [ErrorHelper.throwMatchedException()](/blob/5a70c5e884b0ed8575fadb9c5280662966581a0d/src/main/java/dev/fResult/goutTogether/common/helpers/ErrorHelper.java#L20-L34)
 
 ### Test Coverage
 
