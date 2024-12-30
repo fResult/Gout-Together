@@ -32,8 +32,8 @@ public class TokenService {
   public TokenService(
       RefreshTokenRepository refreshTokenRepository,
       CustomUserDetailsService userDetailsService,
-      @Value("${token.access-token-expired-in-seconds}") long accessTokenExpiredInSeconds,
-      @Value("${token.refresh-token-expired-in-seconds}") long refreshTokenExpiredInSeconds,
+      @Value("${goutapp.token.access-token-expired-in-seconds}") long accessTokenExpiredInSeconds,
+      @Value("${goutapp.token.refresh-token-expired-in-seconds}") long refreshTokenExpiredInSeconds,
       JwtEncoder jwtEncoder) {
     this.refreshTokenRepository = refreshTokenRepository;
     this.userDetailsService = userDetailsService;

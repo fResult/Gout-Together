@@ -33,10 +33,6 @@ management:
       exposure:
         include: "health,info,metrics,prometheus"
 
-token:
-  access-token-expired-in-seconds: ${ACCESS_TOKEN_EXP_SEC:3600} # Default: 1 hour
-  refresh-token-expired-in-seconds: ${REFRESH_TOKEN_EXP_SEC:2592000} # Default: 1 month
-
 oauth:
   private-key: ${OAUTH_PRIVATE_KEY_BASE64:DUMMY}
   public-key: ${OAUTH_PUBLIC_KEY_BASE64:DUMMY}
@@ -52,3 +48,6 @@ org.jobrunr:
 goutapp:
   booking:
     tour-price: 100.00
+  token:
+    access-token-expired-in-seconds: ${ACCESS_TOKEN_EXP_SEC:3600} # Default: 1 hour
+    refresh-token-expired-in-seconds: ${REFRESH_TOKEN_EXP_SEC:2592000} # Default: 1 month

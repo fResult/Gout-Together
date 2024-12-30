@@ -11,16 +11,6 @@
       "description": "Maximum pool size of the database connection."
     },
     {
-      "name": "token.access-token-expired-in-seconds",
-      "type": "java.lang.Integer",
-      "description": "Duration of expiration of access token in 'seconds'."
-    },
-    {
-      "name": "token.refresh-token-expired-in-seconds",
-      "type": "java.lang.Integer",
-      "description": "Duration of expiration of refresh token in 'seconds'."
-    },
-    {
       "name": "oauth.private-key",
       "type": "java.lang.String",
       "description": "oauth.private-key's description"
