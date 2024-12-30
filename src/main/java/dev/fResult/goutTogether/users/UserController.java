@@ -35,6 +35,7 @@ public class UserController {
       @RequestParam int size,
       @RequestParam(defaultValue = "id") String field,
       @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+
     var sort = Sort.by(direction, field);
     var pageable = PageRequest.of(page, size, sort);
 

@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
     var toResponse = UserInfoResponse.fromUserDaoWithUserCredentialMap(userIdToCredentialMap);
     var userInfos = userPage.stream().map(toResponse).toList();
 
-    return new PageImpl<>(userInfos);
+    return new PageImpl<>(userInfos, pageable, userPage.getTotalElements());
   }
 
   @Override
