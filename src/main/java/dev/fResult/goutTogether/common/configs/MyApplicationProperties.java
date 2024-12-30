@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class MyApplicationProperties {
   private final Booking booking = new Booking();
   private final Token token = new Token();
+  private final OAuth oauth = new OAuth();
 
   public Booking getBooking() {
     return booking;
@@ -15,6 +16,10 @@ public class MyApplicationProperties {
 
   public Token getToken() {
     return token;
+  }
+
+  public OAuth getOauth() {
+    return oauth;
   }
 
   public static class Booking {
@@ -51,6 +56,29 @@ public class MyApplicationProperties {
 
     public void setRefreshTokenExpiredInSeconds(int refreshTokenExpiredInSeconds) {
       this.refreshTokenExpiredInSeconds = refreshTokenExpiredInSeconds;
+    }
+  }
+
+  public static class OAuth {
+    /** Private key in Base64 format. */
+    private String privateKey;
+    /** Public key in Base64 format. */
+    private String publicKey;
+
+    public String getPrivateKey() {
+      return privateKey;
+    }
+
+    public void setPrivateKey(String privateKey) {
+      this.privateKey = privateKey;
+    }
+
+    public String getPublicKey() {
+      return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+      this.publicKey = publicKey;
     }
   }
 }

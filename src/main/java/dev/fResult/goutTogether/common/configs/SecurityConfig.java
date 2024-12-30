@@ -50,8 +50,8 @@ public class SecurityConfig {
   private final String publicKeyBase64;
 
   public SecurityConfig(
-      @Value("${oauth.private-key}") String privateKeyBase64,
-      @Value("${oauth.public-key}") String publicKeyBase64) {
+      @Value("${goutapp.oauth.private-key}") String privateKeyBase64,
+      @Value("${goutapp.oauth.public-key}") String publicKeyBase64) {
     this.privateKeyBase64 = privateKeyBase64;
     this.publicKeyBase64 = publicKeyBase64;
   }

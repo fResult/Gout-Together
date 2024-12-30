@@ -9,16 +9,6 @@
       "name": "spring.datasource.hikari.maximum-pool-size",
       "type": "java.lang.Integer",
       "description": "Maximum pool size of the database connection."
-    },
-    {
-      "name": "oauth.private-key",
-      "type": "java.lang.String",
-      "description": "oauth.private-key's description"
-    },
-    {
-      "name": "oauth.public-key",
-      "type": "java.lang.String",
-      "description": "oauth.public-key's description"
     }
   ]
 }
