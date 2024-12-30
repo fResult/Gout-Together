@@ -41,7 +41,7 @@ public class PaymentServiceImpl implements PaymentService {
   private final TransactionService transactionService;
 
   public PaymentServiceImpl(
-      @Value("${booking.tour-price}") double tourPrice,
+      @Value("${goutapp.booking.tour-price}") double tourPrice,
       BookingRepository bookingRepository,
       QrCodeService qrCodeService,
       @Lazy BookingService bookingService,

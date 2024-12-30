@@ -55,7 +55,7 @@ class PaymentServiceTest {
   private final BigDecimal USER_WALLET_BALANCE = BigDecimal.valueOf(100);
   private final BigDecimal COMPANY_WALLET_BALANCE = BigDecimal.valueOf(100);
 
-  @Value("${booking.tour-price}")
+  @Value("${goutapp.booking.tour-price}")
   private double tourPrice;
 
   private final BigDecimal TOUR_PRICE = BigDecimal.valueOf(tourPrice);

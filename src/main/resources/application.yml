@@ -48,5 +48,7 @@ org.jobrunr:
   dashboard:
     enabled: ${JOBRUNR_DASHBOARD_ENABLED:true}
 
-booking:
-  tour-price: 100.00
+
+goutapp:
+  booking:
+    tour-price: 100.00

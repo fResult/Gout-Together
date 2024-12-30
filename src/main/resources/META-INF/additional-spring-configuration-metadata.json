@@ -29,11 +29,6 @@
       "name": "oauth.public-key",
       "type": "java.lang.String",
       "description": "oauth.public-key's description"
-    },
-    {
-      "name": "booking.tour-price",
-      "type": "java.lang.BigDecimal",
-      "description": "The static tour price for learning purpose."
     }
   ]
 }
