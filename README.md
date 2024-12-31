@@ -90,6 +90,7 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
 - Using the Gradle Kotlin instead of the Gradle Groovy
 - PasswordEncoder, using Argon2PasswordEncoder instead of BCryptPasswordEncoder
 - Adding more assertion, assert the error message
+- Solving Circular Dependency by using `@Lazy` annotation
 - Using [Virtual Thread](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html) and Future for concurrency fetching independent data from database
 - Rethrowing exception cause by multiple threads could be tricky, need to be careful
   - See:

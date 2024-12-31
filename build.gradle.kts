@@ -1,4 +1,5 @@
 import io.github.cdimascio.dotenv.Dotenv
+import io.github.cdimascio.dotenv.DotenvEntry
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import org.springframework.boot.gradle.tasks.run.BootRun
 
@@ -91,8 +92,6 @@ tasks.withType<BootRun> {
   doFirst {
     jvmArgs(listOf("-javaagent:build/agent/opentelemetry-javaagent.jar"))
     val dotenv = Dotenv.configure().load()
-    dotenv.entries().forEach { entry ->
-      environment(entry.key, entry.value)
-    }
+    dotenv.entries().forEach { entry -> environment(entry.key, entry.value) }
   }
 }
