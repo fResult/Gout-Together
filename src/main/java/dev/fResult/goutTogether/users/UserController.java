@@ -65,7 +65,6 @@ public class UserController {
     return ResponseEntity.ok(userService.updateUserById(id, body));
   }
 
-  // TODO: Re-think the forgot password flow
   @PatchMapping("/{id}/password")
   public ResponseEntity<UpdatePasswordResult> changePasswordByUserId(
       @PathVariable int id, @Validated @RequestBody UserChangePasswordRequest body) {
