@@ -18,7 +18,6 @@ curl -O https://raw.githubusercontent.com/fResult/Gout-Together/refs/heads/main/
 curl -o /path/to/your/target/directory/Gout-Together.postman_collection.json https://raw.githubusercontent.com/fResult/Gout-Together/refs/heads/main/Gout-Together.postman_collection.json
 ```
 
-
 ## Related commands
 
 ### Build Jar and Get the OpenTelemetry Agent
@@ -105,12 +104,12 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
 - Added more assertion, including asserting error message in Unit Tests
 - Resolved circular dependency using `@Lazy` annotation
 - Implemented [Virtual Thread](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html) and `CompletableFuture` for concurrent database operations
-  - See: [WalletServiceImpl.getConsumerAndTourCompanyWallets()](https://github.com/fResult/Gout-Together/blob/4318c6a84d173aaeb05702955bf33c764c1dfb7b/src/main/java/dev/fResult/goutTogether/wallets/services/WalletServiceImpl.java#L202-L224)
+  - See: [WalletServiceImpl.getConsumerAndTourCompanyWallets()](https://github.com/fResult/Gout-Together/blob/f4ef3ffebc4bee2ad9919b78996cfa1c659e484f/src/main/java/dev/fResult/goutTogether/wallets/services/WalletServiceImpl.java#L202-L224)
 - Handled complex exception propagation in multi-threaded scenarios
-    - Implemented in [ErrorHelper.throwMatchedException()](https://github.com/fResult/Gout-Together/blob/4318c6a84d173aaeb05702955bf33c764c1dfb7b/src/main/java/dev/fResult/goutTogether/common/helpers/ErrorHelper.java#L24-L38)
-    - Applied in [service layer](https://github.com/fResult/Gout-Together/blob/4318c6a84d173aaeb05702955bf33c764c1dfb7b/src/main/java/dev/fResult/goutTogether/wallets/services/WalletServiceImpl.java#L225-L227)
+    - Implemented in [ErrorHelper.throwMatchedException()](https://github.com/fResult/Gout-Together/blob/f4ef3ffebc4bee2ad9919b78996cfa1c659e484f/src/main/java/dev/fResult/goutTogether/common/helpers/ErrorHelper.java#L24-L38)
+    - Applied in [service layer](https://github.com/fResult/Gout-Together/blob/f4ef3ffebc4bee2ad9919b78996cfa1c659e484f/src/main/java/dev/fResult/goutTogether/wallets/services/WalletServiceImpl.java#L225-L227)
 - Created custom application properties
-  - See: [MyApplicationProperties.java](https://github.com/fResult/Gout-Together/blob/4318c6a84d173aaeb05702955bf33c764c1dfb7b/src/main/java/dev/fResult/goutTogether/common/configs/MyApplicationProperties.java)
+  - See: [MyApplicationProperties.java](https://github.com/fResult/Gout-Together/blob/f4ef3ffebc4bee2ad9919b78996cfa1c659e484f/src/main/java/dev/fResult/goutTogether/common/configs/MyApplicationProperties.java)
 
 ### Test Coverage
 ![Image to display percentage of code coverage](https://github.com/user-attachments/assets/ef5c0b2d-3fd4-4af7-804d-7819b5c4b1b8)
