@@ -46,7 +46,6 @@ public class TourCountService {
                     "incrementTourCount", TourCount.class, "tourId", String.valueOf(tourId)));
 
     final var tourCountAmount = 1;
-    // TODO: Make pessimistic lock to avoid race condition
     final var isInsufficient = tour.numberOfPeople() < tourCount.amount() + tourCountAmount;
     if (isInsufficient) {
       throw errorHelper.insufficientTourCount("incrementTourCount", tour.numberOfPeople()).get();

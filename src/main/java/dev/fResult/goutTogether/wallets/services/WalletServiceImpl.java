@@ -275,7 +275,6 @@ public class WalletServiceImpl implements WalletService {
             Instant.now(),
             tourCompanyWalletBalanceToUpdate);
 
-    // TODO: Make pessimistic lock to avoid race condition
     final var updatedUserWallet = userWalletRepository.save(userWalletToUpdate);
     final var updatedCompanyWallet = tourCompanyWalletRepository.save(tourCompanyWalletToUpdate);
 
@@ -311,7 +310,6 @@ public class WalletServiceImpl implements WalletService {
             userWallet.id(), userWallet.userId(), Instant.now(), userWalletBalanceToUpdate);
 
     try (final var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-      // TODO: Make pessimistic lock to avoid race condition
       final var futureUpdatedUserWallet =
           CompletableFuture.supplyAsync(
               () -> userWalletRepository.save(userWalletToUpdate), executor);

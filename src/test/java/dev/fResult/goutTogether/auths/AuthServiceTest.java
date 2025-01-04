@@ -101,7 +101,7 @@ class AuthServiceTest {
     void byUserIds_ButSomeAreNotFound_ThenThrowEntityNotFoundException() {
       // Arrange
       final var expectedErrorMessage =
-          String.format( // TODO: Refactor this part to a ErrorMessageHelper's method
+          String.format( // TODO: Refactor this part to an ErrorMessageHelper's method
               "%s ids [%s] not found",
               UserLogin.class.getSimpleName(),
               new HashSet<>(List.of(NOT_FOUND_USER_ID_2, NOT_FOUND_USER_ID_1))
