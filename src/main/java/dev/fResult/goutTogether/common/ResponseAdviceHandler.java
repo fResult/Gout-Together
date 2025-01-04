@@ -25,8 +25,9 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
       @NonNull HttpHeaders headers,
       @NonNull HttpStatusCode status,
       @NonNull WebRequest request) {
-    var propertyToError = new HashMap<String, Object>();
-    var detail = ProblemDetail.forStatusAndDetail(status, "Invalid request arguments");
+
+    final var propertyToError = new HashMap<String, Object>();
+    final var detail = ProblemDetail.forStatusAndDetail(status, "Invalid request arguments");
 
     ex.getBindingResult()
         .getFieldErrors()
@@ -43,11 +44,12 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseEntity<String> handleConstraintViolationException(
       ConstraintViolationException ex, WebRequest request) {
-    var errorMessage =
+
+    final var errorMessage =
         ex.getConstraintViolations().stream()
             .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
             .collect(Collectors.joining(", "));
-    var detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errorMessage);
+    final var detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errorMessage);
 
     logger.warn("Constraint violation: {}", errorMessage);
 
@@ -56,7 +58,8 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(ValidationException.class)
   protected ResponseEntity<?> handleValidationException(ValidationException ex) {
-    var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    final var detail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
     logger.warn("Validation error: {}", ex.getMessage());
 
     return ResponseEntity.of(detail).build();
@@ -64,7 +67,7 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(EntityNotFoundException.class)
   protected ResponseEntity<?> handleEntityNotFoundException(EntityNotFoundException ex) {
-    var detail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    final var detail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     logger.warn("Entity not found: {}", ex.getMessage());
 
     return ResponseEntity.of(detail).build();
@@ -72,7 +75,7 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(CredentialExistsException.class)
   protected ResponseEntity<?> handleCredentialExistsException(CredentialExistsException ex) {
-    var detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    final var detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     logger.warn("Credential exists: {}", ex.getMessage());
 
     return ResponseEntity.of(detail).build();
@@ -80,7 +83,7 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(BookingExistsException.class)
   protected ResponseEntity<?> handleBookingExistsException(BookingExistsException ex) {
-    var detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    final var detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     logger.warn("Booking exists: {}", ex.getMessage());
 
     return ResponseEntity.of(detail).build();
@@ -88,7 +91,7 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(RefreshTokenExpiredException.class)
   protected ResponseEntity<?> handleRefreshTokenExpiredException(RefreshTokenExpiredException ex) {
-    var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    final var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
     logger.warn("Refresh token expired: {}", ex.getMessage());
 
     return ResponseEntity.of(detail).build();
@@ -96,7 +99,7 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(Exception.class)
   protected ResponseEntity<?> handleGlobalException(Exception ex) {
-    var detail =
+    final var detail =
         ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     logger.error(ex.getMessage());
     ex.printStackTrace();

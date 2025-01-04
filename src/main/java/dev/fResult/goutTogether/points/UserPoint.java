@@ -1,11 +1,10 @@
 package dev.fResult.goutTogether.points;
 
 import dev.fResult.goutTogether.users.entities.User;
+import java.time.Instant;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.data.relational.core.mapping.Table;
-
-import java.time.Instant;
 
 @Table("user_points")
 public record UserPoint(

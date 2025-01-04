@@ -38,14 +38,14 @@ class TransactionServiceTest {
   @Test
   void whenCreateTransaction_thenSuccess() {
     // Arrange
-    var TRANSACTION_ID = 1;
-    var transactionToCreate = buildTransaction(null);
-    var createdTransaction = buildTransaction(TRANSACTION_ID);
+    final var TRANSACTION_ID = 1;
+    final var transactionToCreate = buildTransaction(null);
+    final var createdTransaction = buildTransaction(TRANSACTION_ID);
 
     when(transactionRepository.save(any(Transaction.class))).thenReturn(createdTransaction);
 
     // Actual
-    var actualCreatedTransaction = transactionService.createTransaction(transactionToCreate);
+    final var actualCreatedTransaction = transactionService.createTransaction(transactionToCreate);
 
     // Assert
     assertEquals(createdTransaction, actualCreatedTransaction);

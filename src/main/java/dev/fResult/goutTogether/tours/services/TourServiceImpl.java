@@ -54,8 +54,8 @@ public class TourServiceImpl implements TourService {
   @Override
   @Transactional
   public Tour createTour(TourRequest body) {
-    var tourCompany = tourCompanyService.getTourCompanyById(body.tourCompanyId());
-    var tourToCreate =
+    final var tourCompany = tourCompanyService.getTourCompanyById(body.tourCompanyId());
+    final var tourToCreate =
         Tour.of(
             null,
             AggregateReference.to(tourCompany.id()),
@@ -66,7 +66,7 @@ public class TourServiceImpl implements TourService {
             body.activityDate(),
             TourStatus.PENDING.name());
 
-    var createdTour = tourRepository.save(tourToCreate);
+    final var createdTour = tourRepository.save(tourToCreate);
     logger.debug("[createTour] New {} is created: {}", Tour.class.getSimpleName(), createdTour);
     tourCountService.createTourCount(
         TourCount.of(null, AggregateReference.to(createdTour.id()), 0));

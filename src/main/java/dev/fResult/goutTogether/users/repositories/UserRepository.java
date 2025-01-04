@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends ListCrudRepository<User, Integer> {
-    Page<User> findByFirstNameContaining(String firstName, Pageable pageable);
+  Page<User> findByFirstNameContaining(String firstName, Pageable pageable);
 }

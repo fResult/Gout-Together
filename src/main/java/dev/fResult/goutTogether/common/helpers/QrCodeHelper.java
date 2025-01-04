@@ -8,8 +8,8 @@ import java.awt.image.BufferedImage;
 
 public class QrCodeHelper {
   public static BufferedImage generateQrCodeImage(String barcodeText) throws WriterException {
-    var qrCodeWriter = new QRCodeWriter();
-    var bitMatrix = qrCodeWriter.encode(barcodeText, BarcodeFormat.QR_CODE, 300, 300);
+    final var qrCodeWriter = new QRCodeWriter();
+    final var bitMatrix = qrCodeWriter.encode(barcodeText, BarcodeFormat.QR_CODE, 300, 300);
 
     return MatrixToImageWriter.toBufferedImage(bitMatrix);
   }

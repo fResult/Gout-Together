@@ -48,10 +48,10 @@ public class UserServiceImpl implements UserService {
 
   public Page<UserInfoResponse> getUsersByFirstName(String keyword, Pageable pageable) {
     logger.debug("[getUsers] Getting all {}s", User.class.getSimpleName());
-    var userPage = userRepository.findByFirstNameContaining(keyword, pageable);
-    var userIdToCredentialMap = buildUserIdToCredentialMap(userPage);
-    var toResponse = UserInfoResponse.fromUserDaoWithUserCredentialMap(userIdToCredentialMap);
-    var userInfos = userPage.stream().map(toResponse).toList();
+    final var userPage = userRepository.findByFirstNameContaining(keyword, pageable);
+    final var userIdToCredentialMap = buildUserIdToCredentialMap(userPage);
+    final var toResponse = UserInfoResponse.fromUserDaoWithUserCredentialMap(userIdToCredentialMap);
+    final var userInfos = userPage.stream().map(toResponse).toList();
 
     return new PageImpl<>(userInfos, pageable, userPage.getTotalElements());
   }
@@ -70,12 +70,12 @@ public class UserServiceImpl implements UserService {
     logger.debug("[register] New {} is registering", User.class.getSimpleName());
     throwExceptionIfUserEmailAlreadyExists(body.email());
 
-    var userToRegister = User.of(null, body.firstName(), body.lastName(), body.phoneNumber());
-    var registeredUser = userRepository.save(userToRegister);
+    final var userToRegister = User.of(null, body.firstName(), body.lastName(), body.phoneNumber());
+    final var registeredUser = userRepository.save(userToRegister);
     logger.info("[register] New {} is registered: {}", User.class.getSimpleName(), registeredUser);
 
-    var boundUserRole = roleService.bindNewUser(registeredUser.id(), UserRoleName.CONSUMER);
-    var createdUserCredential =
+    final var boundUserRole = roleService.bindNewUser(registeredUser.id(), UserRoleName.CONSUMER);
+    final var createdUserCredential =
         authService.createUserCredential(registeredUser.id(), body.email(), body.password());
     walletService.createConsumerWallet(registeredUser.id());
 
@@ -86,13 +86,13 @@ public class UserServiceImpl implements UserService {
   public UserInfoResponse updateUserById(int id, UserUpdateRequest body) {
     logger.debug("[updateUserById] {} id {} is updating", User.class.getSimpleName(), id);
 
-    var toUserUpdate = UserUpdateRequest.dtoToUserUpdate(body);
-    var userToUpdate =
+    final var toUserUpdate = UserUpdateRequest.dtoToUserUpdate(body);
+    final var userToUpdate =
         userRepository
             .findById(id)
             .map(toUserUpdate)
             .orElseThrow(errorHelper.entityNotFound("updateUserById", User.class, id));
-    var updatedUser = userRepository.save(userToUpdate);
+    final var updatedUser = userRepository.save(userToUpdate);
     logger.info("[updateUserById] {}: {} is updated", User.class.getSimpleName(), updatedUser);
 
     return toResponseWithUserCredential(updatedUser);
@@ -100,7 +100,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UpdatePasswordResult changePasswordByUserId(int id, UserChangePasswordRequest body) {
-    var updatedUserCredential =
+    final var updatedUserCredential =
         authService.updateUserPasswordByUserId(id, body.oldPassword(), body.newPassword());
     logger.info(
         "[changePasswordByUserId] {} id [{}] is updated",
@@ -113,7 +113,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public UpdatePasswordResult changePasswordByEmail(String email, UserChangePasswordRequest body) {
     logger.debug("[changePassword] {} email {} is updating", User.class.getSimpleName(), email);
-    var updatedUserCredential =
+    final var updatedUserCredential =
         authService.updateUserPasswordByEmail(email, body.oldPassword(), body.newPassword());
 
     logger.info(
@@ -127,9 +127,9 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public boolean deleteUserById(int id) {
-    var userEntityName = User.class.getSimpleName();
+    final var userEntityName = User.class.getSimpleName();
     logger.debug("[deleteUser] {} id [{}] is deleting", userEntityName, id);
-    var userToDelete =
+    final var userToDelete =
         userRepository
             .findById(id)
             .orElseThrow(errorHelper.entityNotFound("deleteUser", User.class, id));
@@ -148,20 +148,20 @@ public class UserServiceImpl implements UserService {
   }
 
   private Map<Integer, UserLogin> buildUserIdToCredentialMap(Page<User> userPage) {
-    var userIds = buildUniqueUserIds(userPage);
+    final var userIds = buildUniqueUserIds(userPage);
 
     return authService.getUserCredentialsByUserIds(userIds).stream()
         .collect(Collectors.toMap(cred -> cred.userId().getId(), Function.identity()));
   }
 
   private UserInfoResponse toResponseWithUserCredential(User user) {
-    var userCredential = authService.getUserCredentialByUserId(user.id());
+    final var userCredential = authService.getUserCredentialByUserId(user.id());
 
     return UserInfoResponse.fromUserDao(user, userCredential);
   }
 
   private void throwExceptionIfUserEmailAlreadyExists(String email) {
-    var existingUserCredential = authService.findUserCredentialByEmail(email);
+    final var existingUserCredential = authService.findUserCredentialByEmail(email);
     if (existingUserCredential.isPresent()) {
       logger.warn("[register] {} email [{}] already exists", User.class.getSimpleName(), email);
       throw new CredentialExistsException(

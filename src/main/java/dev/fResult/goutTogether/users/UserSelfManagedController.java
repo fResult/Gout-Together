@@ -29,7 +29,7 @@ public class UserSelfManagedController {
 
   @GetMapping
   public ResponseEntity<UserInfoResponse> getMyUser(Authentication authentication) {
-    var userId = getMyId(authentication);
+    final var userId = getMyId(authentication);
 
     return ResponseEntity.ok(userService.getUserById(Math.toIntExact(userId)));
   }
@@ -38,7 +38,7 @@ public class UserSelfManagedController {
   public ResponseEntity<UserInfoResponse> updateMyUser(
       @Validated @RequestBody UserUpdateRequest body, Authentication authentication) {
 
-    var userId = getMyId(authentication);
+    final var userId = getMyId(authentication);
 
     logger.debug("[updateUserById] Updating {} by id [{}]", User.class.getSimpleName(), userId);
 
@@ -49,8 +49,8 @@ public class UserSelfManagedController {
   public ResponseEntity<UpdatePasswordResult> changePassword(
       @Validated @RequestBody UserChangePasswordRequest body, Authentication authentication) {
 
-    var jwt = (Jwt) authentication.getPrincipal();
-    var email = jwt.getClaimAsString("sub");
+    final var jwt = (Jwt) authentication.getPrincipal();
+    final var email = jwt.getClaimAsString("sub");
 
     logger.debug(
         "[changePassword] Changing {} password by email [{}]", User.class.getSimpleName(), email);
@@ -60,7 +60,7 @@ public class UserSelfManagedController {
 
   @DeleteMapping
   public ResponseEntity<String> deleteMyUser(Authentication authentication) {
-    var userId = getMyId(authentication);
+    final var userId = getMyId(authentication);
 
     logger.debug("[deleteMyUser] Deleting {} by id [{}]", User.class.getSimpleName(), userId);
     userService.deleteUserById(userId);
@@ -70,7 +70,8 @@ public class UserSelfManagedController {
   }
 
   private int getMyId(Authentication authentication) {
-    var jwt = (Jwt) authentication.getPrincipal();
+    final var jwt = (Jwt) authentication.getPrincipal();
+
     return Integer.parseInt(jwt.getClaimAsString(RESOURCE_ID_CLAIM));
   }
 }

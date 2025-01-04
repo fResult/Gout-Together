@@ -39,21 +39,22 @@ class CustomUserDetailsServiceTest {
   @Test
   void whenLoadUserAdminDetailsByEmail_ThenSuccess() {
     // Arrange
-    var USER_ID = 1;
-    var ROLE = UserRoleName.ADMIN;
-    var HASHED_PASSWORD = "H@shedP@ssw0rd";
-    var userRef = AggregateReference.<User, Integer>to(USER_ID);
-    var roleRef = AggregateReference.<Role, Integer>to(ROLE.getId());
-    var mockUserLogin = UserLogin.of(1, userRef, EMAIL, HASHED_PASSWORD);
-    var mockUserRole = UserRole.of(1, userRef, roleRef);
-    var expectedAuthenticatedUser = AuthenticatedUser.of(USER_ID, EMAIL, HASHED_PASSWORD, ROLE);
+    final var USER_ID = 1;
+    final var ROLE = UserRoleName.ADMIN;
+    final var HASHED_PASSWORD = "H@shedP@ssw0rd";
+    final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+    final var roleRef = AggregateReference.<Role, Integer>to(ROLE.getId());
+    final var mockUserLogin = UserLogin.of(1, userRef, EMAIL, HASHED_PASSWORD);
+    final var mockUserRole = UserRole.of(1, userRef, roleRef);
+    final var expectedAuthenticatedUser =
+        AuthenticatedUser.of(USER_ID, EMAIL, HASHED_PASSWORD, ROLE);
 
     when(userLoginRepository.findOneByEmail(anyString())).thenReturn(Optional.of(mockUserLogin));
     when(userRoleRepository.findOneByUserId(mockUserLogin.userId()))
         .thenReturn(Optional.of(mockUserRole));
 
     // Actual
-    var actualLoadedUserDetails = customUserDetailsService.loadUserByUsername(EMAIL);
+    final var actualLoadedUserDetails = customUserDetailsService.loadUserByUsername(EMAIL);
 
     // Assert
     assertEquals(expectedAuthenticatedUser, actualLoadedUserDetails);
@@ -62,21 +63,22 @@ class CustomUserDetailsServiceTest {
   @Test
   void whenLoadUserConsumerDetailsByEmailSuccess() {
     // Arrange
-    var USER_ID = 2;
-    var ROLE = UserRoleName.CONSUMER;
-    var HASHED_PASSWORD = "H@shedP@ssw0rd";
-    var userRef = AggregateReference.<User, Integer>to(USER_ID);
-    var roleRef = AggregateReference.<Role, Integer>to(ROLE.getId());
-    var mockUserLogin = UserLogin.of(2, userRef, EMAIL, HASHED_PASSWORD);
-    var mockUserRole = UserRole.of(2, userRef, roleRef);
-    var expectedAuthenticatedUser = AuthenticatedUser.of(USER_ID, EMAIL, HASHED_PASSWORD, ROLE);
+    final var USER_ID = 2;
+    final var ROLE = UserRoleName.CONSUMER;
+    final var HASHED_PASSWORD = "H@shedP@ssw0rd";
+    final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+    final var roleRef = AggregateReference.<Role, Integer>to(ROLE.getId());
+    final var mockUserLogin = UserLogin.of(2, userRef, EMAIL, HASHED_PASSWORD);
+    final var mockUserRole = UserRole.of(2, userRef, roleRef);
+    final var expectedAuthenticatedUser =
+        AuthenticatedUser.of(USER_ID, EMAIL, HASHED_PASSWORD, ROLE);
 
     when(userLoginRepository.findOneByEmail(anyString())).thenReturn(Optional.of(mockUserLogin));
     when(userRoleRepository.findOneByUserId(mockUserLogin.userId()))
         .thenReturn(Optional.of(mockUserRole));
 
     // Actual
-    var actualLoadedUserDetails = customUserDetailsService.loadUserByUsername(EMAIL);
+    final var actualLoadedUserDetails = customUserDetailsService.loadUserByUsername(EMAIL);
 
     // Assert
     assertEquals(expectedAuthenticatedUser, actualLoadedUserDetails);
@@ -85,60 +87,61 @@ class CustomUserDetailsServiceTest {
   @Test
   void whenLoadUserDetailsByUsername_ButUserNotFound_ThenThrowException() {
     // Arrange
-    var NOT_FOUND_EMAIL = "in_existing@email.com";
-    var expectedErrorMessage =
+    final var NOT_FOUND_EMAIL = "in_existing@email.com";
+    final var expectedErrorMessage =
         String.format(
             "%s with email [%s] not found", UserLogin.class.getSimpleName(), NOT_FOUND_EMAIL);
     when(userLoginRepository.findOneByEmail(anyString())).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualLoadedUserDetails =
+    final Executable actualLoadedUserDetails =
         () -> customUserDetailsService.loadUserByUsername(NOT_FOUND_EMAIL);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualLoadedUserDetails);
+    final var exception =
+        assertThrowsExactly(EntityNotFoundException.class, actualLoadedUserDetails);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test
   void whenLoadUserDetailsByUsername_ButUserRoleNotFound_ThenThrowException() {
     // Arrange
-    var NOT_FOUND_USER_ID = 99999;
-    var expectedErrorMessage =
+    final var NOT_FOUND_USER_ID = 99999;
+    final var expectedErrorMessage =
         String.format(
             "%s with userId [%d] not found", UserLogin.class.getSimpleName(), NOT_FOUND_USER_ID);
-    var HASHED_PASSWORD = "H@shedP@ssw0rd";
-    var userRef = AggregateReference.<User, Integer>to(NOT_FOUND_USER_ID);
-    var mockUserLogin = UserLogin.of(1, userRef, EMAIL, HASHED_PASSWORD);
+    final var HASHED_PASSWORD = "H@shedP@ssw0rd";
+    final var userRef = AggregateReference.<User, Integer>to(NOT_FOUND_USER_ID);
+    final var mockUserLogin = UserLogin.of(1, userRef, EMAIL, HASHED_PASSWORD);
 
     when(userLoginRepository.findOneByEmail(anyString())).thenReturn(Optional.of(mockUserLogin));
     when(userRoleRepository.findOneByUserId(mockUserLogin.userId())).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualLoadedUserDetails = () -> customUserDetailsService.loadUserByUsername(EMAIL);
+    final Executable actualLoadedUserDetails = () -> customUserDetailsService.loadUserByUsername(EMAIL);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualLoadedUserDetails);
+    final var exception = assertThrowsExactly(EntityNotFoundException.class, actualLoadedUserDetails);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test
   void whenLoadCompanyDetailsByUsernameSuccess() {
     // Arrange
-    var USERNAME = "DisasterTour";
-    var TOUR_COMPANY_ID = 1;
-    var HASHED_PASSWORD = "H@shedP@ssw0rd";
-    var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
-    var mockTourCompanyLogin =
+    final var USERNAME = "DisasterTour";
+    final var TOUR_COMPANY_ID = 1;
+    final var HASHED_PASSWORD = "H@shedP@ssw0rd";
+    final var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
+    final var mockTourCompanyLogin =
         TourCompanyLogin.of(1, tourCompanyRef, "DisasterTour", HASHED_PASSWORD);
-    var expectedAuthenticatedUser =
+    final var expectedAuthenticatedUser =
         AuthenticatedUser.of(TOUR_COMPANY_ID, USERNAME, HASHED_PASSWORD, UserRoleName.COMPANY);
 
     when(tourCompanyLoginRepository.findOneByUsername(anyString()))
         .thenReturn(Optional.of(mockTourCompanyLogin));
 
     // Actual
-    var actualLoadedCompanyDetails = customUserDetailsService.loadUserByUsername(USERNAME);
+    final var actualLoadedCompanyDetails = customUserDetailsService.loadUserByUsername(USERNAME);
 
     // Assert
     assertEquals(expectedAuthenticatedUser, actualLoadedCompanyDetails);
@@ -147,8 +150,8 @@ class CustomUserDetailsServiceTest {
   @Test
   void whenLoadCompanyDetailsByUsername_ButCompanyNotFound_ThenThrowException() {
     // Arrange
-    var NOT_FOUND_USERNAME = "NonExistentCompany";
-    var expectedErrorMessage =
+    final var NOT_FOUND_USERNAME = "NonExistentCompany";
+    final var expectedErrorMessage =
         String.format(
             "%s with username [%s] not found",
             TourCompanyLogin.class.getSimpleName(), NOT_FOUND_USERNAME);
@@ -156,11 +159,11 @@ class CustomUserDetailsServiceTest {
     when(tourCompanyLoginRepository.findOneByUsername(anyString())).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualLoadedCompanyDetails =
+    final Executable actualLoadedCompanyDetails =
         () -> customUserDetailsService.loadUserByUsername(NOT_FOUND_USERNAME);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualLoadedCompanyDetails);
+    final var exception = assertThrowsExactly(EntityNotFoundException.class, actualLoadedCompanyDetails);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 }

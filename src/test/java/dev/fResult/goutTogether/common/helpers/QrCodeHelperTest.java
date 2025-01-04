@@ -17,7 +17,7 @@ class QrCodeHelperTest {
   @Test
   void whenGenerateQrCodeImageIsCalled_thenNoExceptionIsThrown() {
     // Arrange
-    var barcodeText = "Hello, World!";
+    final var barcodeText = "Hello, World!";
 
     // Actual
     try {
@@ -30,17 +30,17 @@ class QrCodeHelperTest {
 
   @Test
   void whenGenerateQrCode_ThenSuccess() throws WriterException {
-    try (var mockedMatrixToImageWriter = mockStatic(MatrixToImageWriter.class)) {
+    try (final var mockedMatrixToImageWriter = mockStatic(MatrixToImageWriter.class)) {
       // Arrange
-      var barcodeTextInput = "Hello, World!";
-      var expectedQrCodeImage = new BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB);
+      final var barcodeTextInput = "Hello, World!";
+      final var expectedQrCodeImage = new BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB);
 
       mockedMatrixToImageWriter
           .when(() -> MatrixToImageWriter.toBufferedImage(any(BitMatrix.class)))
           .thenReturn(expectedQrCodeImage);
 
       // Actual
-      var actualQrCodeImage = QrCodeHelper.generateQrCodeImage(barcodeTextInput);
+      final var actualQrCodeImage = QrCodeHelper.generateQrCodeImage(barcodeTextInput);
 
       // Assert
       assertEquals(expectedQrCodeImage, actualQrCodeImage);

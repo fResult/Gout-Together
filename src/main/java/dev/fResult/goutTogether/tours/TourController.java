@@ -32,9 +32,9 @@ public class TourController {
       @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
     logger.debug("[getTours] Getting all {}", Tour.class.getSimpleName());
 
-    var sort = Sort.by(direction, field);
-    var pageable = PageRequest.of(page, size, sort);
-    var tours = tourService.getTours(pageable);
+    final var sort = Sort.by(direction, field);
+    final var pageable = PageRequest.of(page, size, sort);
+    final var tours = tourService.getTours(pageable);
 
     return ResponseEntity.ok(tours);
   }
@@ -48,8 +48,9 @@ public class TourController {
   public ResponseEntity<Tour> create(@RequestBody @Validated TourRequest body) {
     logger.debug("[create] Creating a new {}", Tour.class.getSimpleName());
 
-    var createdTour = tourService.createTour(body);
-    var uri = URI.create(String.format("/api/v1/tours/%d", createdTour.id()));
+    final var createdTour = tourService.createTour(body);
+    final var uri = URI.create(String.format("/api/v1/tours/%d", createdTour.id()));
+
     return ResponseEntity.created(uri).body(createdTour);
   }
 }

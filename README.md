@@ -6,6 +6,19 @@ BY [TP Coder](https://www.youtube.com/@tpcoder)
 
 Course Code Example: <https://github.com/marttp/20240629-GoutTogether>
 
+## API Usage
+
+Download Postman Collection from the [Gout-Together.postman_collection.json](https://raw.githubusercontent.com/fResult/Gout-Together/refs/heads/main/Gout-Together.postman_collection.json) file, then import to your [Postman](https://www.postman.com/downloads).
+
+```bash
+# Download the Postman Collection to current (working) directory
+curl -O https://raw.githubusercontent.com/fResult/Gout-Together/refs/heads/main/Gout-Together.postman_collection.json
+
+# Download the Postman Collection to your specific directory
+curl -o /path/to/your/target/directory/Gout-Together.postman_collection.json https://raw.githubusercontent.com/fResult/Gout-Together/refs/heads/main/Gout-Together.postman_collection.json
+```
+
+
 ## Related commands
 
 ### Build Jar and Get the OpenTelemetry Agent
@@ -30,7 +43,7 @@ openssl rsa -pubout -in src/main/resources/private_key.pem -out src/main/resourc
 openssl pkcs8 -topk8 -in src/main/resources/private_key.pem -inform pem -out src/main/resources/private_key_pkcs8.pem -outform pem -nocrypt
 ```
 
-#### To Assign Public/Private Key for Spring Security Config
+#### Assign Public/Private Key for Spring Security Config
 
 ```shell
 base64 -i src/main/resources/private_key_pkcs8.pem # Then put the Base64 text to the `OAUTH_PRIVATE_KEY_BASE64` env var
@@ -79,25 +92,25 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
 ### Things I learned from attending the course
 
 - OpenTelemetry Java Agent
-- Spring Security
+- Spring Security implementation
 - Unit Testing with JUnit 5 and Mockito
-- Config Authorization with OAuth2ResourceServer
+- Configuring authorization with OAuth2ResourceServer
 - Integration Testing
-- Pessimistic Locking to handle data consistency
+- Pessimistic Locking for data consistency
 
 ### Things I did different and learned further
 
-- Using the Gradle Kotlin instead of the Gradle Groovy
-- PasswordEncoder, using Argon2PasswordEncoder instead of BCryptPasswordEncoder
-- Adding more assertion, assert the error message
-- Solving Circular Dependency by using `@Lazy` annotation
-- Using [Virtual Thread](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html) and Future for concurrency fetching independent data from database
-- Rethrowing exception cause by multiple threads could be tricky, need to be careful
-  - See:
-    - [ErrorHelper.throwMatchedException()](https://github.com/fResult/Gout-Together/blob/5a70c5e884b0ed8575fadb9c5280662966581a0d/src/main/java/dev/fResult/goutTogether/common/helpers/ErrorHelper.java#L20-L34)
-    - [Utilized in the service](https://github.com/fResult/Gout-Together/blob/5a70c5e884b0ed8575fadb9c5280662966581a0d/src/main/java/dev/fResult/goutTogether/wallets/services/WalletServiceImpl.java#L225-L227)
-- Create a custom application properties
-  - See: [MyApplicationProperties.java](https://github.com/fResult/Gout-Together/blob/e6f5113f95b57f6c1c51a8113b2ce53a343b35b1/src/main/java/dev/fResult/goutTogether/common/configs/MyApplicationProperties.java)
+- Used the Gradle Kotlin instead of the Gradle Groovy
+- PasswordEncoder: using Argon2PasswordEncoder instead of BCryptPasswordEncoder
+- Added more assertion, including asserting error message in Unit Tests
+- Resolved circular dependency using `@Lazy` annotation
+- Implemented [Virtual Thread](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html) and `CompletableFuture` for concurrent database operations
+  - See: [WalletServiceImpl.getConsumerAndTourCompanyWallets()](https://github.com/fResult/Gout-Together/blob/4318c6a84d173aaeb05702955bf33c764c1dfb7b/src/main/java/dev/fResult/goutTogether/wallets/services/WalletServiceImpl.java#L202-L224)
+- Handled complex exception propagation in multi-threaded scenarios
+    - Implemented in [ErrorHelper.throwMatchedException()](https://github.com/fResult/Gout-Together/blob/4318c6a84d173aaeb05702955bf33c764c1dfb7b/src/main/java/dev/fResult/goutTogether/common/helpers/ErrorHelper.java#L24-L38)
+    - Applied in [service layer](https://github.com/fResult/Gout-Together/blob/4318c6a84d173aaeb05702955bf33c764c1dfb7b/src/main/java/dev/fResult/goutTogether/wallets/services/WalletServiceImpl.java#L225-L227)
+- Created custom application properties
+  - See: [MyApplicationProperties.java](https://github.com/fResult/Gout-Together/blob/4318c6a84d173aaeb05702955bf33c764c1dfb7b/src/main/java/dev/fResult/goutTogether/common/configs/MyApplicationProperties.java)
 
 ### Test Coverage
 ![Image to display percentage of code coverage](https://github.com/user-attachments/assets/ef5c0b2d-3fd4-4af7-804d-7819b5c4b1b8)

@@ -11,5 +11,6 @@ import org.springframework.stereotype.Repository;
 public interface TourCompanyLoginRepository extends CrudRepository<TourCompanyLogin, Integer> {
   Optional<TourCompanyLogin> findOneByUsername(String username);
 
-  Optional<TourCompanyLogin> findOneByTourCompanyId(AggregateReference<TourCompany, Integer> tourCompanyId);
+  Optional<TourCompanyLogin> findOneByTourCompanyId(
+      AggregateReference<TourCompany, Integer> tourCompanyId);
 }

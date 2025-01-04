@@ -13,8 +13,7 @@ public record Booking(
     @Id Integer id,
     AggregateReference<User, Integer> userId,
     AggregateReference<Tour, Integer> tourId,
-    @Column("state")
-    String status,
+    @Column("state") String status,
     Instant bookingDate,
     Instant lastUpdated,
     String idempotentKey) {

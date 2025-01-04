@@ -69,14 +69,14 @@ class WalletServiceTest {
   @Test
   void whenCreateConsumerWallet_ThenSuccess() {
     // Arrange
-    var USER_ID = 1;
-    var mockCreatedUserWallet =
+    final var USER_ID = 1;
+    final var mockCreatedUserWallet =
         UserWallet.of(
             USER_WALLET_ID, AggregateReference.to(USER_ID), Instant.now(), BigDecimal.ZERO);
     when(userWalletRepository.save(any(UserWallet.class))).thenReturn(mockCreatedUserWallet);
 
     // Actual
-    var actualCreatedWallet = walletService.createConsumerWallet(USER_ID);
+    final var actualCreatedWallet = walletService.createConsumerWallet(USER_ID);
 
     // Assert
     assertEquals(mockCreatedUserWallet, actualCreatedWallet);
@@ -85,16 +85,17 @@ class WalletServiceTest {
   @Test
   void whenGetConsumerWallet_ThenSuccess() {
     // Arrange
-    var USER_ID = 1;
-    var userRef = AggregateReference.<User, Integer>to(USER_ID);
-    var mockUserWallet = UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), BigDecimal.ZERO);
-    var expectedFoundUserWallet =
+    final var USER_ID = 1;
+    final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+    final var mockUserWallet =
+        UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), BigDecimal.ZERO);
+    final var expectedFoundUserWallet =
         UserWalletInfoResponse.of(USER_WALLET_ID, USER_ID, BigDecimal.ZERO);
 
     when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserWallet));
 
     // Actual
-    var actualFoundWallet = walletService.getConsumerWalletInfoByUserId(USER_ID);
+    final var actualFoundWallet = walletService.getConsumerWalletInfoByUserId(USER_ID);
 
     // Assert
     assertEquals(expectedFoundUserWallet, actualFoundWallet);
@@ -103,34 +104,34 @@ class WalletServiceTest {
   @Test
   void whenGetConsumerWallet_ButNotFound_ThenThrowEntityNotFoundException() {
     // Arrange
-    var NOT_FOUND_USER_ID = 99999;
-    var expectedErrorMessage =
+    final var NOT_FOUND_USER_ID = 99999;
+    final var expectedErrorMessage =
         String.format(
             "%s with userId [%s] not found", UserWallet.class.getSimpleName(), NOT_FOUND_USER_ID);
-    var notFoundUserRef = AggregateReference.<User, Integer>to(NOT_FOUND_USER_ID);
+    final var notFoundUserRef = AggregateReference.<User, Integer>to(NOT_FOUND_USER_ID);
     when(userWalletRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable =
+    final Executable actualExecutable =
         () -> walletService.getConsumerWalletInfoByUserId(NOT_FOUND_USER_ID);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test
   void whenCreateCompanyWallet_ThenSuccess() {
     // Arrange
-    var COMPANY_ID = 1;
-    var mockCreatedCompanyWallet =
+    final var COMPANY_ID = 1;
+    final var mockCreatedCompanyWallet =
         TourCompanyWallet.of(
             USER_WALLET_ID, AggregateReference.to(COMPANY_ID), Instant.now(), BigDecimal.ZERO);
     when(tourCompanyWalletRepository.save(any(TourCompanyWallet.class)))
         .thenReturn(mockCreatedCompanyWallet);
 
     // Actual
-    var actualCreatedWallet = walletService.createTourCompanyWallet(COMPANY_ID);
+    final var actualCreatedWallet = walletService.createTourCompanyWallet(COMPANY_ID);
 
     // Assert
     assertEquals(mockCreatedCompanyWallet, actualCreatedWallet);
@@ -170,12 +171,12 @@ class WalletServiceTest {
     @Test
     void thenSuccess() {
       // Arrange
-      var body = WalletTopUpRequest.of(AMOUNT);
-      var userRef = AggregateReference.<User, Integer>to(USER_ID);
-      var mockUserWallet = buildUserWallet(CURRENT_BALANCE);
-      var mockUpdatedUserWallet =
+      final var body = WalletTopUpRequest.of(AMOUNT);
+      final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+      final var mockUserWallet = buildUserWallet(CURRENT_BALANCE);
+      final var mockUpdatedUserWallet =
           UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), BALANCE_TO_UPDATE);
-      var expectedUpdatedUserWallet =
+      final var expectedUpdatedUserWallet =
           UserWalletInfoResponse.of(USER_WALLET_ID, USER_ID, BALANCE_TO_UPDATE);
 
       when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserWallet));
@@ -183,7 +184,7 @@ class WalletServiceTest {
       when(userWalletRepository.save(any(UserWallet.class))).thenReturn(mockUpdatedUserWallet);
 
       // Actual
-      var actualUpdatedUserWallet =
+      final var actualUpdatedUserWallet =
           walletService.topUpConsumerWallet(USER_ID, IDEMPOTENCY_KEY, body);
 
       // Assert
@@ -193,11 +194,11 @@ class WalletServiceTest {
     @Test
     void butTransactionAlreadyExists_ThenReturnUserWalletWithoutReTopUp() {
       // Arrange
-      var body = WalletTopUpRequest.of(AMOUNT);
-      var userRef = AggregateReference.<User, Integer>to(USER_ID);
-      var mockUserWallet = buildUserWallet(CURRENT_BALANCE);
-      var mockTransaction = buildTopUpTransaction(USER_ID, 1, 1, AMOUNT);
-      var expectedUpdatedUserWallet =
+      final var body = WalletTopUpRequest.of(AMOUNT);
+      final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+      final var mockUserWallet = buildUserWallet(CURRENT_BALANCE);
+      final var mockTransaction = buildTopUpTransaction(USER_ID, 1, 1, AMOUNT);
+      final var expectedUpdatedUserWallet =
           UserWalletInfoResponse.of(USER_WALLET_ID, USER_ID, CURRENT_BALANCE);
 
       when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserWallet));
@@ -205,7 +206,7 @@ class WalletServiceTest {
           .thenReturn(Optional.of(mockTransaction));
 
       // Actual
-      var actualUpdatedUserWallet =
+      final var actualUpdatedUserWallet =
           walletService.topUpConsumerWallet(USER_ID, IDEMPOTENCY_KEY, body);
 
       // Assert
@@ -215,19 +216,19 @@ class WalletServiceTest {
     @Test
     void butWalletNotFound_ThenThrowException() {
       // Arrange
-      var expectedErrorMessage =
+      final var expectedErrorMessage =
           String.format(
               "%s with userId [%s] not found", UserWallet.class.getSimpleName(), NOT_FOUND_USER_ID);
-      var body = WalletTopUpRequest.of(AMOUNT);
-      var notFoundUserRef = AggregateReference.<User, Integer>to(NOT_FOUND_USER_ID);
+      final var body = WalletTopUpRequest.of(AMOUNT);
+      final var notFoundUserRef = AggregateReference.<User, Integer>to(NOT_FOUND_USER_ID);
       when(userWalletRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
 
       // Actual
-      Executable actualExecutable =
+      final Executable actualExecutable =
           () -> walletService.topUpConsumerWallet(NOT_FOUND_USER_ID, IDEMPOTENCY_KEY, body);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
@@ -235,14 +236,15 @@ class WalletServiceTest {
   @Test
   void whenDeleteConsumerWallet_ThenSuccess() {
     // Arrange
-    var USER_ID = 1;
-    var userRef = AggregateReference.<User, Integer>to(USER_ID);
-    var walletToDelete = UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), BigDecimal.ZERO);
+    final var USER_ID = 1;
+    final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+    final var walletToDelete =
+        UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), BigDecimal.ZERO);
     when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(walletToDelete));
     doNothing().when(userWalletRepository).delete(any(UserWallet.class));
 
     // Actual
-    var actualIsSuccess = walletService.deleteConsumerWalletByUserId(USER_WALLET_ID);
+    final var actualIsSuccess = walletService.deleteConsumerWalletByUserId(USER_WALLET_ID);
 
     // Assert
     verify(userWalletRepository, times(1)).delete(walletToDelete);
@@ -252,17 +254,18 @@ class WalletServiceTest {
   @Test
   void whenGetCompanyWallet_ThenSuccess() {
     // Arrange
-    var TOUR_COMPANY_ID = 1;
-    var companyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
-    var mockCompanyWallet = buildMockCompanyWallet(TOUR_COMPANY_ID, BigDecimal.ZERO);
-    var expectedFoundCompanyWalletInfo =
+    final var TOUR_COMPANY_ID = 1;
+    final var companyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
+    final var mockCompanyWallet = buildMockCompanyWallet(TOUR_COMPANY_ID, BigDecimal.ZERO);
+    final var expectedFoundCompanyWalletInfo =
         TourCompanyWalletInfoResponse.of(TOUR_COMPANY_WALLET_ID, TOUR_COMPANY_ID, BigDecimal.ZERO);
 
     when(tourCompanyWalletRepository.findOneByTourCompanyId(companyRef))
         .thenReturn(Optional.of(mockCompanyWallet));
 
     // Actual
-    var actualFoundWallet = walletService.getTourCompanyWalletInfoByTourCompanyId(TOUR_COMPANY_ID);
+    final var actualFoundWallet =
+        walletService.getTourCompanyWalletInfoByTourCompanyId(TOUR_COMPANY_ID);
 
     // Assert
     assertEquals(expectedFoundCompanyWalletInfo, actualFoundWallet);
@@ -271,19 +274,19 @@ class WalletServiceTest {
   @Test
   void whenGetCompanyWallet_ButNotFound_ThenThrowEntityNotFoundException() {
     // Arrange
-    var NOT_FOUND_USER_ID = 99999;
-    var expectedErrorMessage =
+    final var NOT_FOUND_USER_ID = 99999;
+    final var expectedErrorMessage =
         String.format(
             "%s with userId [%s] not found", UserWallet.class.getSimpleName(), NOT_FOUND_USER_ID);
-    var notFoundUserRef = AggregateReference.<User, Integer>to(NOT_FOUND_USER_ID);
+    final var notFoundUserRef = AggregateReference.<User, Integer>to(NOT_FOUND_USER_ID);
     when(userWalletRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable =
+    final Executable actualExecutable =
         () -> walletService.getConsumerWalletInfoByUserId(NOT_FOUND_USER_ID);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
@@ -313,11 +316,11 @@ class WalletServiceTest {
     @Test
     void thenSuccess() {
       // Arrange
-      var userRef = AggregateReference.<User, Integer>to(1);
-      var tourRef = AggregateReference.<Tour, Integer>to(1);
-      var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(1);
-      var mockBooking = buildMockBooking(userRef, tourRef);
-      var mockTour =
+      final var userRef = AggregateReference.<User, Integer>to(1);
+      final var tourRef = AggregateReference.<Tour, Integer>to(1);
+      final var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(1);
+      final var mockBooking = buildMockBooking(userRef, tourRef);
+      final var mockTour =
           Tour.of(
               TOUR_ID,
               tourCompanyRef,
@@ -327,8 +330,9 @@ class WalletServiceTest {
               10,
               Instant.now().plus(45, ChronoUnit.DAYS),
               TourStatus.APPROVED.name());
-      var mockUserWallet = UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), BigDecimal.ZERO);
-      var mockTourCompanyWallet =
+      final var mockUserWallet =
+          UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), BigDecimal.ZERO);
+      final var mockTourCompanyWallet =
           TourCompanyWallet.of(COMPANY_WALLET_ID, tourCompanyRef, Instant.now(), BigDecimal.ZERO);
 
       when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserWallet));
@@ -337,7 +341,7 @@ class WalletServiceTest {
           .thenReturn(Optional.of(mockTourCompanyWallet));
 
       // Actual
-      var actualUserWallet = walletService.getConsumerAndTourCompanyWallets(mockBooking);
+      final var actualUserWallet = walletService.getConsumerAndTourCompanyWallets(mockBooking);
 
       // Assert
       assertEquals(mockUserWallet, actualUserWallet.getFirst());
@@ -347,14 +351,13 @@ class WalletServiceTest {
     @Test
     void butUserIdIsNull_ThenThrowException() {
       // Arrange
-      var TOUR_ID = 1;
-      AggregateReference<User, Integer> userIdRef = null;
-      var expectedErrorMessage =
+      final AggregateReference<User, Integer> userIdRef = null;
+      final var expectedErrorMessage =
           String.format(
               "%s with userId [%s] tourId [%s] not found",
               Booking.class.getSimpleName(), null, TOUR_ID);
 
-      var mockBooking =
+      final var mockBooking =
           Booking.of(
               1,
               null,
@@ -365,24 +368,22 @@ class WalletServiceTest {
               IDEMPOTENCY_KEY);
 
       // Actual
-      Executable actualUserWallet =
+      final Executable actualUserWallet =
           () -> walletService.getConsumerAndTourCompanyWallets(mockBooking);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualUserWallet);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualUserWallet);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
 
     @Test
     void butTourCompanyIdIsNull_ThenThrowException() {
       // Arrange
-      var USER_ID = 1;
-      AggregateReference<Tour, Integer> userIdRef = null;
-      var expectedErrorMessage =
+      final var expectedErrorMessage =
           String.format(
               "%s with userId [%s] tourId [%s] not found",
               Booking.class.getSimpleName(), USER_ID, null);
-      var mockBooking =
+      final var mockBooking =
           Booking.of(
               1,
               AggregateReference.<User, Integer>to(USER_ID),
@@ -393,36 +394,34 @@ class WalletServiceTest {
               IDEMPOTENCY_KEY);
 
       // Actual
-      Executable actualUserWallet =
+      final Executable actualUserWallet =
           () -> walletService.getConsumerAndTourCompanyWallets(mockBooking);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualUserWallet);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualUserWallet);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
 
     @Test
     void butTourNotFound_ThenThrowException() {
       // Arrange
-      var USER_ID = 1;
-      var TOUR_ID = 1;
-      var expectedErrorMessage =
+      final var expectedErrorMessage =
           String.format("%s id [%d] not found", Tour.class.getSimpleName(), TOUR_ID);
-      var userRef = AggregateReference.<User, Integer>to(USER_ID);
-      var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-      var mockBooking = buildMockBooking(userRef, tourRef);
-      var mockUserWallet = buildMockUserWallet(userRef);
+      final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+      final var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+      final var mockBooking = buildMockBooking(userRef, tourRef);
+      final var mockUserWallet = buildMockUserWallet(userRef);
 
       when(userWalletRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserWallet));
       when(tourService.getTourById(TOUR_ID))
           .thenThrow(new EntityNotFoundException(expectedErrorMessage));
 
       // Actual
-      Executable actualUserWallet =
+      final Executable actualUserWallet =
           () -> walletService.getConsumerAndTourCompanyWallets(mockBooking);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualUserWallet);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualUserWallet);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
@@ -434,16 +433,16 @@ class WalletServiceTest {
     @Test
     void whenSuccess() {
       // Arrange
-      var AMOUNT_TO_WITHDRAW = BigDecimal.valueOf(80_000);
-      var CURRENT_BALANCE = BigDecimal.valueOf(1_000_000);
-      var BALANCE_AFTER_WITHDRAW = BigDecimal.valueOf(920_000);
-      var body = WalletWithdrawRequest.of(AMOUNT_TO_WITHDRAW);
-      var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
+      final var AMOUNT_TO_WITHDRAW = BigDecimal.valueOf(80_000);
+      final var CURRENT_BALANCE = BigDecimal.valueOf(1_000_000);
+      final var BALANCE_AFTER_WITHDRAW = BigDecimal.valueOf(920_000);
+      final var body = WalletWithdrawRequest.of(AMOUNT_TO_WITHDRAW);
+      final var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
 
-      var mockCompanyWallet = buildMockCompanyWallet(TOUR_COMPANY_ID, CURRENT_BALANCE);
-      var mockCompanyWalletToWithdraw =
+      final var mockCompanyWallet = buildMockCompanyWallet(TOUR_COMPANY_ID, CURRENT_BALANCE);
+      final var mockCompanyWalletToWithdraw =
           buildMockCompanyWallet(TOUR_COMPANY_ID, BALANCE_AFTER_WITHDRAW);
-      var expectedCompanyWalletInfo =
+      final var expectedCompanyWalletInfo =
           TourCompanyWalletInfoResponse.of(
               TOUR_COMPANY_WALLET_ID, TOUR_COMPANY_ID, BALANCE_AFTER_WITHDRAW);
 
@@ -453,7 +452,7 @@ class WalletServiceTest {
           .thenReturn(mockCompanyWalletToWithdraw);
 
       // Actual
-      var actualWithdrewWallet =
+      final var actualWithdrewWallet =
           walletService.withdrawTourCompanyWallet(TOUR_COMPANY_ID, IDEMPOTENCY_KEY, body);
 
       // Assert
@@ -463,10 +462,11 @@ class WalletServiceTest {
     @Test
     void butWalletNotFound_ThenThrowException() {
       // Arrange
-      var NOT_FOUND_TOUR_COMPANY_ID = 99999;
-      var body = WalletWithdrawRequest.of(BigDecimal.TEN);
-      var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(NOT_FOUND_TOUR_COMPANY_ID);
-      var expectedErrorMessage =
+      final var NOT_FOUND_TOUR_COMPANY_ID = 99999;
+      final var body = WalletWithdrawRequest.of(BigDecimal.TEN);
+      final var tourCompanyRef =
+          AggregateReference.<TourCompany, Integer>to(NOT_FOUND_TOUR_COMPANY_ID);
+      final var expectedErrorMessage =
           String.format(
               "%s with %s [%s] not found",
               TourCompanyWallet.class.getSimpleName(), "tourCompanyId", NOT_FOUND_TOUR_COMPANY_ID);
@@ -475,13 +475,13 @@ class WalletServiceTest {
           .thenReturn(Optional.empty());
 
       // Actual
-      Executable actualExecutable =
+      final Executable actualExecutable =
           () ->
               walletService.withdrawTourCompanyWallet(
                   NOT_FOUND_TOUR_COMPANY_ID, IDEMPOTENCY_KEY, body);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
@@ -504,13 +504,13 @@ class WalletServiceTest {
       @Test
       void thenSuccess() {
         // Arrange
-        var userRef = AggregateReference.<User, Integer>to(USER_ID);
-        var companyRef = AggregateReference.<TourCompany, Integer>to(COMPANY_ID);
-        var userWalletInput = buildMockUserWallet(USER_ID, CURRENT_USER_BALANCE);
-        var companyWalletInput = buildMockCompanyWallet(COMPANY_ID, CURRENT_COMPANY_BALANCE);
-        var expectedUserWallet =
+        final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+        final var companyRef = AggregateReference.<TourCompany, Integer>to(COMPANY_ID);
+        final var userWalletInput = buildMockUserWallet(USER_ID, CURRENT_USER_BALANCE);
+        final var companyWalletInput = buildMockCompanyWallet(COMPANY_ID, CURRENT_COMPANY_BALANCE);
+        final var expectedUserWallet =
             UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), USER_BALANCE_AFTER_TRANSFER);
-        var expectedCompanyWallet =
+        final var expectedCompanyWallet =
             TourCompanyWallet.of(1, companyRef, Instant.now(), COMPANY_BALANCE_AFTER_TRANSFER);
 
         when(userWalletRepository.save(any(UserWallet.class))).thenReturn(expectedUserWallet);
@@ -518,7 +518,7 @@ class WalletServiceTest {
             .thenReturn(expectedCompanyWallet);
 
         // Actual
-        var actualWallets =
+        final var actualWallets =
             walletService.transferMoney(
                 userWalletInput, companyWalletInput, AMOUNT_TO_TRANSFER, TransactionType.BOOKING);
 
@@ -530,14 +530,15 @@ class WalletServiceTest {
       @Test
       void butInsufficientBalance_ThenThrowException() {
         // Arrange
-        var expectedErrorMessage =
+        final var expectedErrorMessage =
             String.format(
                 "%s balance is insufficient for this operation", UserWallet.class.getSimpleName());
-        var userWalletInput = buildMockUserWallet(USER_ID, CURRENT_USER_BALANCE);
-        var tourCompanyWalletInput = buildMockCompanyWallet(COMPANY_ID, CURRENT_COMPANY_BALANCE);
+        final var userWalletInput = buildMockUserWallet(USER_ID, CURRENT_USER_BALANCE);
+        final var tourCompanyWalletInput =
+            buildMockCompanyWallet(COMPANY_ID, CURRENT_COMPANY_BALANCE);
 
         // Actual
-        Executable actualExecutable =
+        final Executable actualExecutable =
             () ->
                 walletService.transferMoney(
                     userWalletInput,
@@ -546,7 +547,7 @@ class WalletServiceTest {
                     TransactionType.BOOKING);
 
         // Assert
-        var exception = assertThrowsExactly(InsufficientBalanceException.class, actualExecutable);
+        final var exception = assertThrowsExactly(InsufficientBalanceException.class, actualExecutable);
         assertEquals(expectedErrorMessage, exception.getMessage());
       }
     }
@@ -566,13 +567,13 @@ class WalletServiceTest {
       @Test
       void thenSuccess() {
         // Arrange
-        var userWalletInput = buildMockUserWallet(USER_ID, CURRENT_USER_BALANCE);
-        var companyWalletInput = buildMockCompanyWallet(COMPANY_ID, CURRENT_COMPANY_BALANCE);
-        var userRef = AggregateReference.<User, Integer>to(USER_ID);
-        var companyRef = AggregateReference.<TourCompany, Integer>to(COMPANY_ID);
-        var expectedUserWallet =
+        final var userWalletInput = buildMockUserWallet(USER_ID, CURRENT_USER_BALANCE);
+        final var companyWalletInput = buildMockCompanyWallet(COMPANY_ID, CURRENT_COMPANY_BALANCE);
+        final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+        final var companyRef = AggregateReference.<TourCompany, Integer>to(COMPANY_ID);
+        final var expectedUserWallet =
             UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), USER_BALANCE_AFTER_TRANSFER);
-        var expectedCompanyWallet =
+        final var expectedCompanyWallet =
             TourCompanyWallet.of(1, companyRef, Instant.now(), COMPANY_BALANCE_AFTER_TRANSFER);
 
         when(userWalletRepository.save(any(UserWallet.class))).thenReturn(expectedUserWallet);
@@ -580,7 +581,7 @@ class WalletServiceTest {
             .thenReturn(expectedCompanyWallet);
 
         // Actual
-        var actualTransferredWallets =
+        final var actualTransferredWallets =
             walletService.transferMoney(
                 userWalletInput, companyWalletInput, AMOUNT_TO_TRANSFER, TransactionType.REFUND);
 
@@ -593,22 +594,22 @@ class WalletServiceTest {
     @Test
     void forTopUp_ButUnsupported_ThenThrowError() {
       // Arrange
-      var AMOUNT_TO_TRANSFER = BigDecimal.valueOf(200);
-      var expectedErrorMessage =
+      final var AMOUNT_TO_TRANSFER = BigDecimal.valueOf(200);
+      final var expectedErrorMessage =
           String.format(
               "Transaction type [%s] is not supported for this transferring method",
               TransactionType.TOP_UP);
-      var userWalletInput = buildMockUserWallet(1, BigDecimal.ZERO);
-      var companyWalletInput = buildMockCompanyWallet(2, BigDecimal.ZERO);
+      final var userWalletInput = buildMockUserWallet(1, BigDecimal.ZERO);
+      final var companyWalletInput = buildMockCompanyWallet(2, BigDecimal.ZERO);
 
       // Actual
-      Executable actualExecutable =
+      final Executable actualExecutable =
           () ->
               walletService.transferMoney(
                   userWalletInput, companyWalletInput, AMOUNT_TO_TRANSFER, TransactionType.TOP_UP);
 
       // Assert
-      var exception =
+      final var exception =
           assertThrowsExactly(UnsupportedTransactionTypeException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
@@ -616,16 +617,16 @@ class WalletServiceTest {
     @Test
     void forWithdraw_ButUnsupported_ThenThrowError() {
       // Arrange
-      var AMOUNT_TO_TRANSFER = BigDecimal.valueOf(200);
-      var expectedErrorMessage =
+      final var AMOUNT_TO_TRANSFER = BigDecimal.valueOf(200);
+      final var expectedErrorMessage =
           String.format(
               "Transaction type [%s] is not supported for this transferring method",
               TransactionType.WITHDRAW);
-      var userWalletInput = buildMockUserWallet(1, BigDecimal.ZERO);
-      var companyWalletInput = buildMockCompanyWallet(2, BigDecimal.ZERO);
+      final var userWalletInput = buildMockUserWallet(1, BigDecimal.ZERO);
+      final var companyWalletInput = buildMockCompanyWallet(2, BigDecimal.ZERO);
 
       // Actual
-      Executable actualExecutable =
+      final Executable actualExecutable =
           () ->
               walletService.transferMoney(
                   userWalletInput,
@@ -634,7 +635,7 @@ class WalletServiceTest {
                   TransactionType.WITHDRAW);
 
       // Assert
-      var exception =
+      final var exception =
           assertThrowsExactly(UnsupportedTransactionTypeException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }

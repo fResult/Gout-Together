@@ -41,11 +41,12 @@ class PaymentControllerTest {
   @Test
   void getQrCodeImageById_ThenSuccess() throws Exception {
     // Arrange
-    var mockQrCodeImage = new BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB);
+    final var mockQrCodeImage = new BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB);
     when(paymentService.generatePaymentQr(anyInt())).thenReturn(mockQrCodeImage);
 
     // Actual
-    var resultActions = mockMvc.perform(get(PAYMENT_API + "/qr/{qrCodeRefId}", QR_CODE_REF_ID));
+    final var resultActions =
+        mockMvc.perform(get(PAYMENT_API + "/qr/{qrCodeRefId}", QR_CODE_REF_ID));
 
     // Assert
     resultActions.andExpect(status().isOk()).andExpect(jsonPath("$").exists());
@@ -54,15 +55,15 @@ class PaymentControllerTest {
   @Test
   void payByBookingId_ThenSuccess() throws Exception {
     // Arrange
-    var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
-    var BOOKING_ID = 1;
-    var mockBookingInfo =
+    final var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
+    final var BOOKING_ID = 1;
+    final var mockBookingInfo =
         BookingInfoResponse.of(BOOKING_ID, 1, 1, BookingStatus.COMPLETED, QR_CODE_REF_ID);
 
     when(paymentService.payByBookingId(anyInt(), anyString())).thenReturn(mockBookingInfo);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             post(PAYMENT_API + "/{bookingId}", BOOKING_ID)
                 .header("idempotent-key", IDEMPOTENT_KEY));

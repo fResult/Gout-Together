@@ -76,7 +76,7 @@ class BookingServiceTest {
   }
 
   private Authentication buildAuthentication(int userId) {
-    var jwt =
+    final var jwt =
         Jwt.withTokenValue("token").header("alg", "none").claim(RESOURCE_ID_CLAIM, userId).build();
 
     return new JwtAuthenticationToken(jwt);
@@ -95,12 +95,12 @@ class BookingServiceTest {
   @Test
   void whenFindBookingById_thenSuccess() {
     // Arrange
-    var booking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
+    final var booking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
 
     when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(booking));
 
     // Actual
-    var actualBooking = bookingService.findBookingById(BOOKING_ID);
+    final var actualBooking = bookingService.findBookingById(BOOKING_ID);
 
     // Assert
     assertTrue(actualBooking.isPresent());
@@ -116,7 +116,7 @@ class BookingServiceTest {
     when(bookingRepository.findById(anyInt())).thenReturn(Optional.empty());
 
     // Actual
-    var actualBooking = bookingService.findBookingById(NOT_FOUND_BOOKING_ID);
+    final var actualBooking = bookingService.findBookingById(NOT_FOUND_BOOKING_ID);
 
     // Assert
     assertEquals(expectedBooking, actualBooking);
@@ -127,12 +127,12 @@ class BookingServiceTest {
     @Test
     void thenSuccess() {
       // Arrange
-      var authentication = buildAuthentication(USER_ID);
-      var userRef = AggregateReference.<User, Integer>to(USER_ID);
-      var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-      var createdBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
-      var mockQrCodeRef = buildActivatedQrCodeRef(1, BOOKING_ID);
-      var expectedBookingInfo =
+      final var authentication = buildAuthentication(USER_ID);
+      final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+      final var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+      final var createdBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
+      final var mockQrCodeRef = buildActivatedQrCodeRef(1, BOOKING_ID);
+      final var expectedBookingInfo =
           BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.PENDING, 1);
 
       when(bookingRepository.findOneByUserIdAndTourId(userRef, tourRef))
@@ -141,7 +141,7 @@ class BookingServiceTest {
       when(qrCodeService.createQrCodeRefForBooking(anyInt())).thenReturn(mockQrCodeRef);
 
       // Actual
-      var actualBooking = bookingService.bookTour(authentication, TOUR_ID, IDEMPOTENT_KEY);
+      final var actualBooking = bookingService.bookTour(authentication, TOUR_ID, IDEMPOTENT_KEY);
 
       // Assert
       assertEquals(expectedBookingInfo, actualBooking);
@@ -150,12 +150,12 @@ class BookingServiceTest {
     @Test
     void butBookingExists_thenReturnExistingBooking() {
       // Arrange
-      var authentication = buildAuthentication(USER_ID);
-      var userRef = AggregateReference.<User, Integer>to(USER_ID);
-      var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-      var mockQrCodeRef = buildActivatedQrCodeRef(1, BOOKING_ID);
-      var exitingBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
-      var expectedExistingBookingInfo =
+      final var authentication = buildAuthentication(USER_ID);
+      final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+      final var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+      final var mockQrCodeRef = buildActivatedQrCodeRef(1, BOOKING_ID);
+      final var exitingBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
+      final var expectedExistingBookingInfo =
           BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.PENDING, 1);
 
       when(bookingRepository.findOneByUserIdAndTourId(userRef, tourRef))
@@ -163,7 +163,7 @@ class BookingServiceTest {
       when(qrCodeService.getQrCodeRefByBookingId(anyInt())).thenReturn(mockQrCodeRef);
 
       // Actual
-      var actualBooking = bookingService.bookTour(authentication, TOUR_ID, IDEMPOTENT_KEY);
+      final var actualBooking = bookingService.bookTour(authentication, TOUR_ID, IDEMPOTENT_KEY);
 
       // Assert
       assertEquals(expectedExistingBookingInfo, actualBooking);
@@ -173,34 +173,34 @@ class BookingServiceTest {
     void butBookingAlreadyCompleted_ThenThrowException() {
       // Arrange
       final var IDEMPOTENT_KEY = UUIDV7.randomUUID().toString();
-      var authentication = buildAuthentication(USER_ID);
-      var userRef = AggregateReference.<User, Integer>to(USER_ID);
-      var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-      var exitingBooking = buildCompletedBooking(BOOKING_ID, USER_ID, TOUR_ID);
-      var expectedErrorMessage =
+      final var authentication = buildAuthentication(USER_ID);
+      final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+      final var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+      final var exitingBooking = buildCompletedBooking(BOOKING_ID, USER_ID, TOUR_ID);
+      final var expectedErrorMessage =
           String.format("UserId [%d] already booked tourId [%d]", USER_ID, TOUR_ID);
 
       when(bookingRepository.findOneByUserIdAndTourId(userRef, tourRef))
           .thenReturn(Optional.of(exitingBooking));
 
       // Actual
-      Executable actualExecution =
+      final Executable actualExecution =
           () -> bookingService.bookTour(authentication, TOUR_ID, IDEMPOTENT_KEY);
 
       // Assert
-      var exception = assertThrowsExactly(BookingExistsException.class, actualExecution);
+      final var exception = assertThrowsExactly(BookingExistsException.class, actualExecution);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
 
     @Test
     void butBookingExistedAndQrCodeRefNotFound_ThenThrowException() {
       // Arrange
-      var NOT_FOUND_BOOKING_ID = 99999;
-      var authentication = buildAuthentication(USER_ID);
-      var userRef = AggregateReference.<User, Integer>to(USER_ID);
-      var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-      var exitingBooking = buildPendingBooking(NOT_FOUND_BOOKING_ID, USER_ID, TOUR_ID);
-      var expectedErrorMessage =
+      final var NOT_FOUND_BOOKING_ID = 99999;
+      final var authentication = buildAuthentication(USER_ID);
+      final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+      final var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+      final var exitingBooking = buildPendingBooking(NOT_FOUND_BOOKING_ID, USER_ID, TOUR_ID);
+      final var expectedErrorMessage =
           String.format(
               "%s with bookingId [%d] not found",
               QrCodeReference.class.getSimpleName(), NOT_FOUND_BOOKING_ID);
@@ -211,11 +211,11 @@ class BookingServiceTest {
           .thenThrow(new EntityNotFoundException(expectedErrorMessage));
 
       // Actual
-      Executable actualExecution =
+      final Executable actualExecution =
           () -> bookingService.bookTour(authentication, TOUR_ID, IDEMPOTENT_KEY);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecution);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecution);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
@@ -225,18 +225,18 @@ class BookingServiceTest {
     @Test
     void thenSuccessWithDecrementTourCount() {
       // Arrange
-      var body = BookingCancellationRequest.of(TOUR_ID);
-      var authentication = buildAuthentication(USER_ID);
-      var existingBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
-      var mockExpiredQrCodeRef = buildExpiredQrCodeRef(1, BOOKING_ID);
-      var expectedRefundedBookingInfo =
+      final var body = BookingCancellationRequest.of(TOUR_ID);
+      final var authentication = buildAuthentication(USER_ID);
+      final var existingBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
+      final var mockExpiredQrCodeRef = buildExpiredQrCodeRef(1, BOOKING_ID);
+      final var expectedRefundedBookingInfo =
           BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.CANCELLED, null);
 
       when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(existingBooking));
       when(qrCodeService.getQrCodeRefByBookingId(anyInt())).thenReturn(mockExpiredQrCodeRef);
 
       // Actual
-      var actualRefundedBookingInfo =
+      final var actualRefundedBookingInfo =
           bookingService.cancelTour(authentication, BOOKING_ID, body, IDEMPOTENT_KEY);
 
       // Assert
@@ -248,18 +248,18 @@ class BookingServiceTest {
     @Test
     void butQrCodeRefAlreadyIsNotExpiredYet_ThenSuccessWithoutDecrementTourCount() {
       // Arrange
-      var body = BookingCancellationRequest.of(TOUR_ID);
-      var authentication = buildAuthentication(USER_ID);
-      var existingBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
-      var mockActivatedQrCodeRef = buildActivatedQrCodeRef(1, BOOKING_ID);
-      var expectedRefundedBookingInfo =
+      final var body = BookingCancellationRequest.of(TOUR_ID);
+      final var authentication = buildAuthentication(USER_ID);
+      final var existingBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
+      final var mockActivatedQrCodeRef = buildActivatedQrCodeRef(1, BOOKING_ID);
+      final var expectedRefundedBookingInfo =
           BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.CANCELLED, null);
 
       when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(existingBooking));
       when(qrCodeService.getQrCodeRefByBookingId(anyInt())).thenReturn(mockActivatedQrCodeRef);
 
       // Actual
-      var actualRefundedBookingInfo =
+      final var actualRefundedBookingInfo =
           bookingService.cancelTour(authentication, BOOKING_ID, body, IDEMPOTENT_KEY);
 
       // Assert
@@ -271,32 +271,32 @@ class BookingServiceTest {
     @Test
     void butBookingNotFound_ThenThrowException() {
       // Arrange
-      var NOT_FOUND_BOOKING_ID = 99999;
-      var body = BookingCancellationRequest.of(TOUR_ID);
-      var authentication = buildAuthentication(USER_ID);
-      var expectedErrorMessage =
+      final var NOT_FOUND_BOOKING_ID = 99999;
+      final var body = BookingCancellationRequest.of(TOUR_ID);
+      final var authentication = buildAuthentication(USER_ID);
+      final var expectedErrorMessage =
           String.format(
               "%s id [%d] not found", Booking.class.getSimpleName(), NOT_FOUND_BOOKING_ID);
 
       when(bookingRepository.findById(anyInt())).thenReturn(Optional.empty());
 
       // Actual
-      Executable actualExecution =
+      final Executable actualExecution =
           () ->
               bookingService.cancelTour(authentication, NOT_FOUND_BOOKING_ID, body, IDEMPOTENT_KEY);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecution);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecution);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
 
     @Test
     void butQrCodeRefNotFound_ThenThrowException() {
       // Arrange
-      var body = BookingCancellationRequest.of(TOUR_ID);
-      var authentication = buildAuthentication(USER_ID);
-      var existingBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
-      var expectedErrorMessage =
+      final var body = BookingCancellationRequest.of(TOUR_ID);
+      final var authentication = buildAuthentication(USER_ID);
+      final var existingBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
+      final var expectedErrorMessage =
           String.format(
               "%s with bookingId [%d] not found",
               QrCodeReference.class.getSimpleName(), BOOKING_ID);
@@ -306,11 +306,11 @@ class BookingServiceTest {
           .thenThrow(new EntityNotFoundException(expectedErrorMessage));
 
       // Actual
-      Executable actualExecution =
+      final Executable actualExecution =
           () -> bookingService.cancelTour(authentication, BOOKING_ID, body, IDEMPOTENT_KEY);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecution);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecution);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }

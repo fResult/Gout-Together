@@ -38,11 +38,11 @@ class TourCountServiceTest {
   @Test
   void whenCreateTourCount_ThenSuccess() {
     // Arrange
-    var mockCreatedTourCount = TourCount.of(null, AggregateReference.to(TOUR_ID), 0);
+    final var mockCreatedTourCount = TourCount.of(null, AggregateReference.to(TOUR_ID), 0);
     when(tourCountRepository.save(mockCreatedTourCount)).thenReturn(mockCreatedTourCount);
 
     // Actual
-    var actualCreatedTourCount = tourCountService.createTourCount(mockCreatedTourCount);
+    final var actualCreatedTourCount = tourCountService.createTourCount(mockCreatedTourCount);
 
     // Assert
     assertEquals(mockCreatedTourCount, actualCreatedTourCount);
@@ -51,9 +51,9 @@ class TourCountServiceTest {
   @Test
   void whenIncrementTourCount_ThenSuccess() {
     // Arrange
-    var TOUR_COUNT_ID = 3;
-    var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-    var mockTour =
+    final var TOUR_COUNT_ID = 3;
+    final var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+    final var mockTour =
         Tour.of(
             TOUR_ID,
             AggregateReference.to(1),
@@ -63,8 +63,9 @@ class TourCountServiceTest {
             35,
             Instant.now().plus(45, ChronoUnit.DAYS),
             TourStatus.APPROVED.name());
-    var mockTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, 5);
-    var actualIncrementedTourCount = mockTourCount.increaseAmount(1);
+    final var mockTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, 5);
+    final var actualIncrementedTourCount = mockTourCount.increaseAmount(1);
+
     when(tourService.getTourById(anyInt())).thenReturn(mockTour);
     when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.of(mockTourCount));
     when(tourCountRepository.save(any(TourCount.class))).thenReturn(actualIncrementedTourCount);
@@ -78,23 +79,24 @@ class TourCountServiceTest {
   @Test
   void whenIncrementTourCount_ButTourNotFound_ThenThrowException() {
     // Arrange
-    var expectedErrorMessage =
+    final var expectedErrorMessage =
         String.format("%s with id [%d] not found", Tour.class.getSimpleName(), NOT_FOUND_TOUR_ID);
     when(tourService.getTourById(NOT_FOUND_TOUR_ID))
         .thenThrow(new EntityNotFoundException(expectedErrorMessage));
 
     // Actual
-    Executable actualExecutable = () -> tourCountService.incrementTourCount(NOT_FOUND_TOUR_ID);
+    final Executable actualExecutable =
+        () -> tourCountService.incrementTourCount(NOT_FOUND_TOUR_ID);
 
     // Assert
-    var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test
   void whenIncrementTourCount_ButTourCountNotFound_ThenThrowException() {
     // Arrange
-    var expectedErrorMessage =
+    final var expectedErrorMessage =
         String.format(
             "%s with tourId [%d] not found", TourCount.class.getSimpleName(), NOT_FOUND_TOUR_ID);
 
@@ -102,22 +104,23 @@ class TourCountServiceTest {
         .thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> tourCountService.incrementTourCount(NOT_FOUND_TOUR_ID);
+    final Executable actualExecutable =
+        () -> tourCountService.incrementTourCount(NOT_FOUND_TOUR_ID);
 
     // Assert
-    var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test
   void whenIncrementTourCount_ButTourAmountExceededLimit_ThenThrowException() {
     // Arrange
-    var TOUR_AMOUNT_LIMIT = 5;
-    var expectedErrorMessage =
+    final var TOUR_AMOUNT_LIMIT = 5;
+    final var expectedErrorMessage =
         String.format(
             "%s amount is insufficient for this operation", TourCount.class.getSimpleName());
-    var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-    var mockTour =
+    final var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+    final var mockTour =
         Tour.of(
             TOUR_ID,
             AggregateReference.to(1),
@@ -127,24 +130,26 @@ class TourCountServiceTest {
             TOUR_AMOUNT_LIMIT,
             Instant.now().plus(45, ChronoUnit.DAYS),
             TourStatus.APPROVED.name());
-    var mockTourCount = TourCount.of(1, tourRef, TOUR_AMOUNT_LIMIT);
+    final var mockTourCount = TourCount.of(1, tourRef, TOUR_AMOUNT_LIMIT);
+
     when(tourService.getTourById(TOUR_ID)).thenReturn(mockTour);
     when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.of(mockTourCount));
 
     // Actual
-    Executable actualExecutable = () -> tourCountService.incrementTourCount(TOUR_ID);
+    final Executable actualExecutable = () -> tourCountService.incrementTourCount(TOUR_ID);
 
     // Assert
-    var exception = assertThrows(InsufficientTourCountException.class, actualExecutable);
+    final var exception = assertThrows(InsufficientTourCountException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test
   void whenDecrementTourCount_ThenSuccess() {
     // Arrange
-    var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-    var tourCount = TourCount.of(1, tourRef, 5);
-    var actualDecrementTourCount = tourCount.decreaseAmount(1);
+    final var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+    final var tourCount = TourCount.of(1, tourRef, 5);
+    final var actualDecrementTourCount = tourCount.decreaseAmount(1);
+
     when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.of(tourCount));
     when(tourCountRepository.save(any(TourCount.class))).thenReturn(actualDecrementTourCount);
 
@@ -158,17 +163,17 @@ class TourCountServiceTest {
   @Test
   void whenDecrementTourCount_ButTourCountNotFound_ThenThrowException() {
     // Arrange
-    var expectedErrorMessage =
+    final var expectedErrorMessage =
         String.format(
             "%s with tourId [%d] not found", TourCount.class.getSimpleName(), NOT_FOUND_TOUR_ID);
     when(tourCountRepository.findOneByTourId(AggregateReference.to(NOT_FOUND_TOUR_ID)))
         .thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> tourCountService.decrementTourCount(NOT_FOUND_TOUR_ID);
+    final Executable actualExecutable = () -> tourCountService.decrementTourCount(NOT_FOUND_TOUR_ID);
 
     // Assert
-    var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 }

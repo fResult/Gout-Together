@@ -58,9 +58,9 @@ public class WalletServiceImpl implements WalletService {
   public UserWallet createConsumerWallet(int userId) {
     logger.debug("[createConsumerWallet] New {} is creating", UserWallet.class.getSimpleName());
 
-    var walletToCreate =
+    final var walletToCreate =
         UserWallet.of(null, AggregateReference.to(userId), Instant.now(), BigDecimal.ZERO);
-    var createdWallet = userWalletRepository.save(walletToCreate);
+    final var createdWallet = userWalletRepository.save(walletToCreate);
 
     logger.info(
         "[createConsumerWallet] New {} is created: {}",
@@ -84,9 +84,9 @@ public class WalletServiceImpl implements WalletService {
   @Transactional
   public UserWalletInfoResponse topUpConsumerWallet(
       int userId, String idempotentKey, WalletTopUpRequest body) {
-    var existsTransactionOpt = transactionRepository.findOneByIdempotentKey(idempotentKey);
+    final var existsTransactionOpt = transactionRepository.findOneByIdempotentKey(idempotentKey);
 
-    var userWallet =
+    final var userWallet =
         userWalletRepository
             .findOneByUserId(AggregateReference.to(userId))
             .map(UserWalletInfoResponse::fromDao)
@@ -96,8 +96,8 @@ public class WalletServiceImpl implements WalletService {
 
     if (existsTransactionOpt.isPresent()) return userWallet;
 
-    var userRef = AggregateReference.<User, Integer>to(userWallet.userId());
-    var transactionToAdd = createTopUpTransaction(userRef, body.amount(), idempotentKey);
+    final var userRef = AggregateReference.<User, Integer>to(userWallet.userId());
+    final var transactionToAdd = createTopUpTransaction(userRef, body.amount(), idempotentKey);
 
     transactionRepository.save(transactionToAdd);
     logger.info(
@@ -105,11 +105,11 @@ public class WalletServiceImpl implements WalletService {
         Transaction.class.getSimpleName(),
         userId);
 
-    var balanceToUpdate = userWallet.balance().add(body.amount());
-    var userWalletToUpdate =
+    final var balanceToUpdate = userWallet.balance().add(body.amount());
+    final var userWalletToUpdate =
         UserWallet.of(userWallet.id(), userRef, Instant.now(), balanceToUpdate);
 
-    var updatedUserWallet = userWalletRepository.save(userWalletToUpdate);
+    final var updatedUserWallet = userWalletRepository.save(userWalletToUpdate);
     logger.info(
         "[topUpConsumerWallet] {} with userId [{}] is topped up: {}",
         UserWallet.class.getSimpleName(),
@@ -123,7 +123,7 @@ public class WalletServiceImpl implements WalletService {
   public boolean deleteConsumerWalletByUserId(int userId) {
     logger.debug(
         "[deleteUserWalletById] Deleting {} by id: {}", UserWallet.class.getSimpleName(), userId);
-    var walletToDelete = getUserWalletByUserId(userId);
+    final var walletToDelete = getUserWalletByUserId(userId);
 
     userWalletRepository.delete(walletToDelete);
     logger.info(
@@ -137,11 +137,11 @@ public class WalletServiceImpl implements WalletService {
     logger.debug(
         "[createTourCompanyWallet] New {} is creating", TourCompanyWallet.class.getSimpleName());
 
-    var walletToCreate =
+    final var walletToCreate =
         TourCompanyWallet.of(
             null, AggregateReference.to(tourCompanyId), Instant.now(), BigDecimal.ZERO);
 
-    var createdWallet = tourCompanyWalletRepository.save(walletToCreate);
+    final var createdWallet = tourCompanyWalletRepository.save(walletToCreate);
     logger.info(
         "[createTourCompanyWallet] New {} is created: {}",
         TourCompanyWallet.class.getSimpleName(),
@@ -156,7 +156,7 @@ public class WalletServiceImpl implements WalletService {
         "[getTourCompanyWalletInfoByTourCompanyId] Getting {} by tourCompanyId: {}",
         TourCompanyWallet.class.getSimpleName(),
         tourCompanyId);
-    var tourCompanyWallet = getTourCompanyWalletByTourCompanyId(tourCompanyId);
+    final var tourCompanyWallet = getTourCompanyWalletByTourCompanyId(tourCompanyId);
 
     return TourCompanyWalletInfoResponse.fromDao(tourCompanyWallet);
   }
@@ -170,12 +170,12 @@ public class WalletServiceImpl implements WalletService {
         TourCompanyWallet.class.getSimpleName(),
         tourCompanyId);
 
-    var companyWallet = getTourCompanyWalletByTourCompanyId(tourCompanyId);
-    var balanceToWithdraw = companyWallet.balance().subtract(body.amount());
-    var companyWalletToWithdraw =
+    final var companyWallet = getTourCompanyWalletByTourCompanyId(tourCompanyId);
+    final var balanceToWithdraw = companyWallet.balance().subtract(body.amount());
+    final var companyWalletToWithdraw =
         TourCompanyWallet.of(
             companyWallet.id(), companyWallet.tourCompanyId(), Instant.now(), balanceToWithdraw);
-    var withdrewCompanyWallet = tourCompanyWalletRepository.save(companyWalletToWithdraw);
+    final var withdrewCompanyWallet = tourCompanyWalletRepository.save(companyWalletToWithdraw);
 
     logger.info(
         "[withdrawTourCompanyWallet] {} is withdrew: {}",
@@ -187,8 +187,8 @@ public class WalletServiceImpl implements WalletService {
 
   @Override
   public Pair<UserWallet, TourCompanyWallet> getConsumerAndTourCompanyWallets(Booking booking) {
-    var userRef = booking.userId();
-    var tourRef = booking.tourId();
+    final var userRef = booking.userId();
+    final var tourRef = booking.tourId();
     if (userRef == null || tourRef == null) {
       logger.warn(
           "[getConsumerAndTourCompanyWallets] {}'s userId or tourId must not be null null",
@@ -199,19 +199,19 @@ public class WalletServiceImpl implements WalletService {
               Booking.class.getSimpleName(), getIdOrNull(userRef), getIdOrNull(tourRef)));
     }
 
-    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-      var userWalletFuture =
+    try (final var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+      final var userWalletFuture =
           CompletableFuture.supplyAsync(
               () -> getUserWalletByUserId(Objects.requireNonNull(userRef.getId())));
-      var tourFuture =
+      final var tourFuture =
           CompletableFuture.supplyAsync(
               () -> tourService.getTourById(Objects.requireNonNull(tourRef.getId())));
 
       CompletableFuture.allOf(userWalletFuture, tourFuture).join();
 
-      var userWallet = userWalletFuture.get();
-      var tour = tourFuture.get();
-      var tourCompanyWallet =
+      final var userWallet = userWalletFuture.get();
+      final var tour = tourFuture.get();
+      final var tourCompanyWallet =
           tourCompanyWalletRepository
               .findOneByTourCompanyId(tour.tourCompanyId())
               .orElseThrow(
@@ -255,20 +255,20 @@ public class WalletServiceImpl implements WalletService {
 
   private Pair<UserWallet, TourCompanyWallet> transferMoneyForBooking(
       UserWallet userWallet, TourCompanyWallet companyWallet, BigDecimal amount) {
-    var userWalletBalance = userWallet.balance();
-    var isInsufficientBalance = userWalletBalance.compareTo(amount) < 0;
+    final var userWalletBalance = userWallet.balance();
+    final var isInsufficientBalance = userWalletBalance.compareTo(amount) < 0;
     if (isInsufficientBalance) {
       throw errorHelper.insufficientBalance("transferMoney", userWalletBalance, amount).get();
     }
 
-    var userWalletBalanceToUpdate = userWalletBalance.subtract(amount);
-    var userWalletToUpdate =
+    final var userWalletBalanceToUpdate = userWalletBalance.subtract(amount);
+    final var userWalletToUpdate =
         UserWallet.of(
             userWallet.id(), userWallet.userId(), Instant.now(), userWalletBalanceToUpdate);
 
-    var tourCompanyWalletBalance = companyWallet.balance();
-    var tourCompanyWalletBalanceToUpdate = tourCompanyWalletBalance.add(amount);
-    var tourCompanyWalletToUpdate =
+    final var tourCompanyWalletBalance = companyWallet.balance();
+    final var tourCompanyWalletBalanceToUpdate = tourCompanyWalletBalance.add(amount);
+    final var tourCompanyWalletToUpdate =
         TourCompanyWallet.of(
             companyWallet.id(),
             companyWallet.tourCompanyId(),
@@ -276,8 +276,8 @@ public class WalletServiceImpl implements WalletService {
             tourCompanyWalletBalanceToUpdate);
 
     // TODO: Make pessimistic lock to avoid race condition
-    var updatedUserWallet = userWalletRepository.save(userWalletToUpdate);
-    var updatedCompanyWallet = tourCompanyWalletRepository.save(tourCompanyWalletToUpdate);
+    final var updatedUserWallet = userWalletRepository.save(userWalletToUpdate);
+    final var updatedCompanyWallet = tourCompanyWalletRepository.save(tourCompanyWalletToUpdate);
 
     logger.info(
         "[transferMoney] {} {} from {} id [{}] to {} id [{}] is transferred",
@@ -294,33 +294,33 @@ public class WalletServiceImpl implements WalletService {
   private Pair<UserWallet, TourCompanyWallet> transferMoneyForRefund(
       UserWallet userWallet, TourCompanyWallet companyWallet, BigDecimal amount) {
 
-    var companyWalletBalance = companyWallet.balance();
+    final var companyWalletBalance = companyWallet.balance();
 
-    var companyWalletBalanceToUpdate = companyWalletBalance.subtract(amount);
-    var companyWalletToUpdate =
+    final var companyWalletBalanceToUpdate = companyWalletBalance.subtract(amount);
+    final var companyWalletToUpdate =
         TourCompanyWallet.of(
             companyWallet.id(),
             companyWallet.tourCompanyId(),
             Instant.now(),
             companyWalletBalanceToUpdate);
 
-    var userWalletBalance = userWallet.balance();
-    var userWalletBalanceToUpdate = userWalletBalance.add(amount);
-    var userWalletToUpdate =
+    final var userWalletBalance = userWallet.balance();
+    final var userWalletBalanceToUpdate = userWalletBalance.add(amount);
+    final var userWalletToUpdate =
         UserWallet.of(
             userWallet.id(), userWallet.userId(), Instant.now(), userWalletBalanceToUpdate);
 
-    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    try (final var executor = Executors.newVirtualThreadPerTaskExecutor()) {
       // TODO: Make pessimistic lock to avoid race condition
-      var futureUpdatedUserWallet =
+      final var futureUpdatedUserWallet =
           CompletableFuture.supplyAsync(
               () -> userWalletRepository.save(userWalletToUpdate), executor);
-      var futureUpdatedCompanyWallet =
+      final var futureUpdatedCompanyWallet =
           CompletableFuture.supplyAsync(
               () -> tourCompanyWalletRepository.save(companyWalletToUpdate), executor);
 
-      var updatedUserWallet = futureUpdatedUserWallet.get();
-      var updatedCompanyWallet = futureUpdatedCompanyWallet.get();
+      final var updatedUserWallet = futureUpdatedUserWallet.get();
+      final var updatedCompanyWallet = futureUpdatedCompanyWallet.get();
 
       logger.info(
           "[transferMoney] {} {} from {} id [{}] to {} id [{}] is transferred",
@@ -333,10 +333,11 @@ public class WalletServiceImpl implements WalletService {
 
       return new Pair<>(updatedUserWallet, updatedCompanyWallet);
     } catch (ExecutionException | InterruptedException ex) {
-      var errorMessage =
+      final var errorMessage =
           String.format(
               "Failed to transfer money between %s and %s",
               User.class.getSimpleName(), TourCompanyWallet.class.getSimpleName());
+
       throw new RuntimeException(errorMessage, ex);
     }
   }
@@ -357,9 +358,9 @@ public class WalletServiceImpl implements WalletService {
   private Transaction createTopUpTransaction(
       AggregateReference<User, Integer> userRef, BigDecimal amount, String idempotentKey) {
 
-    var transactionToCreate =
+    final var transactionToCreate =
         TransactionHelper.buildTopUpTransaction(userRef.getId(), null, amount, idempotentKey);
-    var createdTransaction = transactionRepository.save(transactionToCreate);
+    final var createdTransaction = transactionRepository.save(transactionToCreate);
     logger.info(
         "[createTopUpTransaction] New {} is created: {}",
         Transaction.class.getSimpleName(),

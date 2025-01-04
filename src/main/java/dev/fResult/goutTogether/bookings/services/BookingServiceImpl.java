@@ -2,8 +2,8 @@ package dev.fResult.goutTogether.bookings.services;
 
 import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
 
-import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
 import dev.fResult.goutTogether.bookings.dtos.BookingCancellationRequest;
+import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
 import dev.fResult.goutTogether.bookings.entities.Booking;
 import dev.fResult.goutTogether.bookings.repositories.BookingRepository;
 import dev.fResult.goutTogether.common.enumurations.BookingStatus;
@@ -12,14 +12,13 @@ import dev.fResult.goutTogether.common.exceptions.BookingExistsException;
 import dev.fResult.goutTogether.common.helpers.ErrorHelper;
 import dev.fResult.goutTogether.payments.services.PaymentService;
 import dev.fResult.goutTogether.qrcodes.QrCodeService;
+import dev.fResult.goutTogether.tours.services.TourCountService;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import dev.fResult.goutTogether.tours.services.TourCountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
@@ -63,10 +62,10 @@ public class BookingServiceImpl implements BookingService {
       Authentication authentication, int tourId, String idempotentKey) {
     logger.debug("[bookTour] New {} is creating", Booking.class.getSimpleName());
 
-    var jwt = (Jwt) authentication.getPrincipal();
-    var userId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
+    final var jwt = (Jwt) authentication.getPrincipal();
+    final var userId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
 
-    var existingBookingOpt =
+    final var existingBookingOpt =
         bookingRepository.findOneByUserIdAndTourId(
             AggregateReference.to(Integer.valueOf(userId)), AggregateReference.to(tourId));
 
@@ -75,8 +74,8 @@ public class BookingServiceImpl implements BookingService {
     existingBookingOpt.filter(isCompletedBooking).ifPresent(throwExceptionIfBookingExists);
 
     if (existingBookingOpt.isPresent()) {
-      var qrCodeRef = qrCodeService.getQrCodeRefByBookingId(existingBookingOpt.get().id());
-      Function<BookingInfoResponse, BookingInfoResponse> toResponseWithQrCodeRefId =
+      final var qrCodeRef = qrCodeService.getQrCodeRefByBookingId(existingBookingOpt.get().id());
+      final Function<BookingInfoResponse, BookingInfoResponse> toResponseWithQrCodeRefId =
           bookingInfo -> bookingInfo.withQrReference(qrCodeRef.id());
 
       return existingBookingOpt
@@ -85,7 +84,7 @@ public class BookingServiceImpl implements BookingService {
           .get();
     }
 
-    var bookingToCreate =
+    final var bookingToCreate =
         Booking.of(
             null,
             AggregateReference.to(Integer.valueOf(userId)),
@@ -94,9 +93,9 @@ public class BookingServiceImpl implements BookingService {
             Instant.now(),
             Instant.now(),
             idempotentKey);
-    var createdBooking = bookingRepository.save(bookingToCreate);
+    final var createdBooking = bookingRepository.save(bookingToCreate);
     logger.info("[bookTour] New {} is created: {}", Booking.class.getSimpleName(), createdBooking);
-    var qrCodeReference = qrCodeService.createQrCodeRefForBooking(createdBooking.id());
+    final var qrCodeReference = qrCodeService.createQrCodeRefForBooking(createdBooking.id());
 
     return BookingInfoResponse.fromDao(createdBooking).withQrReference(qrCodeReference.id());
   }
@@ -114,14 +113,14 @@ public class BookingServiceImpl implements BookingService {
         Booking.class.getSimpleName(),
         idempotentKey);
 
-    var existingBooking =
+    final var existingBooking =
         findBookingById(id)
             .orElseThrow(errorHelper.entityNotFound("cancelTour", Booking.class, id));
 
-    var qrCodeRef = qrCodeService.getQrCodeRefByBookingId(id);
+    final var qrCodeRef = qrCodeService.getQrCodeRefByBookingId(id);
     bookingRepository.deleteById(id);
 
-    var refundedBookingInfo =
+    final var refundedBookingInfo =
         BookingInfoResponse.of(
             id,
             existingBooking.userId().getId(),

@@ -53,15 +53,16 @@ class TourCompanyControllerTest {
   @Test
   void whenGetCompanies_ThenSuccess() throws Exception {
     // Arrange
-    var mockTourCompany1 =
+    final var mockTourCompany1 =
         TourCompanyResponse.of(TOUR_COMPANY_ID_1, "My Tour 1", TourCompanyStatus.WAITING);
-    var mockTourCompany2 =
+    final var mockTourCompany2 =
         TourCompanyResponse.of(TOUR_COMPANY_ID_2, "My Tour 2", TourCompanyStatus.APPROVED);
+
     when(tourCompanyService.getTourCompanies())
         .thenReturn(List.of(mockTourCompany1, mockTourCompany2));
 
     // Actual
-    var resultActions = mockMvc.perform(get(TOUR_COMPANY_API));
+    final var resultActions = mockMvc.perform(get(TOUR_COMPANY_API));
 
     // Assert
     resultActions
@@ -74,12 +75,12 @@ class TourCompanyControllerTest {
   @Test
   void whenGetCompanyById_ThenSuccess() throws Exception {
     // Arrange
-    var mockTourCompany =
+    final var mockTourCompany =
         TourCompanyResponse.of(TOUR_COMPANY_ID_1, "My Tour", TourCompanyStatus.APPROVED);
     when(tourCompanyService.getTourCompanyById(TOUR_COMPANY_ID_1)).thenReturn(mockTourCompany);
 
     // Actual
-    var resultActions = mockMvc.perform(get(TOUR_COMPANY_API + "/{id}", TOUR_COMPANY_ID_1));
+    final var resultActions = mockMvc.perform(get(TOUR_COMPANY_API + "/{id}", TOUR_COMPANY_ID_1));
 
     // Assert
     resultActions.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(TOUR_COMPANY_ID_1));
@@ -91,7 +92,8 @@ class TourCompanyControllerTest {
     when(tourCompanyService.getTourCompanyById(anyInt())).thenThrow(EntityNotFoundException.class);
 
     // Actual
-    var resultActions = mockMvc.perform(get(TOUR_COMPANY_API + "/{id}", NOT_FOUND_TOUR_COMPANY_ID));
+    final var resultActions =
+        mockMvc.perform(get(TOUR_COMPANY_API + "/{id}", NOT_FOUND_TOUR_COMPANY_ID));
 
     // Assert
     resultActions.andExpect(status().isNotFound());
@@ -100,19 +102,19 @@ class TourCompanyControllerTest {
   @Test
   void whenGetMyTourCompany_ThenSuccess() throws Exception {
     // Arrange
-    var mockJwt =
+    final var mockJwt =
         Jwt.withTokenValue("token")
             .header("alg", "none")
             .claim(RESOURCE_ID_CLAIM, String.valueOf(TOUR_COMPANY_ID_1))
             .build();
-    var mockAuthentication = new JwtAuthenticationToken(mockJwt);
-    var mockTourCompany =
+    final var mockAuthentication = new JwtAuthenticationToken(mockJwt);
+    final var mockTourCompany =
         TourCompanyResponse.of(TOUR_COMPANY_ID_1, "My Tour", TourCompanyStatus.APPROVED);
 
     when(tourCompanyService.getTourCompanyById(anyInt())).thenReturn(mockTourCompany);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(get(TOUR_COMPANY_API + "/me").principal(mockAuthentication));
 
     // Assert
@@ -122,14 +124,14 @@ class TourCompanyControllerTest {
   @Test
   void whenRegisterCompany_ThenSuccess() throws Exception {
     // Arrange
-    var body = TourCompanyRegistrationRequest.of("My Tour", "MyTour123", "mypassword", null);
-    var mockTourCompany =
+    final var body = TourCompanyRegistrationRequest.of("My Tour", "MyTour123", "mypassword", null);
+    final var mockTourCompany =
         TourCompanyResponse.of(TOUR_COMPANY_ID_1, "My Tour", TourCompanyStatus.WAITING);
     when(tourCompanyService.registerTourCompany(any(TourCompanyRegistrationRequest.class)))
         .thenReturn(mockTourCompany);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             post(TOUR_COMPANY_API)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -144,13 +146,15 @@ class TourCompanyControllerTest {
   @Test
   void whenRegisterCompany_ButUsernameIsInvalid_ThenReturn400() throws Exception {
     // Arrange
-    var INVALID_USERNAME = "MyTour";
-    var body = TourCompanyRegistrationRequest.of("My Tour", INVALID_USERNAME, "mypassword", null);
+    final var INVALID_USERNAME = "MyTour";
+    final var body =
+        TourCompanyRegistrationRequest.of("My Tour", INVALID_USERNAME, "mypassword", null);
+
     when(tourCompanyService.registerTourCompany(any(TourCompanyRegistrationRequest.class)))
         .thenThrow(ConstraintViolationException.class);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             post(TOUR_COMPANY_API)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -163,12 +167,12 @@ class TourCompanyControllerTest {
   @Test
   void whenRegisterCompany_ButCompanyUsernameIsAlreadyExists_ThenReturn409() throws Exception {
     // Arrange
-    var body = TourCompanyRegistrationRequest.of("My Tour", "MyTour123", "mypassword", null);
+    final var body = TourCompanyRegistrationRequest.of("My Tour", "MyTour123", "mypassword", null);
     when(tourCompanyService.registerTourCompany(any(TourCompanyRegistrationRequest.class)))
         .thenThrow(CredentialExistsException.class);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             post(TOUR_COMPANY_API)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -181,12 +185,12 @@ class TourCompanyControllerTest {
   @Test
   void whenApproveCompany_ThenSuccess() throws Exception {
     // Arrange
-    var mockTourCompany =
+    final var mockTourCompany =
         TourCompanyResponse.of(TOUR_COMPANY_ID_1, "My Tour", TourCompanyStatus.APPROVED);
     when(tourCompanyService.approveTourCompany(anyInt())).thenReturn(mockTourCompany);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(post(TOUR_COMPANY_API + "/{id}/approve", TOUR_COMPANY_ID_1));
 
     // Assert
@@ -203,7 +207,7 @@ class TourCompanyControllerTest {
         .thenThrow(ValidationException.class);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(post(TOUR_COMPANY_API + "/{id}/approve", TOUR_COMPANY_ID_1));
 
     // Assert
@@ -216,7 +220,7 @@ class TourCompanyControllerTest {
     when(tourCompanyService.approveTourCompany(anyInt())).thenThrow(EntityNotFoundException.class);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(post(TOUR_COMPANY_API + "/{id}/approve", NOT_FOUND_TOUR_COMPANY_ID));
 
     // Assert
@@ -226,14 +230,16 @@ class TourCompanyControllerTest {
   @Test
   void whenUpdateCompany_ThenSuccess() throws Exception {
     // Arrange
-    var STATUS_TO_UPDATE = TourCompanyStatus.BANNED;
-    var body = TourCompanyUpdateRequest.of(null, STATUS_TO_UPDATE);
-    var mockTourCompany = TourCompanyResponse.of(TOUR_COMPANY_ID_1, "My Tour", STATUS_TO_UPDATE);
+    final var STATUS_TO_UPDATE = TourCompanyStatus.BANNED;
+    final var body = TourCompanyUpdateRequest.of(null, STATUS_TO_UPDATE);
+    final var mockTourCompany =
+        TourCompanyResponse.of(TOUR_COMPANY_ID_1, "My Tour", STATUS_TO_UPDATE);
+
     when(tourCompanyService.updateTourCompanyById(anyInt(), any(TourCompanyUpdateRequest.class)))
         .thenReturn(mockTourCompany);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             patch(TOUR_COMPANY_API + "/{id}", TOUR_COMPANY_ID_1)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -249,12 +255,12 @@ class TourCompanyControllerTest {
   @Test
   void whenUpdateCompanyById_ButCompanyNotFound_ThenReturn404() throws Exception {
     // Arrange
-    var body = TourCompanyUpdateRequest.of("My Tour", TourCompanyStatus.APPROVED);
+    final var body = TourCompanyUpdateRequest.of("My Tour", TourCompanyStatus.APPROVED);
     when(tourCompanyService.updateTourCompanyById(anyInt(), any(TourCompanyUpdateRequest.class)))
         .thenThrow(EntityNotFoundException.class);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             patch(TOUR_COMPANY_API + "/{id}", NOT_FOUND_TOUR_COMPANY_ID)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -267,12 +273,13 @@ class TourCompanyControllerTest {
   @Test
   void whenDeleteCompanyById_ThenSuccess() throws Exception {
     // Arrange
-    var expectedResponseMessage =
+    final var expectedResponseMessage =
         String.format("Delete %s by id [%d] successfully", "TourCompany", TOUR_COMPANY_ID_1);
     when(tourCompanyService.deleteTourCompanyById(TOUR_COMPANY_ID_1)).thenReturn(true);
 
     // Actual
-    var resultActions = mockMvc.perform(delete(TOUR_COMPANY_API + "/{id}", TOUR_COMPANY_ID_1));
+    final var resultActions =
+        mockMvc.perform(delete(TOUR_COMPANY_API + "/{id}", TOUR_COMPANY_ID_1));
 
     // Assert
     resultActions
@@ -287,7 +294,7 @@ class TourCompanyControllerTest {
         .thenThrow(new EntityNotFoundException());
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(delete(TOUR_COMPANY_API + "/{id}", NOT_FOUND_TOUR_COMPANY_ID));
 
     // Assert

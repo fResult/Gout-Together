@@ -57,46 +57,46 @@ class UserServiceTest {
   @Test
   void whenGetUsers_ThenSuccess() {
     // Arrange
-    var ANOTHER_USER_ID = 2;
-    var mockUser1 = User.of(USER_ID, "John", "Wick", "0999999999");
-    var mockUser2 = User.of(ANOTHER_USER_ID, "Thomas", "Anderson", "0666666666");
-    var mockUsers = List.of(mockUser1, mockUser2);
+    final var ANOTHER_USER_ID = 2;
+    final var mockUser1 = User.of(USER_ID, "John", "Wick", "0999999999");
+    final var mockUser2 = User.of(ANOTHER_USER_ID, "Thomas", "Anderson", "0666666666");
+    final var mockUsers = List.of(mockUser1, mockUser2);
 
-    var mockCredential1 =
+    final var mockCredential1 =
         UserLogin.of(
             10, AggregateReference.to(USER_ID), "john.w@example.com", "encryptedPassword1");
-    var mockCredential2 =
+    final var mockCredential2 =
         UserLogin.of(
             20,
             AggregateReference.to(ANOTHER_USER_ID),
             "thomas.a@example.com",
             "encryptedPassword2");
-    var mockUserCredentials = List.of(mockCredential1, mockCredential2);
+    final var mockUserCredentials = List.of(mockCredential1, mockCredential2);
 
-    var mockUserInfo1 =
+    final var mockUserInfo1 =
         UserInfoResponse.of(
             USER_ID,
             mockUser1.firstName(),
             mockUser1.lastName(),
             mockCredential1.email(),
             mockUser1.phoneNumber());
-    var mockUserInfo2 =
+    final var mockUserInfo2 =
         UserInfoResponse.of(
             ANOTHER_USER_ID,
             mockUser2.firstName(),
             mockUser2.lastName(),
             mockCredential2.email(),
             mockUser2.phoneNumber());
-    var mockUserPage = new PageImpl<User>(List.of(mockUser1, mockUser2));
-    var mockUsersResp = List.of(mockUserInfo1, mockUserInfo2);
-    var expectedUserInfoPage = new PageImpl<UserInfoResponse>(mockUsersResp);
+    final var mockUserPage = new PageImpl<User>(List.of(mockUser1, mockUser2));
+    final var mockUsersResp = List.of(mockUserInfo1, mockUserInfo2);
+    final var expectedUserInfoPage = new PageImpl<UserInfoResponse>(mockUsersResp);
 
     when(userRepository.findByFirstNameContaining(anyString(), any(Pageable.class)))
         .thenReturn(mockUserPage);
     when(authService.getUserCredentialsByUserIds(anyCollection())).thenReturn(mockUserCredentials);
 
     // Actual
-    var actualUsersResp = userService.getUsersByFirstName("", PageRequest.of(0, 3));
+    final var actualUsersResp = userService.getUsersByFirstName("", PageRequest.of(0, 3));
 
     // Assert
     assertEquals(expectedUserInfoPage.getContent(), actualUsersResp.getContent());
@@ -105,10 +105,10 @@ class UserServiceTest {
   @Test
   void whenGetUserById_ThenSuccess() {
     // Arrange
-    var mockUser = User.of(USER_ID, "John", "Wick", "0999999999");
-    var mockUserCredential =
+    final var mockUser = User.of(USER_ID, "John", "Wick", "0999999999");
+    final var mockUserCredential =
         UserLogin.of(10, AggregateReference.to(USER_ID), "john.w@example.com", "encryptedPassword");
-    var expectedUserResp =
+    final var expectedUserResp =
         UserInfoResponse.of(
             mockUser.id(),
             mockUser.firstName(),
@@ -119,7 +119,7 @@ class UserServiceTest {
     when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
 
     // Actual
-    var actualUserResp = userService.getUserById(USER_ID);
+    final var actualUserResp = userService.getUserById(USER_ID);
 
     // Assert
     assertEquals(expectedUserResp, actualUserResp);
@@ -128,37 +128,37 @@ class UserServiceTest {
   @Test
   void whenGetUserById_ButNotFound_ThenThrowException() {
     // Arrange
-    var expectedErrorMessage =
+    final var expectedErrorMessage =
         String.format("%s id [%d] not found", User.class.getSimpleName(), NOT_FOUND_USER_ID);
     when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> userService.getUserById(NOT_FOUND_USER_ID);
+    final Executable actualExecutable = () -> userService.getUserById(NOT_FOUND_USER_ID);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test
   void whenRegisterUser_ThenSuccess() {
     // Arrange
-    var mockUserRef = AggregateReference.<User, Integer>to(USER_ID);
-    var mockRoleRef = AggregateReference.<Role, Integer>to(UserRoleName.CONSUMER.getId());
-    var body =
+    final var mockUserRef = AggregateReference.<User, Integer>to(USER_ID);
+    final var mockRoleRef = AggregateReference.<Role, Integer>to(UserRoleName.CONSUMER.getId());
+    final var body =
         UserRegistrationRequest.of("John", "Wick", "john.w@example.com", "password", "0999999999");
-    var mockUserToRegister =
+    final var mockUserToRegister =
         User.of(USER_ID, body.firstName(), body.lastName(), body.phoneNumber());
-    var mockUserCredential = UserLogin.of(10, mockUserRef, body.email(), "encryptedPassword");
-    var expectedRegisteredUser =
+    final var mockUserCredential = UserLogin.of(10, mockUserRef, body.email(), "encryptedPassword");
+    final var expectedRegisteredUser =
         UserInfoResponse.of(
             mockUserToRegister.id(),
             body.firstName(),
             body.lastName(),
             body.email(),
             body.phoneNumber());
-    var mockBoundUserRole = UserRole.of(1, mockUserRef, mockRoleRef);
-    var mockCreatedWallet = UserWallet.of(1, mockUserRef, Instant.now(), BigDecimal.ZERO);
+    final var mockBoundUserRole = UserRole.of(1, mockUserRef, mockRoleRef);
+    final var mockCreatedWallet = UserWallet.of(1, mockUserRef, Instant.now(), BigDecimal.ZERO);
 
     when(authService.findUserCredentialByEmail(anyString())).thenReturn(Optional.empty());
     when(userRepository.save(any(User.class))).thenReturn(mockUserToRegister);
@@ -170,7 +170,7 @@ class UserServiceTest {
         .thenReturn(mockCreatedWallet);
 
     // Actual
-    var actualRegisteredUser = userService.registerUser(body);
+    final var actualRegisteredUser = userService.registerUser(body);
 
     // Assert
     assertEquals(expectedRegisteredUser, actualRegisteredUser);
@@ -179,34 +179,36 @@ class UserServiceTest {
   @Test
   void whenRegisterUser_ButUserEmailExists_ThenThrowException() {
     // Arrange
-    var expectedErrorMessage =
+    final var expectedErrorMessage =
         String.format("%s email [%s] already exists", User.class.getSimpleName(), EXISTING_EMAIL);
-    var body = UserRegistrationRequest.of("John", "Wick", EXISTING_EMAIL, "password", "0999999999");
-    var existingUserCredential =
+    final var body =
+        UserRegistrationRequest.of("John", "Wick", EXISTING_EMAIL, "password", "0999999999");
+    final var existingUserCredential =
         UserLogin.of(10, AggregateReference.to(USER_ID), EXISTING_EMAIL, "encryptedPassword");
+
     when(authService.findUserCredentialByEmail(anyString()))
         .thenReturn(Optional.of(existingUserCredential));
 
     // Actual
-    Executable actualExecutable = () -> userService.registerUser(body);
+    final Executable actualExecutable = () -> userService.registerUser(body);
 
     // Assert
-    var exception = assertThrowsExactly(CredentialExistsException.class, actualExecutable);
+    final var exception = assertThrowsExactly(CredentialExistsException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test
   void whenUpdateUserById_ThenSuccess() {
     // Arrange
-    var LAST_NAME_TO_UPDATE = "Constantine";
-    var PHONE_NUMBER_TO_UPDATE = "0888888888";
-    var body = UserUpdateRequest.of(null, LAST_NAME_TO_UPDATE, PHONE_NUMBER_TO_UPDATE);
-    var mockExistingUser = User.of(USER_ID, "John", "Wick", "0999999999");
-    var mockUpdatedUser =
+    final var LAST_NAME_TO_UPDATE = "Constantine";
+    final var PHONE_NUMBER_TO_UPDATE = "0888888888";
+    final var body = UserUpdateRequest.of(null, LAST_NAME_TO_UPDATE, PHONE_NUMBER_TO_UPDATE);
+    final var mockExistingUser = User.of(USER_ID, "John", "Wick", "0999999999");
+    final var mockUpdatedUser =
         User.of(USER_ID, mockExistingUser.firstName(), LAST_NAME_TO_UPDATE, PHONE_NUMBER_TO_UPDATE);
-    var mockUserCredential =
+    final var mockUserCredential =
         UserLogin.of(10, AggregateReference.to(USER_ID), "john.w@example.com", "encryptedPassword");
-    var expectUpdatedUser =
+    final var expectUpdatedUser =
         UserInfoResponse.of(
             mockUpdatedUser.id(),
             mockUpdatedUser.firstName(),
@@ -219,7 +221,7 @@ class UserServiceTest {
     when(authService.getUserCredentialByUserId(anyInt())).thenReturn(mockUserCredential);
 
     // Actual
-    var actualUpdatedUser = userService.updateUserById(USER_ID, body);
+    final var actualUpdatedUser = userService.updateUserById(USER_ID, body);
 
     // Assert
     assertEquals(expectUpdatedUser, actualUpdatedUser);
@@ -228,31 +230,32 @@ class UserServiceTest {
   @Test
   void whenUpdateUserById_ButNotFound_ThenThrowException() {
     // Arrange
-    var expectedErrorMessage =
+    final var expectedErrorMessage =
         String.format("%s id [%d] not found", User.class.getSimpleName(), NOT_FOUND_USER_ID);
-    var body = UserUpdateRequest.of(null, "Constantine", "0888888888");
+    final var body = UserUpdateRequest.of(null, "Constantine", "0888888888");
+
     when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> userService.updateUserById(NOT_FOUND_USER_ID, body);
+    final Executable actualExecutable = () -> userService.updateUserById(NOT_FOUND_USER_ID, body);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test()
   void whenChangePasswordByUserId_ThenSuccess() {
     // Arrange
-    var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
-    var mockUserCredential = buildUserCredential(USER_ID, EXISTING_EMAIL);
-    var expectedChangedPassword = UpdatePasswordResult.SUCCESS;
+    final var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
+    final var mockUserCredential = buildUserCredential(USER_ID, EXISTING_EMAIL);
+    final var expectedChangedPassword = UpdatePasswordResult.SUCCESS;
 
     when(authService.updateUserPasswordByUserId(anyInt(), anyString(), anyString()))
         .thenReturn(mockUserCredential);
 
     // Actual
-    var actualChangedPassword = userService.changePasswordByUserId(USER_ID, body);
+    final var actualChangedPassword = userService.changePasswordByUserId(USER_ID, body);
 
     // Assert
     assertEquals(expectedChangedPassword, actualChangedPassword);
@@ -261,32 +264,33 @@ class UserServiceTest {
   @Test()
   void whenChangePasswordByUserId_ButUserNotFound_ThenReturn404() {
     // Arrange
-    var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
-    var expectedErrorMessage =
+    final var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
+    final var expectedErrorMessage =
         String.format("%s password is in correct", User.class.getSimpleName());
 
     when(authService.updateUserPasswordByUserId(anyInt(), anyString(), anyString()))
         .thenThrow(new EntityNotFoundException(expectedErrorMessage));
 
     // Actual
-    Executable actualExecutable = () -> userService.changePasswordByUserId(USER_ID, body);
+    final Executable actualExecutable = () -> userService.changePasswordByUserId(USER_ID, body);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test()
   void whenChangePasswordByEmail_ThenSuccess() {
     // Arrange
-    var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
-    var mockUserCredential = buildUserCredential(USER_ID, EXISTING_EMAIL);
-    var expectedChangedPassword = UpdatePasswordResult.SUCCESS;
+    final var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
+    final var mockUserCredential = buildUserCredential(USER_ID, EXISTING_EMAIL);
+    final var expectedChangedPassword = UpdatePasswordResult.SUCCESS;
+
     when(authService.updateUserPasswordByEmail(anyString(), anyString(), anyString()))
         .thenReturn(mockUserCredential);
 
     // Actual
-    var actualChangedPassword = userService.changePasswordByEmail(EXISTING_EMAIL, body);
+    final var actualChangedPassword = userService.changePasswordByEmail(EXISTING_EMAIL, body);
 
     // Assert
     assertEquals(expectedChangedPassword, actualChangedPassword);
@@ -295,27 +299,27 @@ class UserServiceTest {
   @Test()
   void whenChangePasswordByEmail_ButUserNotFound_ThenReturn404() {
     // Arrange
-    var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
-    var expectedErrorMessage =
+    final var body = UserChangePasswordRequest.of("0ldP@$$w0rd", "N3wP@$$w0rd");
+    final var expectedErrorMessage =
         String.format("%s password is in correct", User.class.getSimpleName());
 
     when(authService.updateUserPasswordByEmail(anyString(), anyString(), anyString()))
         .thenThrow(new EntityNotFoundException(expectedErrorMessage));
 
     // Actual
-    Executable actualExecutable = () -> userService.changePasswordByEmail(EXISTING_EMAIL, body);
+    final Executable actualExecutable = () -> userService.changePasswordByEmail(EXISTING_EMAIL, body);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test
   void whenDeleteUserById_ThenSuccess() {
     // Arrange
-    var mockUserToDelete = User.of(USER_ID, "John", "Wick", "0999999999");
-    var mockDeleteCredentialSuccess = true;
-    var mockDeleteWalletWalletSuccess = true;
+    final var mockUserToDelete = User.of(USER_ID, "John", "Wick", "0999999999");
+    final var mockDeleteCredentialSuccess = true;
+    final var mockDeleteWalletWalletSuccess = true;
 
     when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUserToDelete));
     when(authService.deleteUserCredentialByUserId(anyInt()))
@@ -325,7 +329,7 @@ class UserServiceTest {
     doNothing().when(userRepository).delete(any(User.class));
 
     // Actual
-    var actualIsDeleteSuccess = userService.deleteUserById(USER_ID);
+    final var actualIsDeleteSuccess = userService.deleteUserById(USER_ID);
 
     // Assert
     verify(userRepository, times(1)).delete(mockUserToDelete);
@@ -335,15 +339,15 @@ class UserServiceTest {
   @Test
   void whenDeleteUserById_ButNotFound_ThenThrowException() {
     // Arrange
-    var expectedErrorMessage =
+    final var expectedErrorMessage =
         String.format("%s id [%d] not found", User.class.getSimpleName(), NOT_FOUND_USER_ID);
     when(userRepository.findById(NOT_FOUND_USER_ID)).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> userService.deleteUserById(NOT_FOUND_USER_ID);
+    final Executable actualExecutable = () -> userService.deleteUserById(NOT_FOUND_USER_ID);
 
     // Assert
-    var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 }

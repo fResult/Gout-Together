@@ -1,11 +1,10 @@
 package dev.fResult.goutTogether.bookings.services;
 
-import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
 import dev.fResult.goutTogether.bookings.dtos.BookingCancellationRequest;
+import dev.fResult.goutTogether.bookings.dtos.BookingInfoResponse;
 import dev.fResult.goutTogether.bookings.entities.Booking;
-import org.springframework.security.core.Authentication;
-
 import java.util.Optional;
+import org.springframework.security.core.Authentication;
 
 public interface BookingService {
   Optional<Booking> findBookingById(int id);

@@ -47,14 +47,14 @@ public class TokenService {
   }
 
   public String issueAccessToken(UserLogin userLogin, Instant issuedAt) {
-    var authenticatedUser =
+    final var authenticatedUser =
         (AuthenticatedUser) userDetailsService.loadUserByUsername(userLogin.email());
 
     return generateToken(authenticatedUser, issuedAt, accessTokenExpiredInSeconds);
   }
 
   public String issueAccessToken(TourCompanyLogin tourCompanyLogin, Instant issuedAt) {
-    var authenticatedUser =
+    final var authenticatedUser =
         (AuthenticatedUser) userDetailsService.loadUserByUsername(tourCompanyLogin.username());
 
     return generateToken(authenticatedUser, issuedAt, accessTokenExpiredInSeconds);
@@ -69,14 +69,14 @@ public class TokenService {
   }
 
   public boolean isRefreshTokenExpired(RefreshToken refreshToken) {
-    var expiredAt = refreshToken.issuedDate().plusSeconds(refreshTokenExpiredInSeconds);
+    final var expiredAt = refreshToken.issuedDate().plusSeconds(refreshTokenExpiredInSeconds);
 
     return Instant.now().isAfter(expiredAt);
   }
 
   public String rotateRefreshTokenIfNeed(RefreshToken refreshToken) {
-    var expiredAt = refreshToken.issuedDate().plusSeconds(refreshTokenExpiredInSeconds);
-    var threadHoldToRotate = expiredAt.minusSeconds(TIME_FOR_ROTATE_IN_SECONDS);
+    final var expiredAt = refreshToken.issuedDate().plusSeconds(refreshTokenExpiredInSeconds);
+    final var threadHoldToRotate = expiredAt.minusSeconds(TIME_FOR_ROTATE_IN_SECONDS);
 
     if (Instant.now().isAfter(threadHoldToRotate)) return issueRefreshToken();
     return refreshToken.token();
@@ -89,22 +89,22 @@ public class TokenService {
      * - Cron started at 20241213 - 16:13
      * - When we want to check expired token from issued date -> use minusDay(1)
      */
-    var currentDateTime = Instant.now();
-    var thresholdDateTime = currentDateTime.minusSeconds(refreshTokenExpiredInSeconds);
+    final var currentDateTime = Instant.now();
+    final var thresholdDateTime = currentDateTime.minusSeconds(refreshTokenExpiredInSeconds);
 
     refreshTokenRepository.updateRefreshTokenThatExpired(true, thresholdDateTime);
   }
 
   private String generateToken(
       AuthenticatedUser authenticatedUser, Instant issuedAt, long expiredInSeconds) {
-    var scope =
+    final var scope =
         authenticatedUser.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.joining(" "));
 
-    var expiresAt = issuedAt.plusSeconds(expiredInSeconds);
+    final var expiresAt = issuedAt.plusSeconds(expiredInSeconds);
 
-    var claims =
+    final var claims =
         JwtClaimsSet.builder()
             .issuer(ISSUER)
             .issuedAt(issuedAt)

@@ -51,7 +51,7 @@ public class UserSelfManagedControllerTest {
   }
 
   private Authentication buildAuthentication(int resourceId, UserRoleName roleName, String email) {
-    var jwt =
+    final var jwt =
         Jwt.withTokenValue("token")
             .header("alg", "none")
             .claim("sub", email)
@@ -64,12 +64,12 @@ public class UserSelfManagedControllerTest {
   @Test
   void whenGetMyUser_ThenSuccess() throws Exception {
     // Arrange
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    final var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
     when(userService.getUserById(USER_ID))
         .thenReturn(UserInfoResponse.of(USER_ID, "John", "Wick", EMAIL, "0999999999"));
 
     // Actual
-    var resultActions = mockMvc.perform(get(MY_USER_API).principal(authentication));
+    final var resultActions = mockMvc.perform(get(MY_USER_API).principal(authentication));
 
     // Assert
     resultActions.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(USER_ID));
@@ -78,15 +78,15 @@ public class UserSelfManagedControllerTest {
   @Test
   void whenUpdateMyUser_ThenSuccess() throws Exception {
     // Arrange
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
-    var LAST_NAME_TO_UPDATE = "Utah";
-    var body = UserUpdateRequest.of(null, LAST_NAME_TO_UPDATE, null);
-    var expectedUpdatedUserInfo =
+    final var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    final var LAST_NAME_TO_UPDATE = "Utah";
+    final var body = UserUpdateRequest.of(null, LAST_NAME_TO_UPDATE, null);
+    final var expectedUpdatedUserInfo =
         UserInfoResponse.of(USER_ID, "John", LAST_NAME_TO_UPDATE, EMAIL, "0999999999");
     when(userService.updateUserById(USER_ID, body)).thenReturn(expectedUpdatedUserInfo);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             patch(MY_USER_API)
                 .principal(authentication)
@@ -103,13 +103,13 @@ public class UserSelfManagedControllerTest {
   @Test
   void whenUpdateMyUser_ButNotFound_ThenReturn404() throws Exception {
     // Arrange
-    var authentication = buildAuthentication(NOT_FOUND_USER_ID, UserRoleName.CONSUMER, EMAIL);
-    var body = UserUpdateRequest.of(null, "Utah", null);
+    final var authentication = buildAuthentication(NOT_FOUND_USER_ID, UserRoleName.CONSUMER, EMAIL);
+    final var body = UserUpdateRequest.of(null, "Utah", null);
     when(userService.updateUserById(NOT_FOUND_USER_ID, body))
         .thenThrow(EntityNotFoundException.class);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             patch(MY_USER_API)
                 .principal(authentication)
@@ -123,13 +123,14 @@ public class UserSelfManagedControllerTest {
   @Test
   void whenChangeMyPassword_ThenSuccess() throws Exception {
     // Arrange
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
-    var body = UserChangePasswordRequest.of("0ldP@ssw0rd", "NewP@ssw0rd");
-    var expectedUpdatePasswordResult = UpdatePasswordResult.SUCCESS;
+    final var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    final var body = UserChangePasswordRequest.of("0ldP@ssw0rd", "NewP@ssw0rd");
+    final var expectedUpdatePasswordResult = UpdatePasswordResult.SUCCESS;
+
     when(userService.changePasswordByEmail(EMAIL, body)).thenReturn(expectedUpdatePasswordResult);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             patch(MY_USER_API + "/password")
                 .principal(authentication)
@@ -145,13 +146,13 @@ public class UserSelfManagedControllerTest {
   @Test
   void whenChangeMyPassword_ButCredentialNotFound_ThenReturn404() throws Exception {
     // Arrange
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
-    var body = UserChangePasswordRequest.of("0ldP@ssw0rd", "NewP@ssw0rd");
+    final var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    final var body = UserChangePasswordRequest.of("0ldP@ssw0rd", "NewP@ssw0rd");
 
     when(userService.changePasswordByEmail(EMAIL, body)).thenThrow(EntityNotFoundException.class);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             patch(MY_USER_API + "/password")
                 .principal(authentication)
@@ -165,14 +166,14 @@ public class UserSelfManagedControllerTest {
   @Test
   void whenDeleteMyUser_ThenSuccess() throws Exception {
     // Arrange
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
-    var expectedDeleteResult =
+    final var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    final var expectedDeleteResult =
         String.format("Delete %s by id [%d] successfully", User.class.getSimpleName(), USER_ID);
 
     when(userService.deleteUserById(USER_ID)).thenReturn(true);
 
     // Actual
-    var resultActions = mockMvc.perform(delete(MY_USER_API).principal(authentication));
+    final var resultActions = mockMvc.perform(delete(MY_USER_API).principal(authentication));
 
     // Assert
     resultActions.andExpect(status().isOk()).andExpect(jsonPath("$").value(expectedDeleteResult));
@@ -181,15 +182,15 @@ public class UserSelfManagedControllerTest {
   @Test
   void whenDeleteMyUser_ButUserNotFound_ThenReturn404() throws Exception {
     // Arrange
-    var authentication = buildAuthentication(NOT_FOUND_USER_ID, UserRoleName.CONSUMER, EMAIL);
-    var expectedDeleteResult =
+    final var authentication = buildAuthentication(NOT_FOUND_USER_ID, UserRoleName.CONSUMER, EMAIL);
+    final var expectedDeleteResult =
         String.format(
             "Delete %s by id [%d] successfully", User.class.getSimpleName(), NOT_FOUND_USER_ID);
 
     when(userService.deleteUserById(NOT_FOUND_USER_ID)).thenThrow(EntityNotFoundException.class);
 
     // Actual
-    var resultActions = mockMvc.perform(delete(MY_USER_API).principal(authentication));
+    final var resultActions = mockMvc.perform(delete(MY_USER_API).principal(authentication));
 
     // Assert
     resultActions.andExpect(status().isNotFound());

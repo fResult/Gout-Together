@@ -47,8 +47,8 @@ public class TourCompanyController {
 
   @GetMapping("/me")
   public ResponseEntity<TourCompanyResponse> getMyTourCompany(Authentication authentication) {
-    var jwt = (Jwt) authentication.getPrincipal();
-    var tourCompanyId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
+    final var jwt = (Jwt) authentication.getPrincipal();
+    final var tourCompanyId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
 
     logger.debug(
         "[getMyTourCompany] Getting {} auth of id [{}]",
@@ -62,6 +62,7 @@ public class TourCompanyController {
   @PostMapping
   public ResponseEntity<TourCompanyResponse> registerTourCompany(
       @RequestBody @Validated TourCompanyRegistrationRequest body) {
+
     logger.info("[registerTourCompany] Registering a new {}", TourCompany.class.getSimpleName());
 
     return ResponseEntity.created(URI.create("/api/v1/tour-companies"))
@@ -74,7 +75,7 @@ public class TourCompanyController {
         "[approveTourCompanyById] Approving a new {} id [{}]",
         TourCompany.class.getSimpleName(),
         id);
-    var approvedCompany = tourCompanyService.approveTourCompany(id);
+    final var approvedCompany = tourCompanyService.approveTourCompany(id);
 
     return ResponseEntity.ok(approvedCompany);
   }
@@ -82,6 +83,7 @@ public class TourCompanyController {
   @PatchMapping("/{id}")
   public ResponseEntity<TourCompanyResponse> updateTourCompanyById(
       @PathVariable int id, @RequestBody @Validated TourCompanyUpdateRequest body) {
+
     logger.debug(
         "[updateTourCompanyById] Updating a {} id [{}]", TourCompany.class.getSimpleName(), id);
 

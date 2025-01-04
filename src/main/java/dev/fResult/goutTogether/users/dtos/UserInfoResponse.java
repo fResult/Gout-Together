@@ -26,7 +26,7 @@ public record UserInfoResponse(
       Map<Integer, UserLogin> userIdToCredentialMap) {
 
     return user -> {
-      var credential = userIdToCredentialMap.get(user.id());
+      final var credential = userIdToCredentialMap.get(user.id());
 
       return new UserInfoResponse(
           user.id(), user.firstName(), user.lastName(), credential.email(), user.phoneNumber());

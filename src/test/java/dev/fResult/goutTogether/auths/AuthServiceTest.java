@@ -40,15 +40,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
-  @InjectMocks @Spy private AuthServiceImpl authService;
-
-  @Mock private UserLoginRepository userLoginRepository;
-  @Mock private TokenService tokenService;
-  @Mock private AuthenticationManager authenticationManager;
-  @Mock private TourCompanyLoginRepository tourCompanyLoginRepository;
-  @Mock private PasswordEncoder passwordEncoder;
-  @Mock private RefreshTokenRepository refreshTokenRepository;
-
   private final int USER_ID_1 = 1;
   private final int USER_ID_2 = 3;
   private final int USER_ID_3 = 5;
@@ -67,6 +58,13 @@ class AuthServiceTest {
 
   private final String ENCRYPTED_PASSWORD =
       "$argon2id$v=19$m=16384,t=2,p=1$NDMxQRhx/yCgg2uNT4GMfA$DZEh4+dJNDDtv8DHxvw7Tm1rXSHWlG/Wxf8S/rrAtTI";
+  @InjectMocks @Spy private AuthServiceImpl authService;
+  @Mock private UserLoginRepository userLoginRepository;
+  @Mock private TokenService tokenService;
+  @Mock private AuthenticationManager authenticationManager;
+  @Mock private TourCompanyLoginRepository tourCompanyLoginRepository;
+  @Mock private PasswordEncoder passwordEncoder;
+  @Mock private RefreshTokenRepository refreshTokenRepository;
 
   private UserLogin buildUserLogin(int id, int userId) {
     return UserLogin.of(id, AggregateReference.to(userId), TARGET_EMAIL, ENCRYPTED_PASSWORD);
@@ -85,15 +83,15 @@ class AuthServiceTest {
     @Test
     void byUserIds_ThenSuccess() {
       // Arrange
-      var mockUserLogin1 = buildUserLogin(1, USER_ID_1);
-      var mockUserLogin2 = buildUserLogin(2, USER_ID_2);
-      var mockUserLogin3 = buildUserLogin(3, USER_ID_3);
-      var mockFoundUserLogins = List.of(mockUserLogin1, mockUserLogin2, mockUserLogin3);
+      final var mockUserLogin1 = buildUserLogin(1, USER_ID_1);
+      final var mockUserLogin2 = buildUserLogin(2, USER_ID_2);
+      final var mockUserLogin3 = buildUserLogin(3, USER_ID_3);
+      final var mockFoundUserLogins = List.of(mockUserLogin1, mockUserLogin2, mockUserLogin3);
 
       when(userLoginRepository.findByUserIdIn(anyList())).thenReturn(mockFoundUserLogins);
 
       // Actual
-      var actualFoundUserLogins = authService.getUserCredentialsByUserIds(USER_IDS);
+      final var actualFoundUserLogins = authService.getUserCredentialsByUserIds(USER_IDS);
 
       // Assert
       assertEquals(mockFoundUserLogins, actualFoundUserLogins);
@@ -102,37 +100,37 @@ class AuthServiceTest {
     @Test
     void byUserIds_ButSomeAreNotFound_ThenThrowEntityNotFoundException() {
       // Arrange
-      var expectedErrorMessage =
+      final var expectedErrorMessage =
           String.format( // TODO: Refactor this part to a ErrorMessageHelper's method
               "%s ids [%s] not found",
               UserLogin.class.getSimpleName(),
               new HashSet<>(List.of(NOT_FOUND_USER_ID_2, NOT_FOUND_USER_ID_1))
                   .toString()
                   .replaceAll("[\\[\\]]", ""));
-      var mockUserLogin1 = buildUserLogin(1, USER_ID_1);
-      var mockUserLogin3 = buildUserLogin(3, USER_ID_3);
-      var mockFoundUserLogins = List.of(mockUserLogin1, mockUserLogin3);
+      final var mockUserLogin1 = buildUserLogin(1, USER_ID_1);
+      final var mockUserLogin3 = buildUserLogin(3, USER_ID_3);
+      final var mockFoundUserLogins = List.of(mockUserLogin1, mockUserLogin3);
 
       when(userLoginRepository.findByUserIdIn(anyList())).thenReturn(mockFoundUserLogins);
 
       // Actual
-      Executable actualExecutable =
+      final Executable actualExecutable =
           () -> authService.getUserCredentialsByUserIds(SOME_NOT_FOUND_USER_IDS);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
 
     @Test
     void byUserId_ThenSuccess() {
       // Arrange
-      var mockUserLogin = buildUserLogin(1, USER_ID_1);
-      var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
+      final var mockUserLogin = buildUserLogin(1, USER_ID_1);
+      final var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
       when(userLoginRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserLogin));
 
       // Actual
-      var actualFoundUserLogin = authService.getUserCredentialByUserId(USER_ID_1);
+      final var actualFoundUserLogin = authService.getUserCredentialByUserId(USER_ID_1);
 
       // Assert
       assertEquals(mockUserLogin, actualFoundUserLogin);
@@ -141,7 +139,7 @@ class AuthServiceTest {
     @Test
     void byUserId_ButNotFound_ThenThrowException() {
       // Arrange
-      var expectedErrorMessage =
+      final var expectedErrorMessage =
           String.format(
               "%s with %s [%d] not found",
               UserLogin.class.getSimpleName(), "userId", NOT_FOUND_USER_ID_1);
@@ -150,22 +148,22 @@ class AuthServiceTest {
       when(userLoginRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
 
       // Actual
-      Executable actualExecutable =
+      final Executable actualExecutable =
           () -> authService.getUserCredentialByUserId(NOT_FOUND_USER_ID_1);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
 
     @Test
     void byEmail_ThenSuccess() {
       // Arrange
-      var mockUserLogin = buildUserLogin(1, USER_ID_1);
+      final var mockUserLogin = buildUserLogin(1, USER_ID_1);
       when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
 
       // Actual
-      var actualFoundUserLogin = authService.findUserCredentialByEmail(TARGET_EMAIL);
+      final var actualFoundUserLogin = authService.findUserCredentialByEmail(TARGET_EMAIL);
 
       // Assert
       assertTrue(actualFoundUserLogin.isPresent());
@@ -178,7 +176,7 @@ class AuthServiceTest {
       when(userLoginRepository.findOneByEmail(NOT_FOUND_EMAIL)).thenReturn(Optional.empty());
 
       // Actual
-      var actualFoundUserLogin = authService.findUserCredentialByEmail(NOT_FOUND_EMAIL);
+      final var actualFoundUserLogin = authService.findUserCredentialByEmail(NOT_FOUND_EMAIL);
 
       // Assert
       assertTrue(actualFoundUserLogin.isEmpty());
@@ -187,12 +185,12 @@ class AuthServiceTest {
     @Test
     void byEmailAndPassword_ThenSuccess() {
       // Arrange
-      var mockUserLogin = buildUserLogin(1, USER_ID_1);
+      final var mockUserLogin = buildUserLogin(1, USER_ID_1);
       when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
       when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
       // Actual
-      var actualFoundUserLogin =
+      final var actualFoundUserLogin =
           authService.findUserCredentialByEmailAndPassword(TARGET_EMAIL, PASSWORD);
 
       // Assert
@@ -205,7 +203,7 @@ class AuthServiceTest {
       when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.empty());
 
       // Actual
-      var actualFoundUserLogin =
+      final var actualFoundUserLogin =
           authService.findUserCredentialByEmailAndPassword(TARGET_EMAIL, PASSWORD);
 
       // Assert
@@ -215,12 +213,12 @@ class AuthServiceTest {
     @Test
     void byEmailAndPassword_ButPasswordNotMatched_ThenReturnEmpty() {
       // Arrange
-      var mockUserLogin = buildUserLogin(1, USER_ID_1);
+      final var mockUserLogin = buildUserLogin(1, USER_ID_1);
       when(userLoginRepository.findOneByEmail(TARGET_EMAIL)).thenReturn(Optional.of(mockUserLogin));
       when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
       // Actual
-      var actualFoundUserLogin =
+      final var actualFoundUserLogin =
           authService.findUserCredentialByEmailAndPassword(TARGET_EMAIL, NOT_MATCHED_PASSWORD);
 
       // Assert
@@ -233,13 +231,13 @@ class AuthServiceTest {
     @Test
     void thenSuccess() {
       // Arrange
-      var mockUserLoginToCreate = buildUserLogin(1, USER_ID_1);
+      final var mockUserLoginToCreate = buildUserLogin(1, USER_ID_1);
 
       when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
       when(userLoginRepository.save(any(UserLogin.class))).thenReturn(mockUserLoginToCreate);
 
       // Actual
-      var actualCreatedUserLogin =
+      final var actualCreatedUserLogin =
           authService.createUserCredential(USER_ID_1, TARGET_EMAIL, "password");
 
       // Assert
@@ -255,8 +253,8 @@ class AuthServiceTest {
     @Test
     void byUserId_ThenSuccess() {
       // Arrange
-      var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
-      var mockUserLoginToUpdate = UserLogin.of(1, userRef, TARGET_EMAIL, ENCRYPTED_PASSWORD);
+      final var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
+      final var mockUserLoginToUpdate = UserLogin.of(1, userRef, TARGET_EMAIL, ENCRYPTED_PASSWORD);
 
       doReturn(mockUserLoginToUpdate).when(authService).getUserCredentialByUserId(anyInt());
       when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
@@ -264,7 +262,7 @@ class AuthServiceTest {
       when(userLoginRepository.save(any(UserLogin.class))).thenReturn(mockUserLoginToUpdate);
 
       // Actual
-      var actualUpdatedUserLogin =
+      final var actualUpdatedUserLogin =
           authService.updateUserPasswordByUserId(USER_ID_1, PASSWORD, NEW_PASSWORD);
 
       // Assert
@@ -275,7 +273,7 @@ class AuthServiceTest {
     @Test
     void byUserId_ButNotFound_ThenThrowException() {
       // Arrange
-      var expectedErrorMessage =
+      final var expectedErrorMessage =
           String.format(
               "%s with %s [%d] not found",
               UserLogin.class.getSimpleName(), "userId", NOT_FOUND_USER_ID_1);
@@ -284,19 +282,19 @@ class AuthServiceTest {
       when(userLoginRepository.findOneByUserId(notFoundUserRef)).thenReturn(Optional.empty());
 
       // Actual
-      Executable actualExecutable =
+      final Executable actualExecutable =
           () -> authService.updateUserPasswordByUserId(NOT_FOUND_USER_ID_1, PASSWORD, NEW_PASSWORD);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
 
     @Test
     void byUserId_ButPasswordNotMatched_ThenThrowException() {
       // Arrange
-      var mockUserLogin = buildUserLogin(1, USER_ID_1);
-      var expectedErrorMessage =
+      final var mockUserLogin = buildUserLogin(1, USER_ID_1);
+      final var expectedErrorMessage =
           String.format("%s password is in correct", User.class.getSimpleName());
 
       when(userLoginRepository.findOneByUserId(AggregateReference.to(USER_ID_1)))
@@ -304,20 +302,20 @@ class AuthServiceTest {
       when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
       // Actual
-      Executable actualExecutable =
+      final Executable actualExecutable =
           () ->
               authService.updateUserPasswordByUserId(USER_ID_1, NOT_MATCHED_PASSWORD, NEW_PASSWORD);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
 
     @Test
     void byEmail_ThenSuccess() {
       // Arrange
-      var mockUserLogin = buildUserLogin(1, USER_ID_1);
-      var expectedUpdatedUserLogin =
+      final var mockUserLogin = buildUserLogin(1, USER_ID_1);
+      final var expectedUpdatedUserLogin =
           UserLogin.of(1, AggregateReference.to(USER_ID_1), TARGET_EMAIL, "NewEncryptedPassword");
 
       doReturn(Optional.of(mockUserLogin))
@@ -327,7 +325,7 @@ class AuthServiceTest {
       when(userLoginRepository.save(any(UserLogin.class))).thenReturn(expectedUpdatedUserLogin);
 
       // Actual
-      var actualUpdatedUserLogin =
+      final var actualUpdatedUserLogin =
           authService.updateUserPasswordByEmail(TARGET_EMAIL, PASSWORD, NEW_PASSWORD);
 
       // Assert
@@ -337,7 +335,7 @@ class AuthServiceTest {
     @Test
     void byEmail_ButPasswordIsIncorrect_ThenThrowException() {
       // Arrange
-      var expectedErrorMessage =
+      final var expectedErrorMessage =
           String.format(
               "%s's %s password is incorrect",
               UserLogin.class.getSimpleName(), User.class.getSimpleName());
@@ -346,11 +344,11 @@ class AuthServiceTest {
           .findUserCredentialByEmailAndPassword(anyString(), anyString());
 
       // Actual
-      Executable actualExecutable =
+      final Executable actualExecutable =
           () -> authService.updateUserPasswordByEmail(TARGET_EMAIL, PASSWORD, NEW_PASSWORD);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
@@ -360,13 +358,13 @@ class AuthServiceTest {
     @Test
     void byId_ThenSuccess() {
       // Arrange
-      var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
-      var mockCredentialToDelete = buildUserLogin(1, USER_ID_1);
+      final var userRef = AggregateReference.<User, Integer>to(USER_ID_1);
+      final var mockCredentialToDelete = buildUserLogin(1, USER_ID_1);
       doReturn(mockCredentialToDelete).when(authService).getUserCredentialByUserId(anyInt());
       doNothing().when(userLoginRepository).delete(any(UserLogin.class));
 
       // Actual
-      var actualDeleteResult = authService.deleteUserCredentialByUserId(USER_ID_1);
+      final var actualDeleteResult = authService.deleteUserCredentialByUserId(USER_ID_1);
 
       // Assert
       verify(userLoginRepository, times(1)).delete(mockCredentialToDelete);
@@ -376,14 +374,14 @@ class AuthServiceTest {
     @Test
     void byId_ButNotFound_ThenThrowException() {
       // Arrange
-      var expectedErrorMessage =
+      final var expectedErrorMessage =
           String.format(
               "%s with %s [%d] not found",
               UserLogin.class.getSimpleName(), "userId", NOT_FOUND_USER_ID_1);
 
       doAnswer(
               invocation -> {
-                var targetUserId = invocation.getArgument(0, Integer.class);
+                final var targetUserId = invocation.getArgument(0, Integer.class);
                 throw new EntityNotFoundException(
                     String.format(
                         "%s with %s [%d] not found",
@@ -393,11 +391,11 @@ class AuthServiceTest {
           .getUserCredentialByUserId(anyInt());
 
       // Actual
-      Executable actualExecutable =
+      final Executable actualExecutable =
           () -> authService.deleteUserCredentialByUserId(NOT_FOUND_USER_ID_1);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
@@ -407,12 +405,12 @@ class AuthServiceTest {
     @Test
     void byUsername_ThenSuccess() {
       // Arrange
-      var mockTourCompanyLogin = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
+      final var mockTourCompanyLogin = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
       when(tourCompanyLoginRepository.findOneByUsername(TARGET_USERNAME))
           .thenReturn(Optional.of(mockTourCompanyLogin));
 
       // Actual
-      var actualFoundCompanyLogin =
+      final var actualFoundCompanyLogin =
           authService.findTourCompanyCredentialByUsername(TARGET_USERNAME);
 
       // Assert
@@ -427,7 +425,7 @@ class AuthServiceTest {
           .thenReturn(Optional.empty());
 
       // Actual
-      var actualFoundCompanyLogin =
+      final var actualFoundCompanyLogin =
           authService.findTourCompanyCredentialByUsername(NOT_FOUND_USERNAME);
 
       // Assert
@@ -439,13 +437,13 @@ class AuthServiceTest {
       // Arrange
       AggregateReference<TourCompany, Integer> tourCompanyRef =
           AggregateReference.to(TOUR_COMPANY_ID);
-      var mockTourCompanyLogin = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
+      final var mockTourCompanyLogin = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
 
       when(tourCompanyLoginRepository.findOneByTourCompanyId(tourCompanyRef))
           .thenReturn(Optional.of(mockTourCompanyLogin));
 
       // Actual
-      var actualFoundCompanyLogin =
+      final var actualFoundCompanyLogin =
           authService.findTourCompanyCredentialByTourCompanyId(TOUR_COMPANY_ID);
 
       // Assert
@@ -455,22 +453,22 @@ class AuthServiceTest {
     @Test
     void byCompanyId_ButNotFound_ThenThrowException() {
       // Arrange
-      var expectedErrorMessage =
+      final var expectedErrorMessage =
           String.format(
               "%s with %s [%d] not found",
               TourCompanyLogin.class.getSimpleName(), "tourCompanyId", NOT_FOUND_TOUR_COMPANY_ID);
-      AggregateReference<TourCompany, Integer> notFoundTourCompanyRef =
+      final AggregateReference<TourCompany, Integer> notFoundTourCompanyRef =
           AggregateReference.to(NOT_FOUND_TOUR_COMPANY_ID);
 
       when(tourCompanyLoginRepository.findOneByTourCompanyId(notFoundTourCompanyRef))
           .thenReturn(Optional.empty());
 
       // Actual
-      Executable actualExecutable =
+      final Executable actualExecutable =
           () -> authService.findTourCompanyCredentialByTourCompanyId(NOT_FOUND_TOUR_COMPANY_ID);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
@@ -480,15 +478,15 @@ class AuthServiceTest {
     @Test
     void thenSuccess() {
       // Arrange
-      var companyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
-      var mockCompanyLoginToCreate = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
+      final var companyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
+      final var mockCompanyLoginToCreate = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
 
       when(passwordEncoder.encode(anyString())).thenReturn(ENCRYPTED_PASSWORD);
       when(tourCompanyLoginRepository.save(any(TourCompanyLogin.class)))
           .thenReturn(mockCompanyLoginToCreate);
 
       // Actual
-      var actualCreatedUserLogin =
+      final var actualCreatedUserLogin =
           authService.createTourCompanyLogin(TOUR_COMPANY_ID, "MyTour", "password");
 
       // Assert
@@ -502,14 +500,14 @@ class AuthServiceTest {
     @Test
     void thenSuccess() {
       // Arrange
-      var companyRef = AggregateReference.<TourCompany, Integer>to(USER_ID_1);
-      var mockCompanyLoginToDelete = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
+      final var mockCompanyLoginToDelete = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
       doReturn(mockCompanyLoginToDelete)
           .when(authService)
           .findTourCompanyCredentialByTourCompanyId(anyInt());
 
       // Actual
-      var actualDeleteResult = authService.deleteTourCompanyLoginByTourCompanyId(TOUR_COMPANY_ID);
+      final var actualDeleteResult =
+          authService.deleteTourCompanyLoginByTourCompanyId(TOUR_COMPANY_ID);
 
       // Assert
       verify(tourCompanyLoginRepository, times(1)).delete(mockCompanyLoginToDelete);
@@ -519,17 +517,14 @@ class AuthServiceTest {
     @Test
     void byId_ButNotFound_ThenThrowException() {
       // Arrange
-      var expectedErrorMessage =
+      final var expectedErrorMessage =
           String.format(
               "%s with %s [%d] not found",
               TourCompanyLogin.class.getSimpleName(), "tourCompanyId", NOT_FOUND_TOUR_COMPANY_ID);
 
-      AggregateReference<TourCompany, Integer> notFoundCompanyRef =
-          AggregateReference.to(NOT_FOUND_TOUR_COMPANY_ID);
-
       doAnswer(
               invocation -> {
-                var targetCompanyId = invocation.getArgument(0, Integer.class);
+                final var targetCompanyId = invocation.getArgument(0, Integer.class);
                 throw new EntityNotFoundException(
                     String.format(
                         "%s with %s [%d] not found",
@@ -539,11 +534,11 @@ class AuthServiceTest {
           .findTourCompanyCredentialByTourCompanyId(anyInt());
 
       // Actual
-      Executable actualExecutable =
+      final Executable actualExecutable =
           () -> authService.deleteTourCompanyLoginByTourCompanyId(NOT_FOUND_TOUR_COMPANY_ID);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
@@ -551,15 +546,19 @@ class AuthServiceTest {
   @Test
   void whenLogin_ThenSuccess() {
     // Arrange
-    var ROLE = UserRoleName.CONSUMER;
-    var body = LoginRequest.of(TARGET_EMAIL, PASSWORD);
-    var refreshToken = UUIDV7.randomUUID().toString();
-    var accessToken = "access_token";
-    var authenticatedUser = AuthenticatedUser.of(USER_ID_1, TARGET_EMAIL, ENCRYPTED_PASSWORD, ROLE);
-    var mockAuthentication = new UsernamePasswordAuthenticationToken(authenticatedUser, PASSWORD);
-    var mockUserLogin = buildUserLogin(1, USER_ID_1);
-    var mockRefreshToken = RefreshToken.of(1, refreshToken, Instant.now(), ROLE, USER_ID_1, false);
-    var expectedLoggedInResp = LoginResponse.of(USER_ID_1, TOKEN_TYPE, accessToken, refreshToken);
+    final var ROLE = UserRoleName.CONSUMER;
+    final var body = LoginRequest.of(TARGET_EMAIL, PASSWORD);
+    final var refreshToken = UUIDV7.randomUUID().toString();
+    final var accessToken = "access_token";
+    final var authenticatedUser =
+        AuthenticatedUser.of(USER_ID_1, TARGET_EMAIL, ENCRYPTED_PASSWORD, ROLE);
+    final var mockAuthentication =
+        new UsernamePasswordAuthenticationToken(authenticatedUser, PASSWORD);
+    final var mockUserLogin = buildUserLogin(1, USER_ID_1);
+    final var mockRefreshToken =
+        RefreshToken.of(1, refreshToken, Instant.now(), ROLE, USER_ID_1, false);
+    final var expectedLoggedInResp =
+        LoginResponse.of(USER_ID_1, TOKEN_TYPE, accessToken, refreshToken);
 
     when(authenticationManager.authenticate(any(Authentication.class)))
         .thenReturn(mockAuthentication);
@@ -570,7 +569,7 @@ class AuthServiceTest {
     when(refreshTokenRepository.save(any(RefreshToken.class))).thenReturn(mockRefreshToken);
 
     // Actual
-    var actualLoginResponse = authService.login(body);
+    final var actualLoginResponse = authService.login(body);
 
     // Assert
     assertEquals(mockUserLogin.userId().getId(), actualLoginResponse.userId());
@@ -584,6 +583,7 @@ class AuthServiceTest {
 
     private RefreshToken buildCurrentRefreshToken(
         String refreshToken, UserRoleName role, int resourceId) {
+
       return RefreshToken.of(
           REFRESH_TOKEN_ID, refreshToken, Instant.now().minusSeconds(90), role, resourceId, false);
     }
@@ -598,15 +598,15 @@ class AuthServiceTest {
     @Test
     void ofConsumerAndTokenIsRotated_ThenSuccess() {
       // Arrange
-      var ROLE = UserRoleName.CONSUMER;
-      var ROTATED_REFRESH_TOKEN = UUIDV7.randomUUID().toString();
-      var NEW_ACCESS_TOKEN = "new_access_token";
-      var body = RefreshTokenRequest.of(ROLE, USER_ID_1, REFRESH_TOKEN);
-      var mockCurrentRefreshToken = buildCurrentRefreshToken(REFRESH_TOKEN, ROLE, USER_ID_1);
-      var mockRotatedRefreshToken =
+      final var ROLE = UserRoleName.CONSUMER;
+      final var ROTATED_REFRESH_TOKEN = UUIDV7.randomUUID().toString();
+      final var NEW_ACCESS_TOKEN = "new_access_token";
+      final var body = RefreshTokenRequest.of(ROLE, USER_ID_1, REFRESH_TOKEN);
+      final var mockCurrentRefreshToken = buildCurrentRefreshToken(REFRESH_TOKEN, ROLE, USER_ID_1);
+      final var mockRotatedRefreshToken =
           buildRotatedRefreshToken(ROTATED_REFRESH_TOKEN, ROLE, USER_ID_1);
-      var mockUserLogin = buildUserLogin(1, USER_ID_1);
-      var expectedLoggedInResp =
+      final var mockUserLogin = buildUserLogin(1, USER_ID_1);
+      final var expectedLoggedInResp =
           LoginResponse.of(USER_ID_1, TOKEN_TYPE, NEW_ACCESS_TOKEN, ROTATED_REFRESH_TOKEN);
 
       when(refreshTokenRepository.findOneByToken(anyString()))
@@ -621,7 +621,7 @@ class AuthServiceTest {
           .thenReturn(ROTATED_REFRESH_TOKEN);
 
       // Actual
-      var actualRefreshedToken = authService.refreshToken(body);
+      final var actualRefreshedToken = authService.refreshToken(body);
 
       // Assert
       assertEquals(expectedLoggedInResp, actualRefreshedToken);
@@ -630,12 +630,12 @@ class AuthServiceTest {
     @Test
     void ofConsumer_ThenReturnCurrentRefreshToken() {
       // Arrange
-      var ROLE = UserRoleName.CONSUMER;
-      var NEW_ACCESS_TOKEN = "new_access_token";
-      var body = RefreshTokenRequest.of(ROLE, USER_ID_1, REFRESH_TOKEN);
-      var mockRefreshToken = buildRotatedRefreshToken(REFRESH_TOKEN, ROLE, USER_ID_1);
-      var mockUserLogin = buildUserLogin(2, USER_ID_2);
-      var expectedLoggedInResp =
+      final var ROLE = UserRoleName.CONSUMER;
+      final var NEW_ACCESS_TOKEN = "new_access_token";
+      final var body = RefreshTokenRequest.of(ROLE, USER_ID_1, REFRESH_TOKEN);
+      final var mockRefreshToken = buildRotatedRefreshToken(REFRESH_TOKEN, ROLE, USER_ID_1);
+      final var mockUserLogin = buildUserLogin(2, USER_ID_2);
+      final var expectedLoggedInResp =
           LoginResponse.of(USER_ID_1, TOKEN_TYPE, NEW_ACCESS_TOKEN, REFRESH_TOKEN);
 
       when(refreshTokenRepository.findOneByToken(anyString()))
@@ -648,7 +648,7 @@ class AuthServiceTest {
           .thenReturn(REFRESH_TOKEN);
 
       // Actual
-      var actualRefreshedToken = authService.refreshToken(body);
+      final var actualRefreshedToken = authService.refreshToken(body);
 
       // Assert
       assertEquals(expectedLoggedInResp, actualRefreshedToken);
@@ -657,10 +657,10 @@ class AuthServiceTest {
     @Test
     void ofConsumer_ButRefreshTokenAlreadyExpired_ThenThrowException() {
       // Arrange
-      var ROLE = UserRoleName.CONSUMER;
-      var body = RefreshTokenRequest.of(ROLE, USER_ID_1, REFRESH_TOKEN);
-      var mockRefreshToken = buildCurrentRefreshToken(REFRESH_TOKEN, ROLE, USER_ID_1);
-      var expectedErrorMessage =
+      final var ROLE = UserRoleName.CONSUMER;
+      final var body = RefreshTokenRequest.of(ROLE, USER_ID_1, REFRESH_TOKEN);
+      final var mockRefreshToken = buildCurrentRefreshToken(REFRESH_TOKEN, ROLE, USER_ID_1);
+      final var expectedErrorMessage =
           String.format(
               "%s is already expired, please re-login", RefreshToken.class.getSimpleName());
 
@@ -670,25 +670,27 @@ class AuthServiceTest {
       doReturn(true).when(authService).logout(any(LogoutInfo.class));
 
       // Actual
-      Executable actualExecutable = () -> authService.refreshToken(body);
+      final Executable actualExecutable = () -> authService.refreshToken(body);
 
       // Assert
-      var exception = assertThrowsExactly(RefreshTokenExpiredException.class, actualExecutable);
+      final var exception =
+          assertThrowsExactly(RefreshTokenExpiredException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
 
     @Test
     void ofTourCompanyAndTokenIsRotated_ThenSuccess() {
       // Arrange
-      var ROLE = UserRoleName.COMPANY;
-      var ROTATED_REFRESH_TOKEN = UUIDV7.randomUUID().toString();
-      var NEW_ACCESS_TOKEN = "new_access_token";
-      var body = RefreshTokenRequest.of(ROLE, TOUR_COMPANY_ID, REFRESH_TOKEN);
-      var mockCurrentRefreshToken = buildCurrentRefreshToken(REFRESH_TOKEN, ROLE, TOUR_COMPANY_ID);
-      var mockRotatedRefreshToken =
+      final var ROLE = UserRoleName.COMPANY;
+      final var ROTATED_REFRESH_TOKEN = UUIDV7.randomUUID().toString();
+      final var NEW_ACCESS_TOKEN = "new_access_token";
+      final var body = RefreshTokenRequest.of(ROLE, TOUR_COMPANY_ID, REFRESH_TOKEN);
+      final var mockCurrentRefreshToken =
+          buildCurrentRefreshToken(REFRESH_TOKEN, ROLE, TOUR_COMPANY_ID);
+      final var mockRotatedRefreshToken =
           buildRotatedRefreshToken(ROTATED_REFRESH_TOKEN, ROLE, TOUR_COMPANY_ID);
-      var mockTourCompanyLogin = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
-      var expectedLoggedInResp =
+      final var mockTourCompanyLogin = buildTourCompanyLogin(1, TOUR_COMPANY_ID);
+      final var expectedLoggedInResp =
           LoginResponse.of(TOUR_COMPANY_ID, TOKEN_TYPE, NEW_ACCESS_TOKEN, ROTATED_REFRESH_TOKEN);
 
       when(refreshTokenRepository.findOneByToken(anyString()))
@@ -705,7 +707,7 @@ class AuthServiceTest {
           .thenReturn(ROTATED_REFRESH_TOKEN);
 
       // Actual
-      var actualRefreshedToken = authService.refreshToken(body);
+      final var actualRefreshedToken = authService.refreshToken(body);
 
       // Assert
       assertEquals(expectedLoggedInResp, actualRefreshedToken);
@@ -714,10 +716,10 @@ class AuthServiceTest {
     @Test
     void butNotFound_ThenThrowException() {
       // Arrange
-      var ROLE = UserRoleName.CONSUMER;
-      var NOT_FOUND_REFRESH_TOKEN = "NOT_FOUND_TOKEN";
-      var body = RefreshTokenRequest.of(ROLE, USER_ID_1, NOT_FOUND_REFRESH_TOKEN);
-      var expectedErrorMessage =
+      final var ROLE = UserRoleName.CONSUMER;
+      final var NOT_FOUND_REFRESH_TOKEN = "NOT_FOUND_TOKEN";
+      final var body = RefreshTokenRequest.of(ROLE, USER_ID_1, NOT_FOUND_REFRESH_TOKEN);
+      final var expectedErrorMessage =
           String.format(
               "%s with %s [%s] not found",
               RefreshToken.class.getSimpleName(), "token", NOT_FOUND_REFRESH_TOKEN);
@@ -725,10 +727,10 @@ class AuthServiceTest {
       when(refreshTokenRepository.findOneByToken(anyString())).thenReturn(Optional.empty());
 
       // Actual
-      Executable actualExecutable = () -> authService.refreshToken(body);
+      final Executable actualExecutable = () -> authService.refreshToken(body);
 
       // Assert
-      var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+      final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
       assertEquals(expectedErrorMessage, exception.getMessage());
     }
   }
@@ -743,7 +745,7 @@ class AuthServiceTest {
           .updateRefreshTokenByResource(any(UserRoleName.class), anyInt(), eq(true));
 
       // Actual
-      var actualLogoutResult =
+      final var actualLogoutResult =
           authService.logout(
               AuthenticatedUser.of(USER_ID_1, TARGET_EMAIL, PASSWORD, UserRoleName.ADMIN));
 
@@ -754,14 +756,14 @@ class AuthServiceTest {
     @Test
     void byLogoutInfo_ThenSuccess() {
       // Arrange
-      var logoutInfoInput = LogoutInfo.of(USER_ID_1, UserRoleName.ADMIN.name());
+      final var logoutInfoInput = LogoutInfo.of(USER_ID_1, UserRoleName.ADMIN.name());
 
       doNothing()
           .when(refreshTokenRepository)
           .updateRefreshTokenByResource(any(UserRoleName.class), anyInt(), eq(true));
 
       // Actual
-      var actualLogoutResult = authService.logout(logoutInfoInput);
+      final var actualLogoutResult = authService.logout(logoutInfoInput);
 
       // Assert
       assertTrue(actualLogoutResult);

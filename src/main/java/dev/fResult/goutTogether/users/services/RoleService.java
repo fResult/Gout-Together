@@ -24,7 +24,7 @@ public class RoleService {
   }
 
   public List<Role> getRoles() {
-    var availableRoles = roleRepository.findAll();
+    final var availableRoles = roleRepository.findAll();
     logger.info("[getRoles] Available Roles: {}", availableRoles);
 
     return availableRoles;
@@ -32,10 +32,10 @@ public class RoleService {
 
   public UserRole bindNewUser(int userId, UserRoleName roleName) {
     logger.debug("[bindNewUser] new {} is binding", UserRole.class.getSimpleName());
-    var userRoleToBind =
+    final var userRoleToBind =
         UserRole.of(null, AggregateReference.to(userId), AggregateReference.to(roleName.getId()));
 
-    var boundUserRole = userRoleRepository.save(userRoleToBind);
+    final var boundUserRole = userRoleRepository.save(userRoleToBind);
     logger.info(
         "[bindNewUser] New {} is registered: {}", UserRole.class.getSimpleName(), boundUserRole);
 
@@ -46,7 +46,7 @@ public class RoleService {
     logger.debug(
         "[deleteRoleByUserId] {} userId [{}] is deleting", Role.class.getSimpleName(), userId);
 
-    var userRoleToDelete = userRoleRepository.findOneByUserId(AggregateReference.to(userId));
+    final var userRoleToDelete = userRoleRepository.findOneByUserId(AggregateReference.to(userId));
 
     if (userRoleToDelete.isEmpty()) {
       logger.warn(

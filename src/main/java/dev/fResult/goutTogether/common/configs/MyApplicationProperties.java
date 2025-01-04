@@ -1,7 +1,6 @@
 package dev.fResult.goutTogether.common.configs;
 
 import java.math.BigDecimal;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "goutapp")

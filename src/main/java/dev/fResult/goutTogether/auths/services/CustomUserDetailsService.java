@@ -58,33 +58,33 @@ public class CustomUserDetailsService implements UserDetailsService {
 
   private AuthenticatedUser loginUser(String email) {
     logger.debug("[loginUser] {} is logging in", User.class.getSimpleName());
-    var userLogin =
+    final var userLogin =
         userLoginRepository
             .findOneByEmail(email)
             .orElseThrow(
                 errorHelper.entityWithSubResourceNotFound(
                     "loginUser", UserLogin.class, "email", email));
 
-    var userId = Objects.requireNonNull(userLogin.userId().getId());
+    final var userId = Objects.requireNonNull(userLogin.userId().getId());
 
-    var userRole =
+    final var userRole =
         userRoleRepository
             .findOneByUserId(AggregateReference.to(userId))
             .orElseThrow(
                 errorHelper.entityWithSubResourceNotFound(
                     "loginUser", UserLogin.class, "userId", String.valueOf(userId)));
 
-    Predicate<Integer> isAdmin =
+    final Predicate<Integer> isAdmin =
         roleId -> Objects.requireNonNull(roleId) == UserRoleName.ADMIN.getId();
 
-    var role = isAdmin.test(userRole.roleId().getId()) ? UserRoleName.ADMIN : UserRoleName.CONSUMER;
+    final var role = isAdmin.test(userRole.roleId().getId()) ? UserRoleName.ADMIN : UserRoleName.CONSUMER;
 
     return AuthenticatedUser.of(userId, userLogin.email(), userLogin.password(), role);
   }
 
   private AuthenticatedUser loginTourCompany(String username) {
     logger.debug("[loginTourCompany] {} is logging in", TourCompany.class.getSimpleName());
-    var companyCredential =
+    final var companyCredential =
         tourCompanyLoginRepository
             .findOneByUsername(username)
             .orElseThrow(

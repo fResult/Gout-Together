@@ -48,7 +48,7 @@ class AuthControllerTest {
   }
 
   private Authentication buildAuthentication(int resourceId, UserRoleName roleName) {
-    var jwt =
+    final var jwt =
         Jwt.withTokenValue("token")
             .header("alg", "none")
             .claim(RESOURCE_ID_CLAIM, String.valueOf(resourceId))
@@ -60,15 +60,15 @@ class AuthControllerTest {
   @Test
   void whenLogin_ThenSuccess() throws Exception {
     // Arrange
-    var body = new LoginRequest("username", "password");
-    var expectedLoggedInUser =
+    final var body = new LoginRequest("username", "password");
+    final var expectedLoggedInUser =
         new LoginResponse(
             USER_ID, TOKEN_TYPE, "%(!(@)*$&(!&^^%$##!&", UUIDV7.randomUUID().toString());
 
     when(authService.login(Mockito.any(LoginRequest.class))).thenReturn(expectedLoggedInUser);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             post(AUTH_API + "/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -84,15 +84,15 @@ class AuthControllerTest {
   @Test
   void whenRefreshToken_ThenSuccess() throws Exception {
     // Arrange
-    var refreshToken = UUIDV7.randomUUID().toString();
-    var body = new RefreshTokenRequest(UserRoleName.CONSUMER, USER_ID, refreshToken);
-    var expectedRotatedLoggedInUser =
+    final var refreshToken = UUIDV7.randomUUID().toString();
+    final var body = new RefreshTokenRequest(UserRoleName.CONSUMER, USER_ID, refreshToken);
+    final var expectedRotatedLoggedInUser =
         new LoginResponse(USER_ID, TOKEN_TYPE, "%(!(@)*$&(!&^^%$##!&", refreshToken);
 
     when(authService.refreshToken(Mockito.any())).thenReturn(expectedRotatedLoggedInUser);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             post(AUTH_API + "/refresh")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -109,13 +109,13 @@ class AuthControllerTest {
   @Test
   void whenLogout_ThenSuccess() throws Exception {
     // Arrange
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
-    var mockLogoutInfoInput = LogoutInfo.of(USER_ID, UserRoleName.CONSUMER.name());
+    final var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
+    final var mockLogoutInfoInput = LogoutInfo.of(USER_ID, UserRoleName.CONSUMER.name());
 
     when(authService.logout(mockLogoutInfoInput)).thenReturn(true);
 
     // Actual
-    var resultActions = mockMvc.perform(post(AUTH_API + "/logout").principal(authentication));
+    final var resultActions = mockMvc.perform(post(AUTH_API + "/logout").principal(authentication));
 
     // Assert
     resultActions.andExpect(status().isNoContent());

@@ -15,11 +15,11 @@ class StringUtilTest {
     void whenInputIsNullOrEmpty_thenReturnInputItself() {
       // Arrange
       String expectedOutput1 = null;
-      var expectedOutput2 = "";
+      final var expectedOutput2 = "";
 
       // Act
-      var result1 = StringUtil.pluralize(null);
-      var result2 = StringUtil.pluralize("");
+      final var result1 = StringUtil.pluralize(null);
+      final var result2 = StringUtil.pluralize("");
 
       // Assert
       assertEquals(expectedOutput1, result1);
@@ -29,14 +29,14 @@ class StringUtilTest {
     @Test
     void whenInputEndsWithY_thenReturnInputWithoutYAndWithIes() {
       // Arrange
-      var input1 = "party";
-      var expectedOutput1 = "parties";
-      var input2 = "Ally";
-      var expectedOutput2 = "Allies";
+      final var input1 = "party";
+      final var expectedOutput1 = "parties";
+      final var input2 = "Ally";
+      final var expectedOutput2 = "Allies";
 
       // Act
-      var result1 = StringUtil.pluralize(input1);
-      var result2 = StringUtil.pluralize(input2);
+      final var result1 = StringUtil.pluralize(input1);
+      final var result2 = StringUtil.pluralize(input2);
 
       // Assert
       assertEquals(expectedOutput1, result1);
@@ -46,23 +46,23 @@ class StringUtilTest {
     @Test
     void whenInputEndsWithSOrShOrChOrXOrZ_thenReturnInputWithEs() {
       // Arrange
-      var input1 = "bus";
-      var expectedOutput1 = "buses";
-      var input2 = "brush";
-      var expectedOutput2 = "brushes";
-      var input3 = "church";
-      var expectedOutput3 = "churches";
-      var input4 = "Box";
-      var expectedOutput4 = "Boxes";
-      var input5 = "Buzz";
-      var expectedOutput5 = "Buzzes";
+      final var input1 = "bus";
+      final var expectedOutput1 = "buses";
+      final var input2 = "brush";
+      final var expectedOutput2 = "brushes";
+      final var input3 = "church";
+      final var expectedOutput3 = "churches";
+      final var input4 = "Box";
+      final var expectedOutput4 = "Boxes";
+      final var input5 = "Buzz";
+      final var expectedOutput5 = "Buzzes";
 
       // Act
-      var result1 = StringUtil.pluralize(input1);
-      var result2 = StringUtil.pluralize(input2);
-      var result3 = StringUtil.pluralize(input3);
-      var result4 = StringUtil.pluralize(input4);
-      var result5 = StringUtil.pluralize(input5);
+      final var result1 = StringUtil.pluralize(input1);
+      final var result2 = StringUtil.pluralize(input2);
+      final var result3 = StringUtil.pluralize(input3);
+      final var result4 = StringUtil.pluralize(input4);
+      final var result5 = StringUtil.pluralize(input5);
 
       // Assert
       assertEquals(expectedOutput1, result1);
@@ -75,17 +75,17 @@ class StringUtilTest {
     @Test
     void whenInput_thenAddS() {
       // Arrange
-      var input1 = "car";
-      var expectedOutput1 = "cars";
-      var input2 = "Apple";
-      var expectedOutput2 = "Apples";
-      var input3 = "dog";
-      var expectedOutput3 = "dogs";
+      final var input1 = "car";
+      final var expectedOutput1 = "cars";
+      final var input2 = "Apple";
+      final var expectedOutput2 = "Apples";
+      final var input3 = "dog";
+      final var expectedOutput3 = "dogs";
 
       // Act
-      var result1 = StringUtil.pluralize(input1);
-      var result2 = StringUtil.pluralize(input2);
-      var result3 = StringUtil.pluralize(input3);
+      final var result1 = StringUtil.pluralize(input1);
+      final var result2 = StringUtil.pluralize(input2);
+      final var result3 = StringUtil.pluralize(input3);
 
       // Assert
       assertEquals(expectedOutput1, result1);

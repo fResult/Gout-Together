@@ -54,7 +54,7 @@ class WalletControllerTest {
   }
 
   private Authentication buildAuthentication(int resourceId, UserRoleName roleName) {
-    var jwt =
+    final var jwt =
         Jwt.withTokenValue("token")
             .header("alg", "none")
             .claim(RESOURCE_ID_CLAIM, String.valueOf(resourceId))
@@ -66,15 +66,15 @@ class WalletControllerTest {
   @Test
   void whenGetMyUserWallet_ThenSuccess() throws Exception {
     // Arrange
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
-    var userWallet =
+    final var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
+    final var userWallet =
         UserWallet.of(1, AggregateReference.to(USER_ID), Instant.now(), BigDecimal.TEN);
-    var expectedUserWalletInfo =
+    final var expectedUserWalletInfo =
         UserWalletInfoResponse.of(userWallet.id(), USER_ID, userWallet.balance());
     when(walletService.getConsumerWalletInfoByUserId(anyInt())).thenReturn(expectedUserWalletInfo);
 
     // Actual
-    var resultActions = mockMvc.perform(get(WALLET_API + "/me").principal(authentication));
+    final var resultActions = mockMvc.perform(get(WALLET_API + "/me").principal(authentication));
 
     // Assert
     resultActions.andExpect(status().isOk()).andExpect(jsonPath("$.userId").value(USER_ID));
@@ -83,17 +83,17 @@ class WalletControllerTest {
   @Test
   void whenTopUpUserWallet_ThenSuccess() throws Exception {
     // Arrange
-    var AMOUNT_TO_TOP_UP = BigDecimal.valueOf(300);
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
-    var body = WalletTopUpRequest.of(AMOUNT_TO_TOP_UP);
-    var expectedBalanceAfterTopUp = AMOUNT_TO_TOP_UP.add(BigDecimal.valueOf(100));
-    var expectedUserWalletInfo = UserWalletInfoResponse.of(1, USER_ID, expectedBalanceAfterTopUp);
+    final var AMOUNT_TO_TOP_UP = BigDecimal.valueOf(300);
+    final var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER);
+    final var body = WalletTopUpRequest.of(AMOUNT_TO_TOP_UP);
+    final var expectedBalanceAfterTopUp = AMOUNT_TO_TOP_UP.add(BigDecimal.valueOf(100));
+    final var expectedUserWalletInfo = UserWalletInfoResponse.of(1, USER_ID, expectedBalanceAfterTopUp);
 
     when(walletService.topUpConsumerWallet(USER_ID, IDEMPOTENT_KEY, body))
         .thenReturn(expectedUserWalletInfo);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             post(WALLET_API + "/top-up")
                 .principal(authentication)
@@ -111,15 +111,15 @@ class WalletControllerTest {
   @Test
   void whenGetMyTourCompanyWallet_ThenSuccess() throws Exception {
     // Arrange
-    var BALANCE = BigDecimal.valueOf(1_000_000);
-    var authentication = buildAuthentication(TOUR_COMPANY_ID, UserRoleName.COMPANY);
-    var expectedCompanyWalletInfo = TourCompanyWalletInfoResponse.of(3, TOUR_COMPANY_ID, BALANCE);
+    final var BALANCE = BigDecimal.valueOf(1_000_000);
+    final var authentication = buildAuthentication(TOUR_COMPANY_ID, UserRoleName.COMPANY);
+    final var expectedCompanyWalletInfo = TourCompanyWalletInfoResponse.of(3, TOUR_COMPANY_ID, BALANCE);
 
     when(walletService.getTourCompanyWalletInfoByTourCompanyId(TOUR_COMPANY_ID))
         .thenReturn(expectedCompanyWalletInfo);
 
     // Actual
-    var resultActions = mockMvc.perform(get(WALLET_API + "/my-company").principal(authentication));
+    final var resultActions = mockMvc.perform(get(WALLET_API + "/my-company").principal(authentication));
 
     // Assert
     resultActions
@@ -131,11 +131,11 @@ class WalletControllerTest {
   @Test
   void whenWithdrawMoney_ThenSuccess() throws Exception {
     // Arrange
-    var AMOUNT_TO_WITHDRAW = BigDecimal.valueOf(80_000);
-    var BALANCE_AFTER_WITHDRAW = BigDecimal.valueOf(920_000);
-    var authentication = buildAuthentication(TOUR_COMPANY_ID, UserRoleName.COMPANY);
-    var body = WalletWithdrawRequest.of(AMOUNT_TO_WITHDRAW);
-    var expectedCompanyWalletInfo =
+    final var AMOUNT_TO_WITHDRAW = BigDecimal.valueOf(80_000);
+    final var BALANCE_AFTER_WITHDRAW = BigDecimal.valueOf(920_000);
+    final var authentication = buildAuthentication(TOUR_COMPANY_ID, UserRoleName.COMPANY);
+    final var body = WalletWithdrawRequest.of(AMOUNT_TO_WITHDRAW);
+    final var expectedCompanyWalletInfo =
         TourCompanyWalletInfoResponse.of(2, TOUR_COMPANY_ID, BALANCE_AFTER_WITHDRAW);
 
     when(walletService.withdrawTourCompanyWallet(
@@ -143,7 +143,7 @@ class WalletControllerTest {
         .thenReturn(expectedCompanyWalletInfo);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             post(WALLET_API + "/withdraw")
                 .header("idempotent-key", IDEMPOTENT_KEY)

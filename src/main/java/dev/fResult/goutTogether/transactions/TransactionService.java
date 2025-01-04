@@ -17,7 +17,7 @@ public class TransactionService {
     logger.debug(
         "[createTransaction] Creating {}: {}", Transaction.class.getSimpleName(), transaction);
 
-    var createdTransaction = transactionRepository.save(transaction);
+    final var createdTransaction = transactionRepository.save(transaction);
     logger.info(
         "[createTransaction] New {} is created: {}",
         Transaction.class.getSimpleName(),

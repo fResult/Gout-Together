@@ -66,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
   public List<UserLogin> getUserCredentialsByUserIds(Collection<Integer> userIds) {
     logger.debug(
         "[findUserCredentialsByUserIds] Finding {}s by userIds: {}", UserLogin.class, userIds);
-    var foundCredentials = userLoginRepository.findByUserIdIn(userIds);
+    final var foundCredentials = userLoginRepository.findByUserIdIn(userIds);
 
     throwExceptionIfSomeUserIdsNotFound(userIds, foundCredentials);
 
@@ -99,8 +99,8 @@ public class AuthServiceImpl implements AuthService {
   public Optional<UserLogin> findUserCredentialByEmailAndPassword(
       String userEmail, String password) {
 
-    var credentialToCheck = userLoginRepository.findOneByEmail(userEmail);
-    Predicate<UserLogin> checkUserPassword =
+    final var credentialToCheck = userLoginRepository.findOneByEmail(userEmail);
+    final Predicate<UserLogin> checkUserPassword =
         credential -> passwordEncoder.matches(password, credential.password());
 
     return credentialToCheck.filter(checkUserPassword);
@@ -112,11 +112,11 @@ public class AuthServiceImpl implements AuthService {
         "[createUserLogin] Creating new {} for userId: {}",
         UserLogin.class.getSimpleName(),
         userId);
-    var encryptedPassword = passwordEncoder.encode(password);
+    final var encryptedPassword = passwordEncoder.encode(password);
 
-    var userCredentialToCreate =
+    final var userCredentialToCreate =
         new UserLogin(null, AggregateReference.to(userId), email, encryptedPassword);
-    var createdUserLogin = userLoginRepository.save(userCredentialToCreate);
+    final var createdUserLogin = userLoginRepository.save(userCredentialToCreate);
     logger.info(
         "[createUserLogin] New {} is created: {}",
         UserLogin.class.getSimpleName(),
@@ -127,9 +127,9 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public UserLogin updateUserPasswordByUserId(int userId, String oldPassword, String newPassword) {
-    Predicate<UserLogin> checkUserPassword =
+    final Predicate<UserLogin> checkUserPassword =
         credential -> passwordEncoder.matches(oldPassword, credential.password());
-    var userCredential =
+    final var userCredential =
         Optional.of(getUserCredentialByUserId(userId))
             .filter(checkUserPassword)
             .orElseThrow(
@@ -137,8 +137,8 @@ public class AuthServiceImpl implements AuthService {
                     new EntityNotFoundException(
                         String.format("%s password is in correct", User.class.getSimpleName())));
 
-    var passwordToUpdate = passwordEncoder.encode(newPassword);
-    var credentialToUpdate =
+    final var passwordToUpdate = passwordEncoder.encode(newPassword);
+    final var credentialToUpdate =
         UserLogin.of(
             userCredential.id(), userCredential.userId(), userCredential.email(), passwordToUpdate);
 
@@ -147,7 +147,7 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public UserLogin updateUserPasswordByEmail(String email, String oldPassword, String newPassword) {
-    var userCredential =
+    final var userCredential =
         findUserCredentialByEmailAndPassword(email, oldPassword)
             .orElseThrow(
                 () ->
@@ -155,8 +155,8 @@ public class AuthServiceImpl implements AuthService {
                         String.format(
                             "%s's %s password is incorrect",
                             UserLogin.class.getSimpleName(), User.class.getSimpleName())));
-    var passwordToUpdate = passwordEncoder.encode(newPassword);
-    var credentialToUpdate =
+    final var passwordToUpdate = passwordEncoder.encode(newPassword);
+    final var credentialToUpdate =
         UserLogin.of(userCredential.id(), userCredential.userId(), email, passwordToUpdate);
 
     return userLoginRepository.save(credentialToUpdate);
@@ -168,7 +168,7 @@ public class AuthServiceImpl implements AuthService {
         "[deleteUserCredentialById] Deleting {} by id: {}",
         UserLogin.class.getSimpleName(),
         userId);
-    var credentialToDelete = getUserCredentialByUserId(userId);
+    final var credentialToDelete = getUserCredentialByUserId(userId);
 
     userLoginRepository.delete(credentialToDelete);
     logger.info(
@@ -210,18 +210,19 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public TourCompanyLogin createTourCompanyLogin(
       int tourCompanyId, String username, String password) {
+
     logger.debug(
         "[createTourCompanyLogin] Creating new {} for tourCompanyId: {}",
         TourCompanyLogin.class.getSimpleName(),
         tourCompanyId);
 
-    AggregateReference<TourCompany, Integer> companyReference =
+    final AggregateReference<TourCompany, Integer> companyRef =
         AggregateReference.to(tourCompanyId);
-    var encryptedPassword = passwordEncoder.encode(password);
-    var companyCredentialToCreate =
-        TourCompanyLogin.of(null, companyReference, username, encryptedPassword);
+    final var encryptedPassword = passwordEncoder.encode(password);
+    final var companyCredentialToCreate =
+        TourCompanyLogin.of(null, companyRef, username, encryptedPassword);
 
-    var createdCompanyCredential = tourCompanyLoginRepository.save(companyCredentialToCreate);
+    final var createdCompanyCredential = tourCompanyLoginRepository.save(companyCredentialToCreate);
     logger.info(
         "[createTourCompanyLogin] New {} is created: {}",
         TourCompanyLogin.class.getSimpleName(),
@@ -236,7 +237,7 @@ public class AuthServiceImpl implements AuthService {
         "[deleteTourCompanyLoginById] Deleting {} by id: {}",
         TourCompanyLogin.class.getSimpleName(),
         id);
-    var credentialToDelete = findTourCompanyCredentialByTourCompanyId(id);
+    final var credentialToDelete = findTourCompanyCredentialByTourCompanyId(id);
 
     tourCompanyLoginRepository.delete(credentialToDelete);
     logger.info(
@@ -251,17 +252,17 @@ public class AuthServiceImpl implements AuthService {
   @Transactional
   public LoginResponse login(LoginRequest body) {
     logger.debug("[login] Logging in by username [{}]", body.username());
-    var authInfo = new UsernamePasswordAuthenticationToken(body.username(), body.password());
-    var authentication = authenticationManager.authenticate(authInfo);
-    var authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
+    final var authInfo = new UsernamePasswordAuthenticationToken(body.username(), body.password());
+    final var authentication = authenticationManager.authenticate(authInfo);
+    final var authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
 
-    var now = Instant.now();
-    var accessToken = tokenService.issueAccessToken(authenticatedUser, now);
-    var refreshToken = tokenService.issueRefreshToken();
+    final var now = Instant.now();
+    final var accessToken = tokenService.issueAccessToken(authenticatedUser, now);
+    final var refreshToken = tokenService.issueRefreshToken();
 
     logout(authenticatedUser);
 
-    var refreshTokenToCreate =
+    final var refreshTokenToCreate =
         RefreshToken.of(
             null,
             refreshToken,
@@ -272,7 +273,7 @@ public class AuthServiceImpl implements AuthService {
 
     refreshTokenRepository.save(refreshTokenToCreate);
 
-    var loggedInInfo =
+    final var loggedInInfo =
         LoginResponse.of(authenticatedUser.userId(), TOKEN_TYPE, accessToken, refreshToken);
     logger.info("[login] {} is logged in: {}", UserLogin.class.getSimpleName(), loggedInInfo);
 
@@ -286,27 +287,27 @@ public class AuthServiceImpl implements AuthService {
         "[refreshToken] {} token [{}] is refreshing",
         RefreshToken.class.getSimpleName(),
         body.refreshToken());
-    var refreshToken =
+    final var refreshToken =
         refreshTokenRepository
             .findOneByToken(body.refreshToken())
             .orElseThrow(
                 errorHelper.entityWithSubResourceNotFound(
                     "refreshToken", RefreshToken.class, "token", body.refreshToken()));
 
-    var resourceId = body.resourceId();
-    var refreshTokenExpired = tokenService.isRefreshTokenExpired(refreshToken);
+    final var resourceId = body.resourceId();
+    final var refreshTokenExpired = tokenService.isRefreshTokenExpired(refreshToken);
     throwExceptionIfRefreshTokenExpired(refreshTokenExpired, refreshToken, resourceId);
 
-    var refreshedAccessToken =
+    final var refreshedAccessToken =
         switch (body.usage()) {
           case UserRoleName.COMPANY -> issueTourCompanyAccessToken(resourceId);
           case UserRoleName.ADMIN, UserRoleName.CONSUMER -> issueUserAccessToken(resourceId);
         };
 
-    var refreshTokenRotation = tokenService.rotateRefreshTokenIfNeed(refreshToken);
+    final var refreshTokenRotation = tokenService.rotateRefreshTokenIfNeed(refreshToken);
 
     if (!refreshTokenRotation.equals(refreshToken.token())) {
-      var refreshTokenToBeExpired =
+      final var refreshTokenToBeExpired =
           RefreshToken.of(
               refreshToken.id(),
               refreshToken.token(),
@@ -316,7 +317,7 @@ public class AuthServiceImpl implements AuthService {
               true);
       refreshTokenRepository.save(refreshTokenToBeExpired);
 
-      var newRefreshToken =
+      final var newRefreshToken =
           RefreshToken.of(
               null,
               refreshTokenRotation,
@@ -324,7 +325,7 @@ public class AuthServiceImpl implements AuthService {
               refreshToken.usage(),
               refreshToken.resourceId(),
               false);
-      var rotatedRefreshToken = refreshTokenRepository.save(newRefreshToken);
+      final var rotatedRefreshToken = refreshTokenRepository.save(newRefreshToken);
 
       return LoginResponse.of(
           rotatedRefreshToken.resourceId(), TOKEN_TYPE, refreshedAccessToken, refreshTokenRotation);
@@ -350,7 +351,7 @@ public class AuthServiceImpl implements AuthService {
   public boolean logout(LogoutInfo logoutInfo) {
     logger.debug("[logout] Logging out by resourceId [{}]", logoutInfo.resourceId());
 
-    var roleName = UserRoleName.valueOf(logoutInfo.roles());
+    final var roleName = UserRoleName.valueOf(logoutInfo.roles());
     refreshTokenRepository.updateRefreshTokenByResource(roleName, logoutInfo.resourceId(), true);
 
     logger.info(
@@ -363,14 +364,14 @@ public class AuthServiceImpl implements AuthService {
 
   private void throwExceptionIfSomeUserIdsNotFound(
       Collection<Integer> userIdsToFind, List<UserLogin> foundCredentials) {
-    var foundCredentialUserIds =
+    final var foundCredentialUserIds =
         foundCredentials.stream()
             .map(credential -> credential.userId().getId())
             .collect(Collectors.toMap(Function.identity(), x -> true));
 
     Predicate<Integer> foundUserIdInDb = id -> foundCredentialUserIds.getOrDefault(id, false);
 
-    var notFoundUserIds =
+    final var notFoundUserIds =
         userIdsToFind.stream().filter(not(foundUserIdInDb)).collect(Collectors.toUnmodifiableSet());
 
     if (!notFoundUserIds.isEmpty())
@@ -387,7 +388,7 @@ public class AuthServiceImpl implements AuthService {
           "[refreshToken] {} token [{}] is already expired, please re-login",
           refreshToken.token(),
           RefreshToken.class.getSimpleName());
-      var logoutInfo = LogoutInfo.of(resourceId, refreshToken.usage().name());
+      final var logoutInfo = LogoutInfo.of(resourceId, refreshToken.usage().name());
       logout(logoutInfo);
 
       logger.warn("[refreshToken] {} is already expired, please re-login", refreshToken.token());
@@ -398,12 +399,12 @@ public class AuthServiceImpl implements AuthService {
   }
 
   private String issueUserAccessToken(int userId) {
-    var userCredential = getUserCredentialByUserId(userId);
+    final var userCredential = getUserCredentialByUserId(userId);
     return tokenService.issueAccessToken(userCredential, Instant.now());
   }
 
   private String issueTourCompanyAccessToken(int tourCompanyId) {
-    var companyCredential = findTourCompanyCredentialByTourCompanyId(tourCompanyId);
+    final var companyCredential = findTourCompanyCredentialByTourCompanyId(tourCompanyId);
     return tokenService.issueAccessToken(companyCredential, Instant.now());
   }
 }

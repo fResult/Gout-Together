@@ -68,21 +68,21 @@ public class PaymentServiceImpl implements PaymentService {
   @Override
   @Transactional
   public BookingInfoResponse payByBookingId(int bookingId, String idempotentKey) {
-    var booking =
+    final var booking =
         bookingService
             .findBookingById(bookingId)
             .orElseThrow(errorHelper.entityNotFound("payByBookingId", Booking.class, bookingId));
 
-    var wallets = walletService.getConsumerAndTourCompanyWallets(booking);
-    var userWallet = wallets.getFirst();
-    var tourCompanyWallet = wallets.getSecond();
+    final var wallets = walletService.getConsumerAndTourCompanyWallets(booking);
+    final var userWallet = wallets.getFirst();
+    final var tourCompanyWallet = wallets.getSecond();
 
     walletService.transferMoney(
         userWallet, tourCompanyWallet, BigDecimal.valueOf(tourPrice), TransactionType.BOOKING);
     tourCountService.incrementTourCount(Objects.requireNonNull(booking.tourId().getId()));
     qrCodeService.updateQrCodeRefStatusByBookingId(bookingId, QrCodeStatus.EXPIRED);
 
-    var transactionToCreate =
+    final var transactionToCreate =
         TransactionHelper.buildBookingTransaction(
             idempotentKey,
             userWallet.userId().getId(),
@@ -90,14 +90,14 @@ public class PaymentServiceImpl implements PaymentService {
             tourCompanyWallet.tourCompanyId().getId(),
             BigDecimal.valueOf(tourPrice));
 
-    var createdTransaction = transactionService.createTransaction(transactionToCreate);
+    final var createdTransaction = transactionService.createTransaction(transactionToCreate);
 
     logger.info(
         "[payByBookingId] Created {} id [{}]",
         Transaction.class.getSimpleName(),
         createdTransaction.id());
 
-    var bookingToBeCompleted =
+    final var bookingToBeCompleted =
         Booking.of(
             bookingId,
             booking.userId(),
@@ -107,7 +107,7 @@ public class PaymentServiceImpl implements PaymentService {
             Instant.now(),
             idempotentKey);
 
-    var completedBooking = bookingRepository.save(bookingToBeCompleted);
+    final var completedBooking = bookingRepository.save(bookingToBeCompleted);
 
     return BookingInfoResponse.fromDao(completedBooking);
   }
@@ -115,14 +115,14 @@ public class PaymentServiceImpl implements PaymentService {
   @Override
   @Transactional
   public boolean refundBooking(Booking booking, String idempotentKey) {
-    var wallets = walletService.getConsumerAndTourCompanyWallets(booking);
-    var userWallet = wallets.getFirst();
-    var tourCompanyWallet = wallets.getSecond();
+    final var wallets = walletService.getConsumerAndTourCompanyWallets(booking);
+    final var userWallet = wallets.getFirst();
+    final var tourCompanyWallet = wallets.getSecond();
 
     walletService.transferMoney(
         userWallet, tourCompanyWallet, BigDecimal.valueOf(tourPrice), TransactionType.REFUND);
 
-    var transactionToRefund =
+    final var transactionToRefund =
         TransactionHelper.buildRefundTransaction(
             idempotentKey,
             userWallet.userId().getId(),
@@ -130,7 +130,7 @@ public class PaymentServiceImpl implements PaymentService {
             tourCompanyWallet.tourCompanyId().getId(),
             BigDecimal.valueOf(tourPrice));
 
-    var refundedTransaction = transactionService.createTransaction(transactionToRefund);
+    final var refundedTransaction = transactionService.createTransaction(transactionToRefund);
 
     logger.info(
         "[refundBookingByBookingId] Refunded {} id [{}]",

@@ -53,8 +53,9 @@ class TourControllerTest {
   @Test
   void whenGetTours_ThenSuccess() throws Exception {
     // Arrange
-    var params = new LinkedMultiValueMap<>(Map.of("page", List.of("0"), "size", List.of("10")));
-    var tours =
+    final var params =
+        new LinkedMultiValueMap<>(Map.of("page", List.of("0"), "size", List.of("10")));
+    final var tours =
         List.of(
             Tour.of(
                 TOUR_ID,
@@ -65,11 +66,12 @@ class TourControllerTest {
                 20,
                 Instant.now().plus(Duration.ofDays(45)),
                 TourStatus.APPROVED.name()));
-    var pageTours = new PageImpl<>(tours);
+    final var pageTours = new PageImpl<>(tours);
+
     when(tourService.getTours(any(Pageable.class))).thenReturn(pageTours);
 
     // Actual
-    var actualResults = mockMvc.perform(get(TOUR_API).params(params));
+    final var actualResults = mockMvc.perform(get(TOUR_API).params(params));
 
     // Assert
     actualResults
@@ -81,10 +83,10 @@ class TourControllerTest {
   @Test
   void whenGetTours_ButForgotRequiredQueryParams_ThenReturn400() throws Exception {
     // Arrange
-    var params = new LinkedMultiValueMap<String, String>();
+    final var params = new LinkedMultiValueMap<String, String>();
 
     // Actual
-    var actualResults = mockMvc.perform(get(TOUR_API).params(params));
+    final var actualResults = mockMvc.perform(get(TOUR_API).params(params));
 
     // Assert
     actualResults.andExpect(status().isBadRequest());
@@ -93,7 +95,7 @@ class TourControllerTest {
   @Test
   void whenGetTourById_ThenSuccess() throws Exception {
     // Arrange
-    var mockTour =
+    final var mockTour =
         Tour.of(
             TOUR_ID,
             AggregateReference.to(1),
@@ -103,10 +105,11 @@ class TourControllerTest {
             20,
             Instant.now().plus(Duration.ofDays(45)),
             TourStatus.APPROVED.name());
+
     when(tourService.getTourById(anyInt())).thenReturn(mockTour);
 
     // Actual
-    var resultActions = mockMvc.perform(get(TOUR_API + "/{id}", TOUR_ID));
+    final var resultActions = mockMvc.perform(get(TOUR_API + "/{id}", TOUR_ID));
 
     // Assert
     resultActions.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(TOUR_ID));
@@ -118,7 +121,7 @@ class TourControllerTest {
     when(tourService.getTourById(anyInt())).thenThrow(new EntityNotFoundException());
 
     // Actual
-    var resultActions = mockMvc.perform(get(TOUR_API + "/{id}", NOT_FOUND_TOUR_ID));
+    final var resultActions = mockMvc.perform(get(TOUR_API + "/{id}", NOT_FOUND_TOUR_ID));
 
     // Assert
     resultActions.andExpect(status().isNotFound());
@@ -131,7 +134,7 @@ class TourControllerTest {
         .thenThrow(new InternalServerErrorException("Mock Error"));
 
     // Actual
-    var resultActions = mockMvc.perform(get(TOUR_API + "/{id}", NOT_FOUND_TOUR_ID));
+    final var resultActions = mockMvc.perform(get(TOUR_API + "/{id}", NOT_FOUND_TOUR_ID));
 
     // Assert
     resultActions.andExpect(status().isInternalServerError());
@@ -140,8 +143,8 @@ class TourControllerTest {
   @Test
   void whenCreateTour_ThenSuccess() throws Exception {
     // Arrange
-    var TOUR_COMPANY_ID = 1;
-    var body =
+    final var TOUR_COMPANY_ID = 1;
+    final var body =
         TourRequest.of(
             TOUR_COMPANY_ID,
             "Kunlun 7 days",
@@ -150,7 +153,7 @@ class TourControllerTest {
             20,
             Instant.now().plus(Duration.ofDays(45)),
             null);
-    var mockTour =
+    final var mockTour =
         Tour.of(
             TOUR_ID,
             AggregateReference.to(body.tourCompanyId()),
@@ -160,10 +163,11 @@ class TourControllerTest {
             body.numberOfPeople(),
             body.activityDate(),
             TourStatus.PENDING.name());
+
     when(tourService.createTour(any(TourRequest.class))).thenReturn(mockTour);
 
     // Actual
-    var actualResults =
+    final var actualResults =
         mockMvc.perform(
             post(TOUR_API)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -176,13 +180,13 @@ class TourControllerTest {
   @Test
   void whenCreateTour_ButMissingSomeFields_ThenReturn400() throws Exception {
     // Arrange
-    var TOUR_COMPANY_ID = 1;
-    var body =
+    final var TOUR_COMPANY_ID = 1;
+    final var body =
         TourRequest.of(
             TOUR_COMPANY_ID, null, "Go 12 places around Kunlun", "Kunlun, China", 20, null, null);
 
     // Actual
-    var actualResults =
+    final var actualResults =
         mockMvc.perform(
             post(TOUR_API)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)

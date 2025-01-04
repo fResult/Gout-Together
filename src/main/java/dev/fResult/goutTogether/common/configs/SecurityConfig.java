@@ -71,11 +71,11 @@ public class SecurityConfig {
 
   @Bean
   public JwtAuthenticationConverter jwtAuthenticationConverter() {
-    var jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+    final var jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
     jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName(ROLES_CLAIM);
     jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
 
-    var jwtConverter = new JwtAuthenticationConverter();
+    final var jwtConverter = new JwtAuthenticationConverter();
     jwtConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
 
     return jwtConverter;
@@ -85,7 +85,7 @@ public class SecurityConfig {
   public AuthenticationManager authenticationManager(
       PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
 
-    var daoProvider = new DaoAuthenticationProvider(passwordEncoder);
+    final var daoProvider = new DaoAuthenticationProvider(passwordEncoder);
     daoProvider.setUserDetailsService(userDetailsService);
 
     return new ProviderManager(daoProvider);
@@ -98,9 +98,9 @@ public class SecurityConfig {
 
   @Bean
   public JwtEncoder jwtEncoder(RSAKeyProperties rsaInstance) {
-    var jwk =
+    final var jwk =
         new RSAKey.Builder(rsaInstance.publicKey()).privateKey(rsaInstance.privateKey()).build();
-    var jwkSource = new ImmutableJWKSet<SecurityContext>(new JWKSet(jwk));
+    final var jwkSource = new ImmutableJWKSet<SecurityContext>(new JWKSet(jwk));
 
     return new NimbusJwtEncoder(jwkSource);
   }
@@ -114,8 +114,8 @@ public class SecurityConfig {
   public RSAKeyProperties rsaInstance()
       throws InvalidKeySpecException, IOException, NoSuchAlgorithmException {
 
-    var privateKeyPkcs8Bytes = Base64.getDecoder().decode(privateKeyBase64);
-    var publicKeyBytes = Base64.getDecoder().decode(publicKeyBase64);
+    final var privateKeyPkcs8Bytes = Base64.getDecoder().decode(privateKeyBase64);
+    final var publicKeyBytes = Base64.getDecoder().decode(publicKeyBase64);
 
     var privateKeyContent = new String(privateKeyPkcs8Bytes);
     var publicKeyContent = new String(publicKeyBytes);
@@ -131,13 +131,13 @@ public class SecurityConfig {
             .replace("-----BEGIN PUBLIC KEY-----", "")
             .replace("-----END PUBLIC KEY-----", "");
 
-    var keyFactory = KeyFactory.getInstance("RSA");
+    final var keyFactory = KeyFactory.getInstance("RSA");
 
-    var keySpecPKCS8 = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKeyContent));
-    var privateKey = (RSAPrivateKey) keyFactory.generatePrivate(keySpecPKCS8);
+    final var keySpecPKCS8 = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKeyContent));
+    final var privateKey = (RSAPrivateKey) keyFactory.generatePrivate(keySpecPKCS8);
 
-    var keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyContent));
-    var publicKey = (RSAPublicKey) keyFactory.generatePublic(keySpecX509);
+    final var keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyContent));
+    final var publicKey = (RSAPublicKey) keyFactory.generatePublic(keySpecX509);
 
     return new RSAKeyProperties(publicKey, privateKey);
   }

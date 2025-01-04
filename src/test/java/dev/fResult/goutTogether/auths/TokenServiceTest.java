@@ -55,13 +55,14 @@ class TokenServiceTest {
     @Test
     void byAuthenticatedUser_ThenSuccess() {
       // Arrange
-      var authenticatedUser =
+      final var authenticatedUser =
           AuthenticatedUser.of(1, "email@example.com", "P@$$w0rd", UserRoleName.ADMIN);
-      var mockIssuedAccessToken = "token";
+      final var mockIssuedAccessToken = "token";
       doReturn(mockIssuedAccessToken).when(tokenService).encodeClaimToJwt(any(JwtClaimsSet.class));
 
       // Actual
-      var actualIssuedAccessToken = tokenService.issueAccessToken(authenticatedUser, Instant.now());
+      final var actualIssuedAccessToken =
+          tokenService.issueAccessToken(authenticatedUser, Instant.now());
 
       // Assert
       assertEquals(mockIssuedAccessToken, actualIssuedAccessToken);
@@ -70,19 +71,19 @@ class TokenServiceTest {
     @Test
     void byUserLogin_ThenSuccess() {
       // Arrange
-      var USER_ID = 1;
-      var userLogin =
+      final var USER_ID = 1;
+      final var userLogin =
           UserLogin.of(1, AggregateReference.to(USER_ID), "email@example.com", "P@$$w0rd");
-      var authenticatedUser =
+      final var authenticatedUser =
           AuthenticatedUser.of(
               USER_ID, userLogin.email(), userLogin.password(), UserRoleName.ADMIN);
-      var mockIssuedAccessToken = "token";
+      final var mockIssuedAccessToken = "token";
 
       when(userDetailsService.loadUserByUsername(userLogin.email())).thenReturn(authenticatedUser);
       doReturn(mockIssuedAccessToken).when(tokenService).encodeClaimToJwt(any(JwtClaimsSet.class));
 
       // Actual
-      var actualIssuedAccessToken = tokenService.issueAccessToken(userLogin, Instant.now());
+      final var actualIssuedAccessToken = tokenService.issueAccessToken(userLogin, Instant.now());
 
       // Assert
       assertEquals(mockIssuedAccessToken, actualIssuedAccessToken);
@@ -91,16 +92,16 @@ class TokenServiceTest {
     @Test
     void byTourCompanyLogin_ThenSuccess() {
       // Arrange
-      var TOUR_COMPANY_ID = 1;
-      var tourCompanyLogin =
+      final var TOUR_COMPANY_ID = 1;
+      final var tourCompanyLogin =
           TourCompanyLogin.of(1, AggregateReference.to(TOUR_COMPANY_ID), "username", "P@$$w0rd");
-      var authenticatedUser =
+      final var authenticatedUser =
           AuthenticatedUser.of(
               TOUR_COMPANY_ID,
               tourCompanyLogin.username(),
               tourCompanyLogin.password(),
               UserRoleName.ADMIN);
-      var expectedIssuedAccessToken = "token";
+      final var expectedIssuedAccessToken = "token";
 
       when(userDetailsService.loadUserByUsername(tourCompanyLogin.username()))
           .thenReturn(authenticatedUser);
@@ -109,7 +110,8 @@ class TokenServiceTest {
           .encodeClaimToJwt(any(JwtClaimsSet.class));
 
       // Actual
-      var actualIssuedAccessToken = tokenService.issueAccessToken(tourCompanyLogin, Instant.now());
+      final var actualIssuedAccessToken =
+          tokenService.issueAccessToken(tourCompanyLogin, Instant.now());
 
       // Assert
       assertEquals(expectedIssuedAccessToken, actualIssuedAccessToken);
@@ -118,15 +120,15 @@ class TokenServiceTest {
 
   @Test
   void issueRefreshToken_ThenSuccess() {
-    try (var mockedUUIDV7 = mockStatic(UUIDV7.class)) {
+    try (final var mockedUUIDV7 = mockStatic(UUIDV7.class)) {
       // Arrange
-      var mockRefreshToken = UUID.fromString("cc468bab-17c5-4ded-b94a-7a7d85993bcb");
-      var expectedIssuedRefreshToken = mockRefreshToken.toString();
+      final var mockRefreshToken = UUID.fromString("cc468bab-17c5-4ded-b94a-7a7d85993bcb");
+      final var expectedIssuedRefreshToken = mockRefreshToken.toString();
 
       mockedUUIDV7.when(UUIDV7::randomUUID).thenReturn(mockRefreshToken);
 
       // Actual
-      var actualIssuedRefreshToken = tokenService.issueRefreshToken();
+      final var actualIssuedRefreshToken = tokenService.issueRefreshToken();
 
       // Assert
       assertEquals(expectedIssuedRefreshToken, actualIssuedRefreshToken);
@@ -136,15 +138,15 @@ class TokenServiceTest {
   @Test
   void whenEncodeClaimToJwt_ThenSuccess() {
     // Arrange
-    var claims = JwtClaimsSet.builder().claim("key", "value").build();
-    var expectedEncodedJwt = "encoded_jwt";
-    var mockJwt = mock(Jwt.class);
+    final var claims = JwtClaimsSet.builder().claim("key", "value").build();
+    final var expectedEncodedJwt = "encoded_jwt";
+    final var mockJwt = mock(Jwt.class);
 
     when(jwtEncoder.encode(any(JwtEncoderParameters.class))).thenReturn(mockJwt);
     when(mockJwt.getTokenValue()).thenReturn(expectedEncodedJwt);
 
     // Actual
-    var actualEncodedJwt = tokenService.encodeClaimToJwt(claims);
+    final var actualEncodedJwt = tokenService.encodeClaimToJwt(claims);
 
     // Assert
     assertEquals(expectedEncodedJwt, actualEncodedJwt);
@@ -153,13 +155,14 @@ class TokenServiceTest {
   @Test
   void whenRefreshTokenExpired_ThenReturnTrue() {
     // Arrange
-    var USER_ID = 1;
-    var ISSUED_AT_600_SECS_AGO = Instant.now().minusSeconds(REFRESH_TOKEN_EXPIRED_IN_600_SECONDS);
-    var refreshTokenInput =
+    final var USER_ID = 1;
+    final var ISSUED_AT_600_SECS_AGO =
+        Instant.now().minusSeconds(REFRESH_TOKEN_EXPIRED_IN_600_SECONDS);
+    final var refreshTokenInput =
         RefreshToken.of(1, "token", ISSUED_AT_600_SECS_AGO, UserRoleName.CONSUMER, USER_ID, false);
 
     // Actual
-    var actualIsRefreshTokenExpired = tokenService.isRefreshTokenExpired(refreshTokenInput);
+    final var actualIsRefreshTokenExpired = tokenService.isRefreshTokenExpired(refreshTokenInput);
 
     // Assert
     assertTrue(actualIsRefreshTokenExpired);
@@ -168,14 +171,14 @@ class TokenServiceTest {
   @Test
   void whenRefreshTokenNotExpired_ThenReturnFalse() {
     // Arrange
-    var USER_ID = 1;
-    var ISSUED_AT_599_SECS_AGO =
+    final var USER_ID = 1;
+    final var ISSUED_AT_599_SECS_AGO =
         Instant.now().minusSeconds(REFRESH_TOKEN_EXPIRED_IN_600_SECONDS - 1);
-    var refreshTokenInput =
+    final var refreshTokenInput =
         RefreshToken.of(1, "token", ISSUED_AT_599_SECS_AGO, UserRoleName.CONSUMER, USER_ID, false);
 
     // Actual
-    var actualIsRefreshTokenExpired = tokenService.isRefreshTokenExpired(refreshTokenInput);
+    final var actualIsRefreshTokenExpired = tokenService.isRefreshTokenExpired(refreshTokenInput);
 
     // Assert
     assertFalse(actualIsRefreshTokenExpired);
@@ -186,17 +189,17 @@ class TokenServiceTest {
     @Test
     void andReachedTimeToRotate_ThenReturnNewToken() {
       // Arrange
-      var USER_ID = 1;
-      var ISSUED_AT_480_SECS_AGO = Instant.now().minusSeconds(480);
-      var refreshTokenInput =
+      final var USER_ID = 1;
+      final var ISSUED_AT_480_SECS_AGO = Instant.now().minusSeconds(480);
+      final var refreshTokenInput =
           RefreshToken.of(
               1, "old_token", ISSUED_AT_480_SECS_AGO, UserRoleName.CONSUMER, USER_ID, false);
-      var expectedNewToken = "new_token";
+      final var expectedNewToken = "new_token";
 
       when(tokenService.issueRefreshToken()).thenReturn(expectedNewToken);
 
       // Actual
-      var actualNewToken = tokenService.rotateRefreshTokenIfNeed(refreshTokenInput);
+      final var actualNewToken = tokenService.rotateRefreshTokenIfNeed(refreshTokenInput);
 
       // Assert
       assertEquals(expectedNewToken, actualNewToken);
@@ -205,15 +208,15 @@ class TokenServiceTest {
     @Test
     void andNotReachTimeToRotateYet_ThenReturnOldToken() {
       // Arrange
-      var USER_ID = 1;
-      var ISSUED_AT_479_SECS_AGO = Instant.now().minusSeconds(479);
-      var OLD_TOKEN = "old_token";
-      var refreshTokenInput =
+      final var USER_ID = 1;
+      final var ISSUED_AT_479_SECS_AGO = Instant.now().minusSeconds(479);
+      final var OLD_TOKEN = "old_token";
+      final var refreshTokenInput =
           RefreshToken.of(
               1, OLD_TOKEN, ISSUED_AT_479_SECS_AGO, UserRoleName.CONSUMER, USER_ID, false);
 
       // Actual
-      var actualNewToken = tokenService.rotateRefreshTokenIfNeed(refreshTokenInput);
+      final var actualNewToken = tokenService.rotateRefreshTokenIfNeed(refreshTokenInput);
 
       // Assert
       assertEquals(OLD_TOKEN, actualNewToken);

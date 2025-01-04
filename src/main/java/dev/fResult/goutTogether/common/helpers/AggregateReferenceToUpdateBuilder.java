@@ -9,7 +9,7 @@ public class AggregateReferenceToUpdateBuilder {
 
   public static <T, ID> AggregateReference<T, ID> build(
       ID idFromRequest, AggregateReference<T, ID> aggregateRefIdFromDb, String resourceName) {
-    var existingId =
+    final var existingId =
         Optional.ofNullable(aggregateRefIdFromDb.getId())
             .orElseThrow(
                 () ->

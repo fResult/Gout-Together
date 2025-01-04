@@ -30,13 +30,13 @@ class RoleServiceTest {
 
   @Test
   void shouldReturnRoles() {
-    var mockRoles =
+    final var mockRoles =
         Arrays.stream(UserRoleName.values())
             .map(roleName -> Role.of(roleName.getId(), roleName.name()))
             .toList();
     when(roleRepository.findAll()).thenReturn(mockRoles);
 
-    var actualRoles = roleService.getRoles();
+    final var actualRoles = roleService.getRoles();
 
     assertEquals(mockRoles.size(), actualRoles.size());
     assertEquals(mockRoles, actualRoles);
@@ -45,15 +45,15 @@ class RoleServiceTest {
   @Test
   void whenBindNewUserRole_ThenSuccess() {
     // Arrange
-    var USER_ID = 1;
-    var ROLE = UserRoleName.CONSUMER;
-    var mockUserRole =
+    final var USER_ID = 1;
+    final var ROLE = UserRoleName.CONSUMER;
+    final var mockUserRole =
         UserRole.of(1, AggregateReference.to(USER_ID), AggregateReference.to(ROLE.getId()));
 
     when(userRoleRepository.save(any(UserRole.class))).thenReturn(mockUserRole);
 
     // Actual
-    var actualUserRole = roleService.bindNewUser(USER_ID, ROLE);
+    final var actualUserRole = roleService.bindNewUser(USER_ID, ROLE);
 
     // Assert
     assertEquals(mockUserRole, actualUserRole);
@@ -62,15 +62,15 @@ class RoleServiceTest {
   @Test
   void whenDeleteUserRoleByUserId_ThenSuccess() {
     // Arrange
-    var USER_ID = 1;
-    var userRef = AggregateReference.<User, Integer>to(USER_ID);
-    var mockUserRole = UserRole.of(1, userRef, AggregateReference.to(1));
+    final var USER_ID = 1;
+    final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+    final var mockUserRole = UserRole.of(1, userRef, AggregateReference.to(1));
 
     when(userRoleRepository.findOneByUserId(userRef)).thenReturn(Optional.of(mockUserRole));
     doNothing().when(userRoleRepository).delete(mockUserRole);
 
     // Actual
-    var actualDeleteResult = roleService.deleteUserRoleByUserId(USER_ID);
+    final var actualDeleteResult = roleService.deleteUserRoleByUserId(USER_ID);
 
     // Assert
     assertTrue(actualDeleteResult);
@@ -79,12 +79,12 @@ class RoleServiceTest {
   @Test
   void whenDeleteUserRoleByUserId_ButNotFound_ThenThrowException() {
     // Arrange
-    var USER_ID = 1;
-    var userRef = AggregateReference.<User, Integer>to(USER_ID);
+    final var USER_ID = 1;
+    final var userRef = AggregateReference.<User, Integer>to(USER_ID);
     when(userRoleRepository.findOneByUserId(userRef)).thenReturn(Optional.empty());
 
     // Actual
-    var actualDeleteResult = roleService.deleteUserRoleByUserId(USER_ID);
+    final var actualDeleteResult = roleService.deleteUserRoleByUserId(USER_ID);
 
     // Assert
     assertFalse(actualDeleteResult);

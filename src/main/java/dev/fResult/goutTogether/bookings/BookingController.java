@@ -57,8 +57,8 @@ public class BookingController {
 
     logger.debug("[bookTour] Booking tour with tourId [{}]", tourId);
 
-    var createdTourBooking = bookingService.bookTour(authentication, tourId, idempotentKey);
-    var createdUri = URI.create("/api/v1/bookings/" + createdTourBooking.id());
+    final var createdTourBooking = bookingService.bookTour(authentication, tourId, idempotentKey);
+    final var createdUri = URI.create("/api/v1/bookings/" + createdTourBooking.id());
 
     return ResponseEntity.created(createdUri).body(createdTourBooking);
   }
@@ -72,7 +72,7 @@ public class BookingController {
       Authentication authentication) {
 
     logger.debug("[cancelTourById] Canceling tour booking with tourId [{}]", body.tourId());
-    var cancelledTour = bookingService.cancelTour(authentication, id, body, idempotentKey);
+    final var cancelledTour = bookingService.cancelTour(authentication, id, body, idempotentKey);
 
     return ResponseEntity.ok(cancelledTour);
   }
@@ -108,12 +108,12 @@ public class BookingController {
     // Simulate Race Condition
     @Transactional
     public void updateTourCountById(Integer bookingId, int value) {
-      var booking =
+      final var booking =
           bookingRepository
               .findById(bookingId)
               .orElseThrow(
                   errorHelper.entityNotFound("updateTourCountById", Booking.class, bookingId));
-      var tourCount =
+      final var tourCount =
           tourCountRepository
               .findOneByTourId(booking.tourId())
               .orElseThrow(
@@ -123,17 +123,17 @@ public class BookingController {
                       "tourId",
                       String.valueOf(booking.tourId().getId())));
 
-      var tourCountToUpdate = tourCount.increaseAmount(value);
+      final var tourCountToUpdate = tourCount.increaseAmount(value);
 
-      var updatedTourCount = tourCountRepository.save(tourCountToUpdate);
+      final var updatedTourCount = tourCountRepository.save(tourCountToUpdate);
       System.out.println("[updateTourCountById] TourCount is Updated: " + updatedTourCount);
     }
 
     // With pessimistic lock
     @Transactional
     public void updateTourCountByTourId(Integer tourId, int value) {
-      var tourRef = AggregateReference.<Tour, Integer>to(tourId);
-      var tourCount =
+      final var tourRef = AggregateReference.<Tour, Integer>to(tourId);
+      final var tourCount =
           tourCountRepository
               .findOneByTourId(tourRef)
               .orElseThrow(
@@ -143,9 +143,9 @@ public class BookingController {
                       "tourId",
                       String.valueOf(tourId)));
 
-      var tourCountToUpdate = tourCount.increaseAmount(value);
+      final var tourCountToUpdate = tourCount.increaseAmount(value);
 
-      var updatedTourCount = tourCountRepository.save(tourCountToUpdate);
+      final var updatedTourCount = tourCountRepository.save(tourCountToUpdate);
       System.out.println("[updateTourCountByTourId] TourCount is Updated: " + updatedTourCount);
     }
   }

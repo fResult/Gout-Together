@@ -29,7 +29,7 @@ class QrCodeServiceTest {
   @Mock private QrCodeReferenceRepository qrCodeReferenceRepository;
 
   private QrCodeReference buildQrCodeReference(int id, int bookingId, QrCodeStatus status) {
-    var qrCodeContent = String.format("%s/%d", API_PAYMENT_PATH, bookingId);
+    final var qrCodeContent = String.format("%s/%d", API_PAYMENT_PATH, bookingId);
 
     return QrCodeReference.of(id, bookingId, qrCodeContent, status);
   }
@@ -37,10 +37,10 @@ class QrCodeServiceTest {
   @Test
   void whenGenerateQrCodeImage_thenSuccess() throws WriterException {
     // Arrange
-    try (var mockedQrCodeHelper = mockStatic(QrCodeHelper.class)) {
-      var mockQrCodeReference =
+    try (final var mockedQrCodeHelper = mockStatic(QrCodeHelper.class)) {
+      final var mockQrCodeReference =
           buildQrCodeReference(QR_CODE_REF_ID, BOOKING_ID, QrCodeStatus.ACTIVATED);
-      var expectedQrCodeImage = new BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB);
+      final var expectedQrCodeImage = new BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB);
 
       when(qrCodeReferenceRepository.findById(anyInt()))
           .thenReturn(Optional.of(mockQrCodeReference));
@@ -49,7 +49,7 @@ class QrCodeServiceTest {
           .thenReturn(expectedQrCodeImage);
 
       // Actual
-      var actualGeneratedQrCodeImage = qrCodeService.generateQrCodeImageById(QR_CODE_REF_ID);
+      final var actualGeneratedQrCodeImage = qrCodeService.generateQrCodeImageById(QR_CODE_REF_ID);
 
       // Assert
       assertEquals(expectedQrCodeImage, actualGeneratedQrCodeImage);
@@ -59,14 +59,14 @@ class QrCodeServiceTest {
   @Test
   void whenGetQrCodeRefByBookingId_thenSuccess() {
     // Arrange
-    var mockQrCodeReference =
+    final var mockQrCodeReference =
         buildQrCodeReference(QR_CODE_REF_ID, BOOKING_ID, QrCodeStatus.EXPIRED);
 
     when(qrCodeReferenceRepository.findOneByBookingId(anyInt()))
         .thenReturn(Optional.of(mockQrCodeReference));
 
     // Actual
-    var actualQrCodeReference = qrCodeService.getQrCodeRefByBookingId(BOOKING_ID);
+    final var actualQrCodeReference = qrCodeService.getQrCodeRefByBookingId(BOOKING_ID);
 
     // Assert
     assertEquals(mockQrCodeReference, actualQrCodeReference);
@@ -75,7 +75,7 @@ class QrCodeServiceTest {
   @Test
   void whenGetQrCodeRefByBookingId_ButNotFound_thenThrowException() {
     // Arrange
-    var expectedErrorMessage =
+    final var expectedErrorMessage =
         String.format(
             "%s with bookingId [%d] not found",
             QrCodeReference.class.getSimpleName(), NOT_FOUND_BOOKING_ID);
@@ -83,17 +83,18 @@ class QrCodeServiceTest {
     when(qrCodeReferenceRepository.findOneByBookingId(anyInt())).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> qrCodeService.getQrCodeRefByBookingId(NOT_FOUND_BOOKING_ID);
+    final Executable actualExecutable =
+        () -> qrCodeService.getQrCodeRefByBookingId(NOT_FOUND_BOOKING_ID);
 
     // Assert
-    var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test
   void whenCreateQrCodeForBooking_ThenSuccess() {
     // Arrange
-    var mockCreatedQrCodeReference =
+    final var mockCreatedQrCodeReference =
         buildQrCodeReference(QR_CODE_REF_ID, BOOKING_ID, QrCodeStatus.ACTIVATED);
 
     when(qrCodeReferenceRepository.findOneByBookingId(anyInt())).thenReturn(Optional.empty());
@@ -101,7 +102,7 @@ class QrCodeServiceTest {
         .thenReturn(mockCreatedQrCodeReference);
 
     // Actual
-    var actualQrCodeReference = qrCodeService.createQrCodeRefForBooking(BOOKING_ID);
+    final var actualQrCodeReference = qrCodeService.createQrCodeRefForBooking(BOOKING_ID);
 
     // Assert
     assertEquals(mockCreatedQrCodeReference, actualQrCodeReference);
@@ -110,14 +111,14 @@ class QrCodeServiceTest {
   @Test
   void whenCreateQrCodeForBooking_ButAlreadyExists_ThenReturnExisting() {
     // Arrange
-    var mockExistingQrCodeReference =
+    final var mockExistingQrCodeReference =
         buildQrCodeReference(QR_CODE_REF_ID, BOOKING_ID, QrCodeStatus.EXPIRED);
 
     when(qrCodeReferenceRepository.findOneByBookingId(anyInt()))
         .thenReturn(Optional.of(mockExistingQrCodeReference));
 
     // Actual
-    var actualQrCodeReference = qrCodeService.createQrCodeRefForBooking(BOOKING_ID);
+    final var actualQrCodeReference = qrCodeService.createQrCodeRefForBooking(BOOKING_ID);
 
     // Assert
     assertEquals(mockExistingQrCodeReference, actualQrCodeReference);
@@ -127,9 +128,9 @@ class QrCodeServiceTest {
   @Test
   void whenUpdateQrCodeRefByBookingId_ThenSuccess() {
     // Arrange
-    var mockExistingQrCodeReference =
+    final var mockExistingQrCodeReference =
         buildQrCodeReference(QR_CODE_REF_ID, BOOKING_ID, QrCodeStatus.ACTIVATED);
-    var mockUpdatedQrCodeReference =
+    final var mockUpdatedQrCodeReference =
         buildQrCodeReference(QR_CODE_REF_ID, BOOKING_ID, QrCodeStatus.EXPIRED);
 
     when(qrCodeReferenceRepository.findOneByBookingId(anyInt()))
@@ -138,7 +139,7 @@ class QrCodeServiceTest {
         .thenReturn(mockUpdatedQrCodeReference);
 
     // Actual
-    var actualUpdatedQrCodeReference =
+    final var actualUpdatedQrCodeReference =
         qrCodeService.updateQrCodeRefStatusByBookingId(BOOKING_ID, QrCodeStatus.EXPIRED);
 
     // Assert
@@ -148,7 +149,7 @@ class QrCodeServiceTest {
   @Test
   void whenUpdateQrCodeRefByBookingId_ButNotFound_ThenThrowException() {
     // Arrange
-    var expectedErrorMessage =
+    final var expectedErrorMessage =
         String.format(
             "%s with bookingId [%d] not found",
             QrCodeReference.class.getSimpleName(), NOT_FOUND_BOOKING_ID);
@@ -156,13 +157,13 @@ class QrCodeServiceTest {
     when(qrCodeReferenceRepository.findOneByBookingId(anyInt())).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable =
+    final Executable actualExecutable =
         () ->
             qrCodeService.updateQrCodeRefStatusByBookingId(
                 NOT_FOUND_BOOKING_ID, QrCodeStatus.EXPIRED);
 
     // Assert
-    var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
     verify(qrCodeReferenceRepository, never()).save(any(QrCodeReference.class));
   }
@@ -170,7 +171,7 @@ class QrCodeServiceTest {
   @Test
   void whenDeleteQrCodeRefByBookingId_ThenSuccess() {
     // Arrange
-    var mockExistingQrCodeReference =
+    final var mockExistingQrCodeReference =
         buildQrCodeReference(QR_CODE_REF_ID, BOOKING_ID, QrCodeStatus.ACTIVATED);
 
     when(qrCodeReferenceRepository.findOneByBookingId(anyInt()))
@@ -178,7 +179,7 @@ class QrCodeServiceTest {
     doNothing().when(qrCodeReferenceRepository).delete(any(QrCodeReference.class));
 
     // Actual
-    var actualIsDeleted = qrCodeService.deleteQrCodeRefByBookingId(BOOKING_ID);
+    final var actualIsDeleted = qrCodeService.deleteQrCodeRefByBookingId(BOOKING_ID);
 
     // Assert
     assertTrue(actualIsDeleted);
@@ -187,7 +188,7 @@ class QrCodeServiceTest {
   @Test
   void whenDeleteQrCodeRefByBookingId_ButNotFound_ThenThrowException() {
     // Arrange
-    var expectedErrorMessage =
+    final var expectedErrorMessage =
         String.format(
             "%s with bookingId [%d] not found",
             QrCodeReference.class.getSimpleName(), NOT_FOUND_BOOKING_ID);
@@ -195,11 +196,11 @@ class QrCodeServiceTest {
     when(qrCodeReferenceRepository.findOneByBookingId(anyInt())).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable =
+    final Executable actualExecutable =
         () -> qrCodeService.deleteQrCodeRefByBookingId(NOT_FOUND_BOOKING_ID);
 
     // Assert
-    var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
     verify(qrCodeReferenceRepository, never()).delete(any(QrCodeReference.class));
   }

@@ -25,7 +25,7 @@ public class TourCountService {
   public TourCount createTourCount(TourCount tourCount) {
     logger.debug("[createTourCount] Creating new {}", TourCount.class.getSimpleName());
 
-    var createdTourCount = tourCountRepository.save(tourCount);
+    final var createdTourCount = tourCountRepository.save(tourCount);
     logger.info("[createTourCount] Created {}", createdTourCount);
 
     return createdTourCount;
@@ -37,22 +37,22 @@ public class TourCountService {
         TourCount.class.getSimpleName(),
         tourId);
 
-    var tour = tourService.getTourById(tourId);
-    var tourCount =
+    final var tour = tourService.getTourById(tourId);
+    final var tourCount =
         tourCountRepository
             .findOneByTourId(AggregateReference.to(tourId))
             .orElseThrow(
                 errorHelper.entityWithSubResourceNotFound(
                     "incrementTourCount", TourCount.class, "tourId", String.valueOf(tourId)));
 
-    var tourCountAmount = 1;
+    final var tourCountAmount = 1;
     // TODO: Make pessimistic lock to avoid race condition
-    var isInsufficient = tour.numberOfPeople() < tourCount.amount() + tourCountAmount;
+    final var isInsufficient = tour.numberOfPeople() < tourCount.amount() + tourCountAmount;
     if (isInsufficient) {
       throw errorHelper.insufficientTourCount("incrementTourCount", tour.numberOfPeople()).get();
     }
 
-    var incrementedTourCountToUpdate = tourCount.increaseAmount(tourCountAmount);
+    final var incrementedTourCountToUpdate = tourCount.increaseAmount(tourCountAmount);
     tourCountRepository.save(incrementedTourCountToUpdate);
 
     logger.info(
@@ -69,15 +69,15 @@ public class TourCountService {
         TourCount.class.getSimpleName(),
         tourId);
 
-    var tourCount =
+    final var tourCount =
         tourCountRepository
             .findOneByTourId(AggregateReference.to(tourId))
             .orElseThrow(
                 errorHelper.entityWithSubResourceNotFound(
                     "decrementTourCount", TourCount.class, "tourId", String.valueOf(tourId)));
 
-    var tourCountAmount = 1;
-    var decrementTourCountToUpdate = tourCount.decreaseAmount(tourCountAmount);
+    final var tourCountAmount = 1;
+    final var decrementTourCountToUpdate = tourCount.decreaseAmount(tourCountAmount);
     tourCountRepository.save(decrementTourCountToUpdate);
 
     logger.info(

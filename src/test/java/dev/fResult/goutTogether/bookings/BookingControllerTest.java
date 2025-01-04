@@ -70,7 +70,7 @@ class BookingControllerTest {
   }
 
   private Authentication buildAuthentication(int resourceId, UserRoleName roleName, String email) {
-    var jwt =
+    final var jwt =
         Jwt.withTokenValue("token")
             .header("alg", "none")
             .claim("sub", email)
@@ -83,15 +83,15 @@ class BookingControllerTest {
   @Test
   void whenBookTourByTourId_ThenReturn201() throws Exception {
     // Arrange
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
-    var mockCreatedTourBookingInfo =
+    final var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    final var mockCreatedTourBookingInfo =
         BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.COMPLETED, 1);
 
     when(bookingService.bookTour(any(Authentication.class), anyInt(), anyString()))
         .thenReturn(mockCreatedTourBookingInfo);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             post(BOOKING_API + "/tours/{tourId}", TOUR_ID)
                 .principal(authentication)
@@ -109,11 +109,11 @@ class BookingControllerTest {
   @Test
   void whenBookTourByTourId_ButInvalidIdempotentKey_ThenReturn400() throws Exception {
     // Arrange
-    var INVALID_IDEMPOTENT_KEY = "invalid-idempotent-key";
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    final var INVALID_IDEMPOTENT_KEY = "invalid-idempotent-key";
+    final var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             post(BOOKING_API + "/tours/{tourId}", TOUR_ID)
                 .principal(authentication)
@@ -126,11 +126,11 @@ class BookingControllerTest {
   @Test
   void whenBookTourByTourId_ButTourIdIsInvalid_ThenReturn400() throws Exception {
     // Arrange
-    var INVALID_TOUR_ID = 0;
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    final var INVALID_TOUR_ID = 0;
+    final var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             post(BOOKING_API + "/tours/{tourId}", INVALID_TOUR_ID)
                 .principal(authentication)
@@ -143,16 +143,16 @@ class BookingControllerTest {
   @Test
   void whenBookTourByTourId_ButUserTourAlreadyBooked_ThenReturn409() throws Exception {
     // Arrange
-    var TOUR_ID = 120;
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
-    var expectedErrorMessage =
+    final var TOUR_ID = 120;
+    final var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    final var expectedErrorMessage =
         String.format("UserId [%d] already booked tourId [%d]", USER_ID, TOUR_ID);
 
     when(bookingService.bookTour(any(Authentication.class), anyInt(), anyString()))
         .thenThrow(new BookingExistsException(expectedErrorMessage));
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             post(BOOKING_API + "/tours/{tourId}", TOUR_ID)
                 .header("idempotent-key", IDEMPOTENT_KEY)
@@ -167,16 +167,16 @@ class BookingControllerTest {
   @Test
   void whenCancelTourBookingById_ThenReturn200() throws Exception {
     // Arrange
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
-    var body = BookingCancellationRequest.of(TOUR_ID);
-    var mockCancelledTourBookingInfo =
+    final var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    final var body = BookingCancellationRequest.of(TOUR_ID);
+    final var mockCancelledTourBookingInfo =
         BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.CANCELLED, 1);
 
     when(bookingService.cancelTour(any(Authentication.class), anyInt(), any(), anyString()))
         .thenReturn(mockCancelledTourBookingInfo);
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             put(BOOKING_API + "/{id}/cancel", BOOKING_ID)
                 .principal(authentication)
@@ -196,10 +196,10 @@ class BookingControllerTest {
   @Test
   void whenCancelTourBookingById_ButNotFound_ThenReturn404() throws Exception {
     // Arrange
-    var NOT_FOUND_BOOKING_ID = 99999;
-    var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
-    var body = BookingCancellationRequest.of(TOUR_ID);
-    var expectedErrorMessage =
+    final var NOT_FOUND_BOOKING_ID = 99999;
+    final var authentication = buildAuthentication(USER_ID, UserRoleName.CONSUMER, EMAIL);
+    final var body = BookingCancellationRequest.of(TOUR_ID);
+    final var expectedErrorMessage =
         String.format(
             "%s with id [%d] not found", Booking.class.getSimpleName(), NOT_FOUND_BOOKING_ID);
 
@@ -207,7 +207,7 @@ class BookingControllerTest {
         .thenThrow(new EntityNotFoundException(expectedErrorMessage));
 
     // Actual
-    var resultActions =
+    final var resultActions =
         mockMvc.perform(
             put(BOOKING_API + "/{id}/cancel", NOT_FOUND_BOOKING_ID)
                 .header("idempotent-key", IDEMPOTENT_KEY)
@@ -257,15 +257,16 @@ class SimpleServiceTest {
   @Test
   void whenIncreaseTourCountByBookingId_ThenVerifyActions() {
     // Arrange
-    var TOUR_COUNT_ID = 99;
-    var TOUR_COUNT_AMOUNT = 10;
-    var AMOUNT_TO_ADD = 5;
-    var TOUR_COUNT_AMOUNT_AFTER_ADDED = TOUR_COUNT_AMOUNT + AMOUNT_TO_ADD;
-    var userRef = AggregateReference.<User, Integer>to(USER_ID);
-    var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-    var mockCompletedBooking = buildCompletedBooking(BOOKING_ID, USER_ID, TOUR_ID);
-    var mockTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT);
-    var mockIncresedTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT_AFTER_ADDED);
+    final var TOUR_COUNT_ID = 99;
+    final var TOUR_COUNT_AMOUNT = 10;
+    final var AMOUNT_TO_ADD = 5;
+    final var TOUR_COUNT_AMOUNT_AFTER_ADDED = TOUR_COUNT_AMOUNT + AMOUNT_TO_ADD;
+    final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+    final var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+    final var mockCompletedBooking = buildCompletedBooking(BOOKING_ID, USER_ID, TOUR_ID);
+    final var mockTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT);
+    final var mockIncresedTourCount =
+        TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT_AFTER_ADDED);
 
     when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(mockCompletedBooking));
     when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.of(mockTourCount));
@@ -283,18 +284,19 @@ class SimpleServiceTest {
   @Test
   void whenIncreaseTourCountByBookingId_ButBookingNotFound_ThenVerifyActions() {
     // Arrange
-    var NOT_FOUND_BOOKING_ID = 99999;
-    var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-    var expectedErrorMessage =
+    final var NOT_FOUND_BOOKING_ID = 99999;
+    final var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+    final var expectedErrorMessage =
         String.format("%s id [%d] not found", Booking.class.getSimpleName(), NOT_FOUND_BOOKING_ID);
 
     when(bookingRepository.findById(anyInt())).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> simpleService.updateTourCountById(NOT_FOUND_BOOKING_ID, 5);
+    final Executable actualExecutable =
+        () -> simpleService.updateTourCountById(NOT_FOUND_BOOKING_ID, 5);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
     verify(bookingRepository, times(1)).findById(NOT_FOUND_BOOKING_ID);
     verify(tourCountRepository, never()).findOneByTourId(tourRef);
@@ -304,20 +306,21 @@ class SimpleServiceTest {
   @Test
   void whenIncreaseTourCountByBookingId_ButTourCountNotFound_ThenVerifyActions() {
     // Arrange
-    var notFoundTourRef = AggregateReference.<Tour, Integer>to(NOT_FOUND_TOUR_ID);
-    var mockCompletedBooking = buildCompletedBooking(BOOKING_ID, USER_ID, NOT_FOUND_TOUR_ID);
-    var expectedErrorMessage =
+    final var notFoundTourRef = AggregateReference.<Tour, Integer>to(NOT_FOUND_TOUR_ID);
+    final var mockCompletedBooking = buildCompletedBooking(BOOKING_ID, USER_ID, NOT_FOUND_TOUR_ID);
+    final var expectedErrorMessage =
         String.format(
-            "%s with %s [%d] not found", TourCount.class.getSimpleName(), "tourId", NOT_FOUND_TOUR_ID);
+            "%s with %s [%d] not found",
+            TourCount.class.getSimpleName(), "tourId", NOT_FOUND_TOUR_ID);
 
     when(bookingRepository.findById(anyInt())).thenReturn(Optional.of(mockCompletedBooking));
     when(tourCountRepository.findOneByTourId(notFoundTourRef)).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> simpleService.updateTourCountById(BOOKING_ID, 5);
+    final Executable actualExecutable = () -> simpleService.updateTourCountById(BOOKING_ID, 5);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
     verify(bookingRepository, times(1)).findById(BOOKING_ID);
     verify(tourCountRepository, times(1)).findOneByTourId(notFoundTourRef);
@@ -327,13 +330,14 @@ class SimpleServiceTest {
   @Test
   void whenIncreaseTourCountByTourId_ThenVerifyActions() {
     // Arrange
-    var TOUR_COUNT_ID = 99;
-    var AMOUNT_TO_ADD = 5;
-    var TOUR_COUNT_AMOUNT = 10;
-    var TOUR_COUNT_AMOUNT_AFTER_ADDED = TOUR_COUNT_AMOUNT + AMOUNT_TO_ADD;
-    var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
-    var mockTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT);
-    var mockIncresedTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT_AFTER_ADDED);
+    final var TOUR_COUNT_ID = 99;
+    final var AMOUNT_TO_ADD = 5;
+    final var TOUR_COUNT_AMOUNT = 10;
+    final var TOUR_COUNT_AMOUNT_AFTER_ADDED = TOUR_COUNT_AMOUNT + AMOUNT_TO_ADD;
+    final var tourRef = AggregateReference.<Tour, Integer>to(TOUR_ID);
+    final var mockTourCount = TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT);
+    final var mockIncresedTourCount =
+        TourCount.of(TOUR_COUNT_ID, tourRef, TOUR_COUNT_AMOUNT_AFTER_ADDED);
 
     when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.of(mockTourCount));
     when(tourCountRepository.save(any(TourCount.class))).thenReturn(mockIncresedTourCount);
@@ -349,8 +353,8 @@ class SimpleServiceTest {
   @Test
   void whenIncreaseTourCountByTourId_ButTourCountNotFound_ThenVerifyActions() {
     // Arrange
-    var tourRef = AggregateReference.<Tour, Integer>to(NOT_FOUND_TOUR_ID);
-    var expectedErrorMessage =
+    final var tourRef = AggregateReference.<Tour, Integer>to(NOT_FOUND_TOUR_ID);
+    final var expectedErrorMessage =
         String.format(
             "%s with %s [%s] not found",
             TourCount.class.getSimpleName(), "tourId", NOT_FOUND_TOUR_ID);
@@ -358,10 +362,11 @@ class SimpleServiceTest {
     when(tourCountRepository.findOneByTourId(tourRef)).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> simpleService.updateTourCountByTourId(NOT_FOUND_TOUR_ID, 5);
+    final Executable actualExecutable =
+        () -> simpleService.updateTourCountByTourId(NOT_FOUND_TOUR_ID, 5);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
     verify(tourCountRepository, times(1)).findOneByTourId(tourRef);
     verify(tourCountRepository, never()).save(any(TourCount.class));

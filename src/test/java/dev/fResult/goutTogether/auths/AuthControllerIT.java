@@ -2,18 +2,8 @@ package dev.fResult.goutTogether.auths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import dev.fResult.goutTogether.auths.dtos.LoginRequest;
-import dev.fResult.goutTogether.auths.dtos.LoginResponse;
-import dev.fResult.goutTogether.auths.dtos.RefreshTokenRequest;
 import dev.fResult.goutTogether.configs.AbstractIntegrationTest;
-import dev.fResult.goutTogether.users.dtos.UserInfoResponse;
-import dev.fResult.goutTogether.users.dtos.UserRegistrationRequest;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 
 // NOTE: `IT` suffix stands for Integration Test
@@ -28,7 +18,7 @@ public class AuthControllerIT extends AbstractIntegrationTest {
 //  void setupUser() {
 //    restClient = RestClient.builder().baseUrl(String.format("http://localhost:%d", port)).build();
 //
-//    var body =
+//    final var body =
 //        UserRegistrationRequest.of("Test", "Test", "email@example.com", "mypassword", "0000000000");
 //
 //    // TODO: Remove `.retrieve()`, then retry again
@@ -44,8 +34,8 @@ public class AuthControllerIT extends AbstractIntegrationTest {
 //
 //  @Test
 //  void shouldLoginSuccess() {
-//    var body = LoginRequest.of("email@example.com", "999999999");
-//    var actualLoggedIn = login(body);
+//    final var body = LoginRequest.of("email@example.com", "999999999");
+//    final var actualLoggedIn = login(body);
 //
 //    assertTrue(actualLoggedIn.userId() > 0);
 //    assertFalse(actualLoggedIn.accessToken().isBlank());
@@ -55,8 +45,8 @@ public class AuthControllerIT extends AbstractIntegrationTest {
 //
 //  @Test
 //  void shouldRefreshNewToken() {
-//    var body = LoginRequest.of("email@example.com", "999999999");
-//    var actualRefreshedToken = login(body);
+//    final var body = LoginRequest.of("email@example.com", "999999999");
+//    final var actualRefreshedToken = login(body);
 //
 //    assertTrue(actualRefreshedToken.userId() > 0);
 //    assertFalse(actualRefreshedToken.accessToken().isBlank());
@@ -66,14 +56,14 @@ public class AuthControllerIT extends AbstractIntegrationTest {
 //
 //  @Test
 //  void shouldLogoutSuccess() {
-//    var body = LoginRequest.of("email@example.com", "999999999");
-//    Executable actualExecutable = () -> login(body);
+//    final var body = LoginRequest.of("email@example.com", "999999999");
+//    final Executable actualExecutable = () -> login(body);
 //
 //    assertDoesNotThrow(actualExecutable);
 //  }
 //
 //  private LoginResponse login(LoginRequest body) {
-//    var entity =
+//    final var entity =
 //        restClient
 //            .post()
 //            .uri(AUTHS_API + "/login")
@@ -85,7 +75,7 @@ public class AuthControllerIT extends AbstractIntegrationTest {
 //  }
 //
 //  private LoginResponse refreshToken(RefreshTokenRequest body) {
-//    var entity =
+//    final var entity =
 //        restClient
 //            .post()
 //            .uri(AUTHS_API + "/refresh")
@@ -98,7 +88,7 @@ public class AuthControllerIT extends AbstractIntegrationTest {
 //  }
 //
 //  private void logout(String accessToken) {
-//    var authorizationHeader = String.format("Bearer %s", accessToken);
+//    final var authorizationHeader = String.format("Bearer %s", accessToken);
 //    restClient
 //        .post()
 //        .uri(AUTHS_API + "/logout")

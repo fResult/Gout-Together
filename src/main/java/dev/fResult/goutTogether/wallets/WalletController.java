@@ -32,8 +32,8 @@ public class WalletController {
   // User -> See own wallet
   @GetMapping("/me")
   public ResponseEntity<UserWalletInfoResponse> getMyUserWallet(Authentication authentication) {
-    var jwt = (Jwt) authentication.getPrincipal();
-    var userId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
+    final var jwt = (Jwt) authentication.getPrincipal();
+    final var userId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
 
     return ResponseEntity.ok(walletService.getConsumerWalletInfoByUserId(Integer.parseInt(userId)));
   }
@@ -46,14 +46,14 @@ public class WalletController {
           String idempotentKey,
       Authentication authentication) {
 
-    var jwt = (Jwt) authentication.getPrincipal();
-    var userId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
+    final var jwt = (Jwt) authentication.getPrincipal();
+    final var userId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
     logger.debug(
         "[topUpUserWallet] Topping up {} by user id [{}]",
         UserWallet.class.getSimpleName(),
         userId);
 
-    var toppedUpWallet =
+    final var toppedUpWallet =
         walletService.topUpConsumerWallet(Integer.parseInt(userId), idempotentKey, body);
 
     return ResponseEntity.ok(toppedUpWallet);
@@ -63,10 +63,10 @@ public class WalletController {
   @GetMapping("/my-company")
   public ResponseEntity<TourCompanyWalletInfoResponse> getMyCompanyWallet(
       Authentication authentication) {
-    var jwt = (Jwt) authentication.getPrincipal();
-    var companyId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
+    final var jwt = (Jwt) authentication.getPrincipal();
+    final var companyId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
 
-    var companyWalletInfo =
+    final var companyWalletInfo =
         walletService.getTourCompanyWalletInfoByTourCompanyId(Integer.parseInt(companyId));
 
     return ResponseEntity.ok(companyWalletInfo);
@@ -80,8 +80,8 @@ public class WalletController {
           String idempotentKey,
       Authentication authentication) {
 
-    var jwt = (Jwt) authentication.getPrincipal();
-    var companyId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
+    final var jwt = (Jwt) authentication.getPrincipal();
+    final var companyId = jwt.getClaimAsString(RESOURCE_ID_CLAIM);
 
     logger.info("Assume pay to bank");
     logger.debug(
@@ -89,7 +89,7 @@ public class WalletController {
         UserWallet.class.getSimpleName(),
         companyId);
 
-    var withdrewCompanyInfo =
+    final var withdrewCompanyInfo =
         walletService.withdrawTourCompanyWallet(Integer.parseInt(companyId), idempotentKey, body);
 
     return ResponseEntity.ok(withdrewCompanyInfo);

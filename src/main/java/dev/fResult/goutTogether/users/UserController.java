@@ -36,8 +36,8 @@ public class UserController {
       @RequestParam(defaultValue = "id") String field,
       @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
 
-    var sort = Sort.by(direction, field);
-    var pageable = PageRequest.of(page, size, sort);
+    final var sort = Sort.by(direction, field);
+    final var pageable = PageRequest.of(page, size, sort);
 
     return ResponseEntity.ok(userService.getUsersByFirstName(keyword, pageable));
   }
@@ -51,8 +51,8 @@ public class UserController {
   public ResponseEntity<UserInfoResponse> register(
       @Validated @RequestBody UserRegistrationRequest body) {
     logger.debug("[register] Registering a new {}", User.class.getSimpleName());
-    var createdUser = userService.registerUser(body);
-    var createdUserUri = URI.create(String.format("/api/v1/users/%d", createdUser.id()));
+    final var createdUser = userService.registerUser(body);
+    final var createdUserUri = URI.create(String.format("/api/v1/users/%d", createdUser.id()));
 
     return ResponseEntity.created(createdUserUri).body(createdUser);
   }

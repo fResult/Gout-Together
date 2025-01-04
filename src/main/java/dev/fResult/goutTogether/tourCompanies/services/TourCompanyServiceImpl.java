@@ -5,8 +5,8 @@ import dev.fResult.goutTogether.auths.services.AuthService;
 import dev.fResult.goutTogether.common.enumurations.TourCompanyStatus;
 import dev.fResult.goutTogether.common.exceptions.CredentialExistsException;
 import dev.fResult.goutTogether.common.exceptions.ValidationException;
-import dev.fResult.goutTogether.common.utils.StringUtil;
 import dev.fResult.goutTogether.common.helpers.ErrorHelper;
+import dev.fResult.goutTogether.common.utils.StringUtil;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyRegistrationRequest;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyResponse;
 import dev.fResult.goutTogether.tourCompanies.dtos.TourCompanyUpdateRequest;
@@ -59,8 +59,9 @@ public class TourCompanyServiceImpl implements TourCompanyService {
     logger.debug("[registerTourCompany] New {} is registering", TourCompany.class.getSimpleName());
     throwExceptionIfTourCompanyUserNameAlreadyExists(body.username());
 
-    var companyToRegister = TourCompany.of(null, body.name(), TourCompanyStatus.WAITING.name());
-    var registeredCompany = tourCompanyRepository.save(companyToRegister);
+    final var companyToRegister =
+        TourCompany.of(null, body.name(), TourCompanyStatus.WAITING.name());
+    final var registeredCompany = tourCompanyRepository.save(companyToRegister);
     logger.info(
         "[registerTourCompany] New {} is registered: {}",
         TourCompany.class.getSimpleName(),
@@ -76,7 +77,7 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   public TourCompanyResponse approveTourCompany(int id) {
     logger.debug(
         "[approveTourCompany] {} id [{}] is approving", TourCompany.class.getSimpleName(), id);
-    var tourCompany = getTourCompanyById(id);
+    final var tourCompany = getTourCompanyById(id);
 
     if (tourCompany.status().equals(TourCompanyStatus.APPROVED)) {
       logger.warn(
@@ -86,9 +87,9 @@ public class TourCompanyServiceImpl implements TourCompanyService {
       throw new ValidationException(String.format("Tour company id [%s] is already approved", id));
     }
 
-    var companyToApprove =
+    final var companyToApprove =
         TourCompany.of(tourCompany.id(), tourCompany.name(), TourCompanyStatus.APPROVED.name());
-    var approvedCompany = tourCompanyRepository.save(companyToApprove);
+    final var approvedCompany = tourCompanyRepository.save(companyToApprove);
     logger.info(
         "[approveTourCompany] {} is approved: {}",
         TourCompany.class.getSimpleName(),
@@ -103,15 +104,15 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   public TourCompanyResponse updateTourCompanyById(int id, TourCompanyUpdateRequest body) {
     logger.debug(
         "[updateTourCompanyById] {} id [{}] is updating", TourCompany.class.getSimpleName(), id);
-    var toTourCompanyUpdate = TourCompanyUpdateRequest.dtoToTourCompanyUpdate(body);
-    var companyToUpdate =
+    final var toTourCompanyUpdate = TourCompanyUpdateRequest.dtoToTourCompanyUpdate(body);
+    final var companyToUpdate =
         tourCompanyRepository
             .findById(id)
             .map(toTourCompanyUpdate)
             .orElseThrow(
                 errorHelper.entityNotFound("updateTourCompanyById", TourCompany.class, id));
 
-    var updatedCompany = tourCompanyRepository.save(companyToUpdate);
+    final var updatedCompany = tourCompanyRepository.save(companyToUpdate);
     logger.info(
         "[updateTourCompanyById] {} id [{}] is updated",
         TourCompany.class.getSimpleName(),
@@ -124,7 +125,7 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   public boolean deleteTourCompanyById(int id) {
     logger.debug(
         "[deleteTourCompanyById] {} id [{}] is deleting", TourCompany.class.getSimpleName(), id);
-    var existingCompany =
+    final var existingCompany =
         getOptTourCompanyById(id)
             .orElseThrow(
                 errorHelper.entityNotFound("deleteTourCompanyById", TourCompany.class, id));
@@ -145,12 +146,13 @@ public class TourCompanyServiceImpl implements TourCompanyService {
   }
 
   private void throwExceptionIfTourCompanyUserNameAlreadyExists(String username) {
-    var existingCompanyCredential = authService.findTourCompanyCredentialByUsername(username);
+    final var existingCompanyCredential = authService.findTourCompanyCredentialByUsername(username);
     if (existingCompanyCredential.isPresent()) {
       logger.warn(
           "[registerTourCompany] {} username [{}] already exists",
           TourCompanyLogin.class.getSimpleName(),
           username);
+
       throw new CredentialExistsException(
           String.format(
               "%s username [%s] already exists", TourCompanyLogin.class.getSimpleName(), username));

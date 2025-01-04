@@ -12,7 +12,9 @@ public record RefreshTokenRequest(
     @NonNull @Min(1) Integer resourceId,
     @NotBlank @UUID(message = "invalid format") String refreshToken) {
 
-  public static RefreshTokenRequest of(UserRoleName usage, Integer resourceId, String refreshToken) {
+  public static RefreshTokenRequest of(
+      UserRoleName usage, Integer resourceId, String refreshToken) {
+
     return new RefreshTokenRequest(usage, resourceId, refreshToken);
   }
 }

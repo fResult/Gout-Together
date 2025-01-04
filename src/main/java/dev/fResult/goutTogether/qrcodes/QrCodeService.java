@@ -4,8 +4,8 @@ import static dev.fResult.goutTogether.common.Constants.API_PAYMENT_PATH;
 
 import com.google.zxing.WriterException;
 import dev.fResult.goutTogether.common.enumurations.QrCodeStatus;
-import dev.fResult.goutTogether.common.helpers.QrCodeHelper;
 import dev.fResult.goutTogether.common.helpers.ErrorHelper;
+import dev.fResult.goutTogether.common.helpers.QrCodeHelper;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ public class QrCodeService {
         QrCodeReference.class.getSimpleName(),
         id);
 
-    var qrCodeRef =
+    final var qrCodeRef =
         qrCodeReferenceRepository
             .findById(id)
             .orElseThrow(errorHelper.entityNotFound("generateQrById", QrCodeReference.class, id));
@@ -48,7 +48,7 @@ public class QrCodeService {
   }
 
   public QrCodeReference createQrCodeRefForBooking(int bookingId) {
-    var qrCodeRefOpt = findQrCodeRefByBookingId(bookingId);
+    final var qrCodeRefOpt = findQrCodeRefByBookingId(bookingId);
     if (qrCodeRefOpt.isPresent()) {
       logger.info(
           "[createQrCodeRefForBooking] {} for bookingId [{}] exists, return the existing one",
@@ -63,11 +63,11 @@ public class QrCodeService {
         QrCodeReference.class.getSimpleName(),
         bookingId);
 
-    var paymentApiPath = String.format("%s/%d", API_PAYMENT_PATH, bookingId);
-    var qrCodeToCreate =
+    final var paymentApiPath = String.format("%s/%d", API_PAYMENT_PATH, bookingId);
+    final var qrCodeToCreate =
         QrCodeReference.of(null, bookingId, paymentApiPath, QrCodeStatus.ACTIVATED);
 
-    var createdQrCode = qrCodeReferenceRepository.save(qrCodeToCreate);
+    final var createdQrCode = qrCodeReferenceRepository.save(qrCodeToCreate);
     logger.info(
         "[createQrCodeRefForBooking] New {} is created: {}",
         QrCodeReference.class.getSimpleName(),
@@ -84,12 +84,12 @@ public class QrCodeService {
         QrCodeReference.class.getSimpleName(),
         bookingId);
 
-    var qrCodeRef = getQrCodeRefByBookingId(bookingId);
-    var qrCodeToUpdate =
+    final var qrCodeRef = getQrCodeRefByBookingId(bookingId);
+    final var qrCodeToUpdate =
         QrCodeReference.of(
             qrCodeRef.id(), qrCodeRef.bookingId(), qrCodeRef.content(), statusToUpdate);
 
-    var updatedQrCodeRef = qrCodeReferenceRepository.save(qrCodeToUpdate);
+    final var updatedQrCodeRef = qrCodeReferenceRepository.save(qrCodeToUpdate);
     logger.info(
         "[updateQrCodeRefStatusByBookingId] {} bookingId [{}] is updated: {}",
         QrCodeReference.class.getSimpleName(),
@@ -105,7 +105,7 @@ public class QrCodeService {
         QrCodeReference.class.getSimpleName(),
         bookingId);
 
-    var qrCodeRef = getQrCodeRefByBookingId(bookingId);
+    final var qrCodeRef = getQrCodeRefByBookingId(bookingId);
     qrCodeReferenceRepository.delete(qrCodeRef);
 
     logger.info(

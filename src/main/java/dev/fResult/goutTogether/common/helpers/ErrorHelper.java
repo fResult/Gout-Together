@@ -17,6 +17,10 @@ import org.slf4j.LoggerFactory;
 public class ErrorHelper {
   private final Logger logger;
 
+  public ErrorHelper(Class<?> classToLog) {
+    logger = LoggerFactory.getLogger(classToLog);
+  }
+
   /**
    * Rethrow error for the multi-thread to works with {@link ResponseAdviceHandler}'s methods.
    */
@@ -31,10 +35,6 @@ public class ErrorHelper {
       case RefreshTokenExpiredException rtee -> rtee;
       default -> new RuntimeException(defaultErrorMessage, cause);
     };
-  }
-
-  public ErrorHelper(Class<?> classToLog) {
-    logger = LoggerFactory.getLogger(classToLog);
   }
 
   public Supplier<EntityNotFoundException> entityNotFound(
@@ -65,8 +65,8 @@ public class ErrorHelper {
   public Supplier<EntityNotFoundException> someEntitiesMissing(
       String methodName, Class<?> entityClass, Collection<Integer> ids) {
 
-    var uniqueIds = new HashSet<>(ids);
-    var idsToDisplay = uniqueIds.toString().replaceAll("[\\[\\]]", "");
+    final var uniqueIds = new HashSet<>(ids);
+    final var idsToDisplay = uniqueIds.toString().replaceAll("[\\[\\]]", "");
 
     return () -> {
       logger.warn(

@@ -43,7 +43,7 @@ class TourServiceTest {
   @Test
   void whenGetTours_ThenSuccess() {
     // Arrange
-    var tours =
+    final var tours =
         List.of(
             Tour.of(
                 1,
@@ -54,11 +54,11 @@ class TourServiceTest {
                 20,
                 Instant.now().plus(Duration.ofDays(45)),
                 TourStatus.APPROVED.name()));
-    var pageTours = new PageImpl<>(tours);
+    final var pageTours = new PageImpl<>(tours);
     when(tourRepository.findAll(any(Pageable.class))).thenReturn(pageTours);
 
     // Actual
-    var actualTours = tourService.getTours(PageRequest.of(0, 3));
+    final var actualTours = tourService.getTours(PageRequest.of(0, 3));
 
     // Assert
     assertEquals(pageTours, actualTours);
@@ -67,8 +67,8 @@ class TourServiceTest {
   @Test
   void whenGetTourById_ThenSuccess() {
     // Arrange
-    var TOUR_ID = 1;
-    var mockTour =
+    final var TOUR_ID = 1;
+    final var mockTour =
         Tour.of(
             TOUR_ID,
             AggregateReference.to(1),
@@ -81,7 +81,7 @@ class TourServiceTest {
     when(tourRepository.findById(TOUR_ID)).thenReturn(Optional.of(mockTour));
 
     // Actual
-    var actualTour = tourService.getTourById(TOUR_ID);
+    final var actualTour = tourService.getTourById(TOUR_ID);
 
     // Assert
     assertEquals(mockTour, actualTour);
@@ -90,24 +90,25 @@ class TourServiceTest {
   @Test
   void whenGetTourById_ButTourNotFound_ThenThrowEntityNotfoundException() {
     // Arrange
-    var TOUR_ID = 99999;
-    var expectedErrorMessage =
+    final var TOUR_ID = 99999;
+    final var expectedErrorMessage =
         String.format("%s id [%d] not found", Tour.class.getSimpleName(), TOUR_ID);
+
     when(tourRepository.findById(TOUR_ID)).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> tourService.getTourById(TOUR_ID);
+    final Executable actualExecutable = () -> tourService.getTourById(TOUR_ID);
 
     // Assert
-    var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test
   void whenCreateTour_ThenSuccess() {
     // Arrange
-    var TOUR_COMPANY_ID = 1;
-    var body =
+    final var TOUR_COMPANY_ID = 1;
+    final var body =
         TourRequest.of(
             TOUR_COMPANY_ID,
             "Kunlun 7 days",
@@ -116,8 +117,9 @@ class TourServiceTest {
             20,
             Instant.now().plus(Duration.ofDays(45)),
             null);
-    var mockCompany = TourCompanyResponse.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.WAITING);
-    var mockCreatedTour =
+    final var mockCompany =
+        TourCompanyResponse.of(TOUR_COMPANY_ID, "My Tour", TourCompanyStatus.WAITING);
+    final var mockCreatedTour =
         Tour.of(
             body.tourCompanyId(),
             AggregateReference.to(body.tourCompanyId()),
@@ -127,15 +129,15 @@ class TourServiceTest {
             body.numberOfPeople(),
             body.activityDate(),
             TourStatus.PENDING.name());
-    var mockTourCount = TourCount.of(1, AggregateReference.to(mockCreatedTour.id()), 0);
+    final var mockTourCount = TourCount.of(1, AggregateReference.to(mockCreatedTour.id()), 0);
 
     when(tourCompanyService.getTourCompanyById(TOUR_COMPANY_ID)).thenReturn(mockCompany);
     when(tourRepository.save(any(Tour.class))).thenReturn(mockCreatedTour);
     when(tourCountService.createTourCount(any(TourCount.class))).thenReturn(mockTourCount);
 
     // Actual
-    var actualCreatedTour = tourService.createTour(body);
-    var actualCreatedTourCount = tourCountService.createTourCount(mockTourCount);
+    final var actualCreatedTour = tourService.createTour(body);
+    final var actualCreatedTourCount = tourCountService.createTourCount(mockTourCount);
 
     // Assert
     assertEquals(mockCreatedTour, actualCreatedTour);
@@ -145,8 +147,8 @@ class TourServiceTest {
   @Test
   void whenCreateTour_ButTourCompanyNotFound_ThenSuccess() {
     // Arrange
-    var TOUR_COMPANY_ID = 99999;
-    var body =
+    final var TOUR_COMPANY_ID = 99999;
+    final var body =
         TourRequest.of(
             TOUR_COMPANY_ID,
             "Kunlun 7 days",
@@ -155,16 +157,17 @@ class TourServiceTest {
             20,
             Instant.now().plus(Duration.ofDays(45)),
             null);
-    var expectedErrorMessage =
+    final var expectedErrorMessage =
         String.format("%s id [%d] not found", TourCompany.class.getSimpleName(), TOUR_COMPANY_ID);
+
     when(tourCompanyService.getTourCompanyById(anyInt()))
         .thenThrow(new EntityNotFoundException(expectedErrorMessage));
 
     // Actual
-    Executable actualExecutable = () -> tourService.createTour(body);
+    final Executable actualExecutable = () -> tourService.createTour(body);
 
     // Assert
-    var actualException = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
+    final var actualException = assertThrowsExactly(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, actualException.getMessage());
   }
 }

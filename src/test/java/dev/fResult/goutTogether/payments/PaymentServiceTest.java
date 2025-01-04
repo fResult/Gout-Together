@@ -20,7 +20,6 @@ import dev.fResult.goutTogether.payments.services.PaymentServiceImpl;
 import dev.fResult.goutTogether.qrcodes.QrCodeReference;
 import dev.fResult.goutTogether.qrcodes.QrCodeService;
 import dev.fResult.goutTogether.tourCompanies.entities.TourCompany;
-import dev.fResult.goutTogether.tours.entities.Tour;
 import dev.fResult.goutTogether.tours.services.TourCountService;
 import dev.fResult.goutTogether.transactions.Transaction;
 import dev.fResult.goutTogether.transactions.TransactionService;
@@ -125,12 +124,12 @@ class PaymentServiceTest {
   @Test
   void whenGenerateQrCode_ThenSuccess() throws WriterException {
     // Arrange
-    var mockQrCodeImage = new BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB);
+    final var mockQrCodeImage = new BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB);
 
     when(qrCodeService.generateQrCodeImageById(anyInt())).thenReturn(mockQrCodeImage);
 
     // Actual
-    var qrCodeImage = paymentService.generatePaymentQr(QR_CODE_REF_ID);
+    final var qrCodeImage = paymentService.generatePaymentQr(QR_CODE_REF_ID);
 
     // Assert
     assertEquals(mockQrCodeImage, qrCodeImage);
@@ -139,28 +138,28 @@ class PaymentServiceTest {
   @Test
   void whenPayByBookingId_ThenSuccess() {
     // Arrange
-    var TOUR_ID = 1;
-    var userRef = AggregateReference.<User, Integer>to(USER_ID);
-    var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_ID);
-    var bookingRef = AggregateReference.<Booking, Integer>to(BOOKING_ID);
-    var mockBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
-    var USER_WALLET_BALANCE_AFTER_TRANSFER = USER_WALLET_BALANCE.subtract(TOUR_PRICE);
-    var COMPANY_WALLET_BALANCE_AFTER_TRANSFER = COMPANY_WALLET_BALANCE.add(TOUR_PRICE);
-    var qrCodeContent = buildQrCodeContent(BOOKING_ID);
-    var mockUserWallet = buildUserWallet(USER_WALLET_ID, USER_ID, USER_WALLET_BALANCE);
-    var mockTourCompanyWallet =
+    final var TOUR_ID = 1;
+    final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+    final var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_ID);
+    final var bookingRef = AggregateReference.<Booking, Integer>to(BOOKING_ID);
+    final var mockBooking = buildPendingBooking(BOOKING_ID, USER_ID, TOUR_ID);
+    final var USER_WALLET_BALANCE_AFTER_TRANSFER = USER_WALLET_BALANCE.subtract(TOUR_PRICE);
+    final var COMPANY_WALLET_BALANCE_AFTER_TRANSFER = COMPANY_WALLET_BALANCE.add(TOUR_PRICE);
+    final var qrCodeContent = buildQrCodeContent(BOOKING_ID);
+    final var mockUserWallet = buildUserWallet(USER_WALLET_ID, USER_ID, USER_WALLET_BALANCE);
+    final var mockTourCompanyWallet =
         buildTourCompanyWallet(COMPANY_WALLET_ID, TOUR_COMPANY_ID, COMPANY_WALLET_BALANCE);
-    var mockUserWalletAfterTransfer =
+    final var mockUserWalletAfterTransfer =
         UserWallet.of(USER_ID, userRef, Instant.now(), USER_WALLET_BALANCE_AFTER_TRANSFER);
-    var mockTourCompanyWalletAfterTransfer =
+    final var mockTourCompanyWalletAfterTransfer =
         TourCompanyWallet.of(
             COMPANY_WALLET_ID,
             tourCompanyRef,
             Instant.now(),
             COMPANY_WALLET_BALANCE_AFTER_TRANSFER);
-    var mockQrCodeRef =
+    final var mockQrCodeRef =
         QrCodeReference.of(QR_CODE_REF_ID, BOOKING_ID, qrCodeContent, QrCodeStatus.EXPIRED);
-    var mockTransaction =
+    final var mockTransaction =
         Transaction.of(
             1,
             userRef,
@@ -170,8 +169,8 @@ class PaymentServiceTest {
             TOUR_PRICE,
             TransactionType.BOOKING,
             IDEMPOTENT_KEY);
-    var mockBookingToBeCompleted = buildCompletedBooking(BOOKING_ID, USER_ID, TOUR_ID);
-    var expectedBookingInfo =
+    final var mockBookingToBeCompleted = buildCompletedBooking(BOOKING_ID, USER_ID, TOUR_ID);
+    final var expectedBookingInfo =
         BookingInfoResponse.of(BOOKING_ID, USER_ID, TOUR_ID, BookingStatus.COMPLETED, null);
 
     when(bookingService.findBookingById(anyInt())).thenReturn(Optional.of(mockBooking));
@@ -191,7 +190,7 @@ class PaymentServiceTest {
     when(bookingRepository.save(any(Booking.class))).thenReturn(mockBookingToBeCompleted);
 
     // Actual
-    var actualPaidBookingInfo = paymentService.payByBookingId(1, IDEMPOTENT_KEY);
+    final var actualPaidBookingInfo = paymentService.payByBookingId(1, IDEMPOTENT_KEY);
 
     // Assert
     assertEquals(expectedBookingInfo, actualPaidBookingInfo);
@@ -200,39 +199,39 @@ class PaymentServiceTest {
   @Test
   void whenPayByBookingId_ButBookingNotFound_ThenThrowException() {
     // Arrange
-    var expectedErrorMessage =
+    final var expectedErrorMessage =
         String.format("%s id [%d] not found", Booking.class.getSimpleName(), BOOKING_ID);
     when(bookingService.findBookingById(anyInt())).thenReturn(Optional.empty());
 
     // Actual
-    Executable actualExecutable = () -> paymentService.payByBookingId(BOOKING_ID, IDEMPOTENT_KEY);
+    final Executable actualExecutable = () -> paymentService.payByBookingId(BOOKING_ID, IDEMPOTENT_KEY);
 
     // Assert
-    var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
+    final var exception = assertThrows(EntityNotFoundException.class, actualExecutable);
     assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @Test
   void whenRefundBooking_ThenSuccess() {
     // Arrange
-    var bookingRef = AggregateReference.<Booking, Integer>to(BOOKING_ID);
-    var userRef = AggregateReference.<User, Integer>to(USER_ID);
-    var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
-    var completedBookingInput = buildCompletedBooking(BOOKING_ID, USER_ID, TOUR_COMPANY_ID);
-    var mockUserWallet = buildUserWallet(USER_WALLET_ID, USER_ID, USER_WALLET_BALANCE);
-    var mockTourCompanyWallet =
+    final var bookingRef = AggregateReference.<Booking, Integer>to(BOOKING_ID);
+    final var userRef = AggregateReference.<User, Integer>to(USER_ID);
+    final var tourCompanyRef = AggregateReference.<TourCompany, Integer>to(TOUR_COMPANY_ID);
+    final var completedBookingInput = buildCompletedBooking(BOOKING_ID, USER_ID, TOUR_COMPANY_ID);
+    final var mockUserWallet = buildUserWallet(USER_WALLET_ID, USER_ID, USER_WALLET_BALANCE);
+    final var mockTourCompanyWallet =
         buildTourCompanyWallet(COMPANY_WALLET_ID, TOUR_COMPANY_ID, COMPANY_WALLET_BALANCE);
-    var USER_WALLET_BALANCE_AFTER_TRANSFER = USER_WALLET_BALANCE.add(TOUR_PRICE);
-    var COMPANY_WALLET_BALANCE_AFTER_TRANSFER = COMPANY_WALLET_BALANCE.subtract(TOUR_PRICE);
-    var mockUserWalletAfterTransfer =
+    final var USER_WALLET_BALANCE_AFTER_TRANSFER = USER_WALLET_BALANCE.add(TOUR_PRICE);
+    final var COMPANY_WALLET_BALANCE_AFTER_TRANSFER = COMPANY_WALLET_BALANCE.subtract(TOUR_PRICE);
+    final var mockUserWalletAfterTransfer =
         UserWallet.of(USER_WALLET_ID, userRef, Instant.now(), USER_WALLET_BALANCE_AFTER_TRANSFER);
-    var mockTourCompanyWalletAfterTransfer =
+    final var mockTourCompanyWalletAfterTransfer =
         TourCompanyWallet.of(
             COMPANY_WALLET_ID,
             tourCompanyRef,
             Instant.now(),
             COMPANY_WALLET_BALANCE_AFTER_TRANSFER);
-    var mockTransaction =
+    final var mockTransaction =
         Transaction.of(
             1,
             userRef,
@@ -254,7 +253,7 @@ class PaymentServiceTest {
     when(transactionService.createTransaction(any(Transaction.class))).thenReturn(mockTransaction);
 
     // Actual
-    var actualResult = paymentService.refundBooking(completedBookingInput, IDEMPOTENT_KEY);
+    final var actualResult = paymentService.refundBooking(completedBookingInput, IDEMPOTENT_KEY);
 
     // Assert
     assertTrue(actualResult);
