@@ -6,8 +6,8 @@ import org.springframework.boot.gradle.tasks.run.BootRun
 plugins {
   application
   java
-  id("org.springframework.boot") version "3.4.0"
-  id("io.spring.dependency-management") version "1.1.6"
+  id("org.springframework.boot") version libs.versions.springboot.get()
+  id("io.spring.dependency-management") version "1.1.7"
 }
 
 buildscript {
@@ -38,15 +38,15 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-api")
   agent("io.opentelemetry.javaagent:opentelemetry-javaagent:2.9.0")
 
-  developmentOnly("org.springframework.boot:spring-boot-devtools")
+  developmentOnly(libs.spring.boot.devtools)
 
-  annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-  implementation("org.springframework.boot:spring-boot-starter-actuator")
-  implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-  implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-  implementation("org.springframework.boot:spring-boot-starter-security")
-  implementation("org.springframework.boot:spring-boot-starter-validation")
-  implementation("org.springframework.boot:spring-boot-starter-web")
+  annotationProcessor(libs.spring.boot.configuration.processor)
+  implementation(libs.spring.boot.starter.actuator)
+  implementation(libs.spring.boot.starter.data.jdbc)
+  implementation(libs.spring.boot.starter.oauth2.resource.server)
+  implementation(libs.spring.boot.starter.security)
+  implementation(libs.spring.boot.starter.validation)
+  implementation(libs.spring.boot.starter.web)
   implementation("org.bouncycastle:bcprov-jdk18on:1.79") // As an Argon2PasswordEncoder's dependency in Spring Security
   implementation("org.flywaydb:flyway-core")
   implementation("org.flywaydb:flyway-database-postgresql")
@@ -59,9 +59,9 @@ dependencies {
   runtimeOnly("io.micrometer:micrometer-registry-prometheus")
   runtimeOnly("org.postgresql:postgresql")
 
-  testImplementation("org.springframework.boot:spring-boot-starter-test")
+  testImplementation(libs.spring.boot.starter.test)
+  testImplementation(libs.spring.boot.testcontainers)
   testImplementation("org.springframework.security:spring-security-test")
-  testImplementation("org.springframework.boot:spring-boot-testcontainers")
   testImplementation("org.testcontainers:junit-jupiter")
   testImplementation("org.testcontainers:postgresql")
 
