@@ -1,6 +1,7 @@
 package dev.fResult.goutTogether.auths;
 
 import static dev.fResult.goutTogether.common.Constants.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -18,7 +19,6 @@ import dev.fResult.goutTogether.common.utils.UUIDV7;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -65,7 +65,7 @@ class AuthControllerTest {
         new LoginResponse(
             USER_ID, TOKEN_TYPE, "%(!(@)*$&(!&^^%$##!&", UUIDV7.randomUUID().toString());
 
-    when(authService.login(Mockito.any(LoginRequest.class))).thenReturn(expectedLoggedInUser);
+    when(authService.login(any(LoginRequest.class))).thenReturn(expectedLoggedInUser);
 
     // Actual
     final var resultActions =
@@ -89,7 +89,7 @@ class AuthControllerTest {
     final var expectedRotatedLoggedInUser =
         new LoginResponse(USER_ID, TOKEN_TYPE, "%(!(@)*$&(!&^^%$##!&", refreshToken);
 
-    when(authService.refreshToken(Mockito.any())).thenReturn(expectedRotatedLoggedInUser);
+    when(authService.refreshToken(any())).thenReturn(expectedRotatedLoggedInUser);
 
     // Actual
     final var resultActions =
