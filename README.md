@@ -96,6 +96,7 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
 - Configuring authorization with OAuth2ResourceServer
 - Integration Testing
 - Pessimistic Locking for data consistency
+- Implementing idempotency keys to prevent duplicate transaction processing
 
 ### Things I did different and learned further
 

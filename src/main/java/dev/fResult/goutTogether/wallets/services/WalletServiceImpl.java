@@ -84,6 +84,7 @@ public class WalletServiceImpl implements WalletService {
   @Transactional
   public UserWalletInfoResponse topUpConsumerWallet(
       int userId, String idempotentKey, WalletTopUpRequest body) {
+
     final var existsTransactionOpt = transactionRepository.findOneByIdempotentKey(idempotentKey);
 
     final var userWallet =
