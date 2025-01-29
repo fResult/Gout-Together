@@ -13,7 +13,7 @@ public class TestContainerConfig {
   public PostgreSQLContainer<?> postgreSQLContainer() {
     System.setProperty(
         "TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", "/Users/fresult/.colima/default/docker.sock");
-    System.setProperty("DOCKER_HOST", "unix:///Users/korn/.colima/default/docker.sock");
+    System.setProperty("DOCKER_HOST", "unix:///Users/fresult/.colima/default/docker.sock");
 
     return new PostgreSQLContainer<>("postgres:13.3");
   }
