@@ -49,11 +49,10 @@ public class SecurityConfig {
   private final String privateKeyBase64;
   private final String publicKeyBase64;
 
-  public SecurityConfig(
-      @Value("${goutapp.oauth.private-key}") String privateKeyBase64,
-      @Value("${goutapp.oauth.public-key}") String publicKeyBase64) {
-    this.privateKeyBase64 = privateKeyBase64;
-    this.publicKeyBase64 = publicKeyBase64;
+  public SecurityConfig(MyApplicationProperties myProps) {
+    final var oauthProps = myProps.getOauth();
+    this.privateKeyBase64 = oauthProps.getPrivateKey();
+    this.publicKeyBase64 = oauthProps.getPublicKey();
   }
 
   @Bean
