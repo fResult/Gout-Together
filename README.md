@@ -105,12 +105,13 @@ java -javaagent:build/agent/opentelemetry-javaagent.jar -jar build/libs/app.jar
 - Added more assertion, including asserting error message in Unit Tests
 - Resolved circular dependency using `@Lazy` annotation
 - Implemented [Virtual Thread](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html) and `CompletableFuture` for concurrent database operations
-  - See: [WalletServiceImpl.getConsumerAndTourCompanyWallets()](https://github.com/fResult/Gout-Together/blob/f4ef3ffebc4bee2ad9919b78996cfa1c659e484f/src/main/java/dev/fResult/goutTogether/wallets/services/WalletServiceImpl.java#L202-L224)
+    - See: [WalletServiceImpl.getConsumerAndTourCompanyWallets()](https://github.com/fResult/Gout-Together/blob/f4ef3ffebc4bee2ad9919b78996cfa1c659e484f/src/main/java/dev/fResult/goutTogether/wallets/services/WalletServiceImpl.java#L202-L224)
 - Handled complex exception propagation in multi-threaded scenarios
     - Implemented in [ErrorHelper.throwMatchedException()](https://github.com/fResult/Gout-Together/blob/f4ef3ffebc4bee2ad9919b78996cfa1c659e484f/src/main/java/dev/fResult/goutTogether/common/helpers/ErrorHelper.java#L24-L38)
     - Applied in [service layer](https://github.com/fResult/Gout-Together/blob/f4ef3ffebc4bee2ad9919b78996cfa1c659e484f/src/main/java/dev/fResult/goutTogether/wallets/services/WalletServiceImpl.java#L225-L227)
 - Created custom application properties
-  - See: [MyApplicationProperties.java](https://github.com/fResult/Gout-Together/blob/f4ef3ffebc4bee2ad9919b78996cfa1c659e484f/src/main/java/dev/fResult/goutTogether/common/configs/MyApplicationProperties.java)
+    - Implemented in: [MyApplicationProperties.java](https://github.com/fResult/Gout-Together/blob/f4ef3ffebc4bee2ad9919b78996cfa1c659e484f/src/main/java/dev/fResult/goutTogether/common/configs/MyApplicationProperties.java)
+    - Applied in [SecurityConfig.java](https://github.com/fResult/Gout-Together/blob/34161612b0706213de18d278ebc5c15681c4b324/src/main/java/dev/fResult/goutTogether/common/configs/SecurityConfig.java#L52-L56)
 
 ### Test Coverage
 ![Image to display percentage of code coverage](https://github.com/user-attachments/assets/ef5c0b2d-3fd4-4af7-804d-7819b5c4b1b8)
