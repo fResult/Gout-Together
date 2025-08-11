@@ -1,5 +1,6 @@
 import io.github.cdimascio.dotenv.Dotenv
 import io.github.cdimascio.dotenv.DotenvEntry
+import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import org.springframework.boot.gradle.tasks.run.BootRun
 
@@ -24,7 +25,7 @@ version = "0.0.1"
 
 java {
   toolchain {
-    languageVersion = JavaLanguageVersion.of(23)
+    languageVersion = JavaLanguageVersion.of(24)
   }
 }
 
@@ -70,6 +71,7 @@ dependencies {
 
 tasks.withType<Test> {
   useJUnitPlatform()
+  environment("TESTCONTAINERS_RYUK_DISABLED", "true") // Disable Ryuk container for tests
 }
 
 tasks.register<Copy>("copyAgent") {

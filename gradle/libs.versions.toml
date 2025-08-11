@@ -1,5 +1,5 @@
 [versions]
-springboot = "3.4.1"
+springboot = "3.5.4"
 
 [libraries]
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "springboot" }
