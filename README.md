@@ -18,6 +18,12 @@ curl -O https://raw.githubusercontent.com/fResult/Gout-Together/refs/heads/main/
 curl -o /path/to/your/target/directory/Gout-Together.postman_collection.json https://raw.githubusercontent.com/fResult/Gout-Together/refs/heads/main/Gout-Together.postman_collection.json
 ```
 
+## Prerequisites
+
+- JDK 24 or later
+- Gradle 8.14 or later
+- Docker (for running Database, Grafana, and OpenTelemetry Collector)
+
 ## Related commands
 
 ### Build Jar and Get the OpenTelemetry Agent
