@@ -20,3 +20,11 @@ OAUTH_PUBLIC_KEY_BASE64="«echo $(base64 -i src/main/resources/public_key.pem)»
 # Jobrunr
 JOBRUNR_BACKGROUND_JOB_ENABLED=true
 JOBRUNR_DASHBOARD_ENABLED=true
+
+# Testcontainers
+TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
+## IP is from running `colima ls -j | jq -r '.address'`
+TESTCONTAINERS_HOST_OVERRIDE=192.168.106.4
+DOCKER_HOST=unix://$HOME/.colima/default/docker.sock
+## This environment variable is set, but not working as expected, so we disable Ryuk through build.gradle.kts on Test task.
+TESTCONTAINERS_RYUK_DISABLED=true
