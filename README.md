@@ -26,6 +26,12 @@ curl -o /path/to/your/target/directory/Gout-Together.postman_collection.json htt
 
 ## Related commands
 
+### Start the Database
+
+```bash
+docker-compose -f docker/compose.yml --env-file .env up -d
+```
+
 ### Build Jar and Get the OpenTelemetry Agent
 
 ```bash
