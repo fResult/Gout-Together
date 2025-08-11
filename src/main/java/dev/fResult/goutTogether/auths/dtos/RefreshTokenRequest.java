@@ -1,10 +1,10 @@
 package dev.fResult.goutTogether.auths.dtos;
 
+import dev.fResult.goutTogether.common.constraints.UUID;
 import dev.fResult.goutTogether.common.enumurations.UserRoleName;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.validator.constraints.UUID;
 import org.springframework.lang.NonNull;
 
 public record RefreshTokenRequest(

@@ -2,13 +2,13 @@ package dev.fResult.goutTogether.wallets;
 
 import static dev.fResult.goutTogether.common.Constants.RESOURCE_ID_CLAIM;
 
+import dev.fResult.goutTogether.common.constraints.UUID;
 import dev.fResult.goutTogether.wallets.dtos.TourCompanyWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.UserWalletInfoResponse;
 import dev.fResult.goutTogether.wallets.dtos.WalletTopUpRequest;
 import dev.fResult.goutTogether.wallets.dtos.WalletWithdrawRequest;
 import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import dev.fResult.goutTogether.wallets.services.WalletService;
-import org.hibernate.validator.constraints.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
