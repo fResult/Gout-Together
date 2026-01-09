@@ -24,11 +24,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import kotlin.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -222,7 +222,7 @@ public class WalletServiceImpl implements WalletService {
                       "tourCompanyId",
                       String.valueOf(tour.tourCompanyId())));
 
-      return new Pair<>(userWallet, tourCompanyWallet);
+      return Pair.of(userWallet, tourCompanyWallet);
     } catch (CompletionException | ExecutionException ex) {
       throw ErrorHelper.throwMatchedException(ex.getCause(), "Failed to get wallets");
     } catch (InterruptedException ex) {
@@ -288,7 +288,7 @@ public class WalletServiceImpl implements WalletService {
         TourCompanyWallet.class.getSimpleName(),
         companyWallet.id());
 
-    return new Pair<>(updatedUserWallet, updatedCompanyWallet);
+    return Pair.of(updatedUserWallet, updatedCompanyWallet);
   }
 
   private Pair<UserWallet, TourCompanyWallet> transferMoneyForRefund(
@@ -330,7 +330,7 @@ public class WalletServiceImpl implements WalletService {
           UserWallet.class.getSimpleName(),
           userWallet.id());
 
-      return new Pair<>(updatedUserWallet, updatedCompanyWallet);
+      return Pair.of(updatedUserWallet, updatedCompanyWallet);
     } catch (ExecutionException | InterruptedException ex) {
       final var errorMessage =
           String.format(

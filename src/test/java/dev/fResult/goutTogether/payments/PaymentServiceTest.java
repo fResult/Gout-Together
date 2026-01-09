@@ -32,7 +32,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import kotlin.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
+import org.springframework.data.util.Pair;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
@@ -175,13 +175,13 @@ class PaymentServiceTest {
 
     when(bookingService.findBookingById(anyInt())).thenReturn(Optional.of(mockBooking));
     when(walletService.getConsumerAndTourCompanyWallets(any(Booking.class)))
-        .thenReturn(new Pair<>(mockUserWallet, mockTourCompanyWallet));
+        .thenReturn(Pair.of(mockUserWallet, mockTourCompanyWallet));
     when(walletService.transferMoney(
             any(UserWallet.class),
             any(TourCompanyWallet.class),
             any(BigDecimal.class),
             eq(TransactionType.BOOKING)))
-        .thenReturn(new Pair<>(mockUserWalletAfterTransfer, mockTourCompanyWalletAfterTransfer));
+        .thenReturn(Pair.of(mockUserWalletAfterTransfer, mockTourCompanyWalletAfterTransfer));
     when(transactionService.createTransaction(any())).thenReturn(null);
     doNothing().when(tourCountService).incrementTourCount(anyInt());
     when(qrCodeService.updateQrCodeRefStatusByBookingId(anyInt(), any(QrCodeStatus.class)))
@@ -243,13 +243,13 @@ class PaymentServiceTest {
             null);
 
     when(walletService.getConsumerAndTourCompanyWallets(any(Booking.class)))
-        .thenReturn(new Pair<>(mockUserWallet, mockTourCompanyWallet));
+        .thenReturn(Pair.of(mockUserWallet, mockTourCompanyWallet));
     when(walletService.transferMoney(
             any(UserWallet.class),
             any(TourCompanyWallet.class),
             any(BigDecimal.class),
             eq(TransactionType.REFUND)))
-        .thenReturn(new Pair<>(mockUserWalletAfterTransfer, mockTourCompanyWalletAfterTransfer));
+        .thenReturn(Pair.of(mockUserWalletAfterTransfer, mockTourCompanyWalletAfterTransfer));
     when(transactionService.createTransaction(any(Transaction.class))).thenReturn(mockTransaction);
 
     // Actual

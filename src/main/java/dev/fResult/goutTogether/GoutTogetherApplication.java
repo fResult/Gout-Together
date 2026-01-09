@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @SpringBootApplication
 @EnableConfigurationProperties({ MyApplicationProperties.class })
 public class GoutTogetherApplication {
-  public static void main(String... args) {
+  static void main(String... args) {
     SpringApplication.run(GoutTogetherApplication.class, args);
   }
 }

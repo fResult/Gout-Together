@@ -9,7 +9,7 @@ import dev.fResult.goutTogether.wallets.dtos.WalletWithdrawRequest;
 import dev.fResult.goutTogether.wallets.entities.TourCompanyWallet;
 import dev.fResult.goutTogether.wallets.entities.UserWallet;
 import java.math.BigDecimal;
-import kotlin.Pair;
+import org.springframework.data.util.Pair;
 
 public interface WalletService {
   UserWallet createConsumerWallet(int userId);

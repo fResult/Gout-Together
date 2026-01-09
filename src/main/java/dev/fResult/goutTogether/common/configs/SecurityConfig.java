@@ -17,7 +17,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -84,8 +83,8 @@ public class SecurityConfig {
   public AuthenticationManager authenticationManager(
       PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
 
-    final var daoProvider = new DaoAuthenticationProvider(passwordEncoder);
-    daoProvider.setUserDetailsService(userDetailsService);
+    final var daoProvider = new DaoAuthenticationProvider(userDetailsService);
+    daoProvider.setPasswordEncoder(passwordEncoder);
 
     return new ProviderManager(daoProvider);
   }
