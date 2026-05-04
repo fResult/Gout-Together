@@ -4,10 +4,10 @@ import dev.fResult.goutTogether.common.exceptions.*;
 import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
-import org.springframework.lang.NonNull;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -59,7 +59,7 @@ public class ResponseAdviceHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(ValidationException.class)
   protected ResponseEntity<?> handleValidationException(ValidationException ex) {
     final var detail =
-        ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
     logger.warn("Validation error: {}", ex.getMessage());
 
     return ResponseEntity.of(detail).build();
